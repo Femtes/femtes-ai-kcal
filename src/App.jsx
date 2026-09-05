@@ -110,7 +110,7 @@ export default function App() {
           </span>
         </div>
 
-        <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, textAlign: "center" }}>Femtes AI kcal</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, textAlign: "center" }}>Calio Bite</h1>
         <p style={{ fontSize: 13, color: "#8B8D97", marginBottom: 8, textAlign: "center" }}>
           {mode === "login" ? "Logga in på ditt konto" : "Skapa ett nytt konto"}
         </p>
@@ -176,6 +176,12 @@ export default function App() {
           {submitting ? "Ett ögonblick …" : mode === "login" ? "Logga in" : "Registrera"}
         </button>
 
+        {mode === "register" && (
+          <p style={{ fontSize: 11, color: "#8B8D97", marginTop: 10, textAlign: "center", lineHeight: 1.5 }}>
+            By creating an account, you agree to our Terms and Disclaimer.
+          </p>
+        )}
+
         {mode === "login" ? (
           <>
             <button type="button" onClick={handleForgotPassword} style={linkStyle}>
@@ -196,6 +202,10 @@ export default function App() {
             </button>
           </p>
         )}
+
+        <p style={{ fontSize: 11, color: "#5A5C66", marginTop: 24, textAlign: "center" }}>
+          © {new Date().getFullYear()} Femtes. Alla rättigheter förbehållna.
+        </p>
       </form>
     </div>
   );

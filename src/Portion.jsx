@@ -34,12 +34,13 @@ const WATER_QUICK_ADDS = [200, 330, 500];
 const DAY_LETTERS = ["M", "T", "O", "T", "F", "L", "S"];
 const CATEGORY_KCAL_SPLIT = { breakfast: 0.25, lunch: 0.35, snack: 0.1, dinner: 0.3, other: 0 };
 const TABS = [
-  { key: "budget", label: "Daglig budget" },
+  { key: "budget", label: "Översikt" },
   { key: "scanner", label: "Måltids scanner" },
   { key: "training", label: "Träning" },
   { key: "fasting", label: "Fasta" },
   { key: "trends", label: "Trender" },
   { key: "weight", label: "Viktgång" },
+  { key: "legal", label: "Legal" },
 ];
 
 const KCAL_PER_KG_PER_KM = 0.7;
@@ -421,6 +422,20 @@ function HeartIcon({ fraction, size = 26 }) {
           strokeLinecap="round"
         />
       </svg>
+    </div>
+  );
+}
+
+function InfoBanner({ children }) {
+  return (
+    <div
+      className="rounded-xl px-3.5 py-3 mb-5 flex items-start gap-2.5"
+      style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}` }}
+    >
+      <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>ℹ️</span>
+      <p className="text-xs" style={{ color: colors.textDim, lineHeight: 1.5 }}>
+        {children}
+      </p>
     </div>
   );
 }
@@ -1699,7 +1714,7 @@ export default function Portion() {
         {/* Header */}
         <div className="px-5 pt-6 pb-4 flex items-center justify-between gap-3">
           <span className="text-base font-extrabold truncate" style={{ letterSpacing: "-0.02em" }}>
-            Femtes AI kcal
+            Calio Bite
           </span>
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
@@ -1747,6 +1762,12 @@ export default function Portion() {
 
         {activeTab === "budget" && (
           <>
+        <div className="px-5">
+          <InfoBanner>
+            Detta är din dagliga översikt. Bläddra mellan dagar med veckoremsan, se hur mycket kalorier och makron du har
+            kvar, och tryck på <strong>+</strong> vid en måltid för att logga vad du ätit.
+          </InfoBanner>
+        </div>
         {/* Week strip */}
         <div className="px-5 flex items-center gap-1.5 mb-6">
           <button
@@ -1852,7 +1873,7 @@ export default function Portion() {
         {!dayLoading && !profileLoading && (
           <div className="px-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-extrabold">Daglig budget</h2>
+              <h2 className="text-lg font-extrabold">Dagens mål</h2>
               <div className="flex items-center gap-3">
                 <button onClick={toggleVisualMode} className="text-xs font-semibold" style={{ color: colors.primary }}>
                   {visualMode ? "🔢 Visa siffror" : "🌿 Sifferfritt läge"}
@@ -2286,6 +2307,8 @@ export default function Portion() {
             profile={profile}
           />
         )}
+
+        {activeTab === "legal" && <LegalPanel />}
 
         {activeTab === "scanner" && (
           <ScannerPanel
@@ -3321,9 +3344,10 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
   return (
     <div className="px-5">
       <h2 className="text-lg font-extrabold mb-1">Trender</h2>
-      <p className="text-xs mb-4" style={{ color: colors.textDim }}>
-        Bläddra mellan veckor och tryck på en dag för att se detaljer
-      </p>
+      <InfoBanner>
+        Här kan du gå tillbaka i historiken vecka för vecka. Tryck på en dag för att se just den dagens kalorier och
+        makron i detalj.
+      </InfoBanner>
 
       {/* Week strip */}
       <div className="flex items-center gap-1 mb-5">
@@ -3393,7 +3417,7 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
           className="rounded-2xl p-5 text-center text-sm"
           style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}`, color: colors.textDim }}
         >
-          Ställ in dina mål under "Daglig budget" för att se sammanfattningen
+          Ställ in dina mål under "Översikt" för att se sammanfattningen
         </div>
       )}
 
@@ -3512,9 +3536,10 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
   return (
     <div className="px-5">
       <h2 className="text-lg font-extrabold mb-1">Viktgång</h2>
-      <p className="text-xs mb-4" style={{ color: colors.textDim }}>
-        Logga din vikt för att se utvecklingen över tid
-      </p>
+      <InfoBanner>
+        Logga din vikt regelbundet för att se utvecklingen som en graf över tid, och håll koll på ditt uträknade BMI
+        högst upp.
+      </InfoBanner>
 
       {bmi ? (
         <div className="rounded-2xl p-5 mb-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
@@ -3606,7 +3631,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
           className="rounded-2xl p-5 mb-4 text-center text-sm"
           style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}`, color: colors.textDim }}
         >
-          Lägg in din längd under "Daglig budget" och logga en vikt för att se ditt BMI
+          Lägg in din längd under "Översikt" och logga en vikt för att se ditt BMI
         </div>
       )}
 
@@ -3777,6 +3802,10 @@ function TrainingPanel({
       <p className="text-xs mb-4" style={{ color: colors.textDim }}>
         Träning för {dateLabel(selectedDate)}
       </p>
+
+      <InfoBanner>
+        Logga steg och träningspass här. Kalorierna du bränner räknas automatiskt in i dagens budget på Översikt-fliken.
+      </InfoBanner>
 
       <div className="rounded-2xl p-6 mb-6" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
         <div className="flex justify-center mb-1">
@@ -4141,16 +4170,64 @@ const SCANNER_CATEGORIES = [
   { key: "dinner", label: "Middag" },
 ];
 
+function LegalPanel() {
+  return (
+    <div className="px-5">
+      <h2 className="text-lg font-extrabold mb-1">Legal</h2>
+      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
+        Villkor och ansvarsbegränsning för Calio Bite.
+      </p>
+
+      <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+        <h3 className="text-base font-bold mb-4">Disclaimer and Limitation of Liability</h3>
+
+        <p className="text-sm font-bold mb-1">1. For Educational and Informational Purposes Only</p>
+        <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+          The information provided by this application, including but not limited to caloric calculations,
+          nutritional data, and dietary suggestions, is for general educational and informational purposes only. It
+          is not intended as medical advice, diagnosis, or treatment.
+        </p>
+
+        <p className="text-sm font-bold mb-1">2. Not Medical Advice</p>
+        <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+          Always seek the advice of a qualified healthcare professional or dietitian before starting any new diet,
+          nutrition program, or making changes to your lifestyle. Never disregard professional medical advice
+          because of something you have read or calculated in this application.
+        </p>
+
+        <p className="text-sm font-bold mb-1">3. Accuracy of Data and "As Is" Basis</p>
+        <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+          This application is provided on an "as is" and "as available" basis without any warranties of any kind.
+          While we strive to provide accurate nutritional data, we cannot guarantee that the calculations, food
+          databases, or metrics are 100% correct or up to date. Nutritional values can vary significantly.
+        </p>
+
+        <p className="text-sm font-bold mb-1">4. Limitation of Liability</p>
+        <p className="text-xs" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+          In no event shall the creators, developers, or owners of this application be liable for any direct,
+          indirect, incidental, or consequential damages resulting from the use of, or inability to use, this
+          application, including but not limited to reliance on any information obtained herein. You use this
+          application entirely at your own risk.
+        </p>
+      </div>
+
+      <p className="text-[11px] text-center mt-5" style={{ color: colors.textDim }}>
+        © {new Date().getFullYear()} Femtes. Alla rättigheter förbehållna.
+      </p>
+    </div>
+  );
+}
+
 function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClose, onAddSuggestion, goals, consumed }) {
   const remainingKcal = goals ? Math.max(0, goals.kcalGoal - consumed.kcal) : null;
 
   return (
     <div className="px-5">
       <h2 className="text-lg font-extrabold mb-1">Måltids scanner</h2>
-      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
-        Fota insidan av ditt kylskåp eller skafferi, så föreslår vi måltider utifrån vad du har hemma och hur mycket du har
-        kvar av dagens kalorimål.
-      </p>
+      <InfoBanner>
+        Fota insidan av ditt kylskåp eller skafferi, så föreslår Calio Bite måltider utifrån vad du har hemma och hur
+        mycket du har kvar av dagens kalorimål.
+      </InfoBanner>
 
       <p className="text-xs font-bold mb-2" style={{ color: colors.textDim }}>
         Vad vill du ha förslag på?
@@ -4181,7 +4258,7 @@ function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClo
       ) : (
         <div className="rounded-2xl px-4 py-3 mb-5" style={{ backgroundColor: colors.surfaceMuted }}>
           <p className="text-xs" style={{ color: colors.textDim }}>
-            Ställ in dina mål under "Daglig budget" så kan förslagen anpassas efter hur mycket du har kvar att äta.
+            Ställ in dina mål under "Översikt" så kan förslagen anpassas efter hur mycket du har kvar att äta.
           </p>
         </div>
       )}
@@ -4419,6 +4496,11 @@ function FastingPanel({
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-lg font-extrabold">Fasta</h2>
       </div>
+
+      <InfoBanner>
+        Välj en fastemetod, tryck "Starta fasta" och håll koll på hur länge du fastat. Fastan avslutas automatiskt och du
+        får en fas-uppdatering när målet är nått.
+      </InfoBanner>
 
       {fasting.isFasting && (
         <div className="flex justify-center mb-4">
