@@ -1146,20 +1146,18 @@ export default function Portion() {
     if (!text || !text.trim()) return;
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1200,
           system:
             "Du är en assistent som tolkar en fritextbeskrivning av en måltid och delar upp den i separata livsmedel. Användaren kan nämna flera saker i en och samma mening, t.ex. \"Åt en skål havregrynsgröt med en banan och en skvätt lättmjölk\". Identifiera varje separat livsmedel som nämns, uppskatta en rimlig portionsstorlek utifrån beskrivningen (t.ex. \"en skål\", \"en banan\", \"en skvätt\") och ange näringsvärden, klimatavtryck och kostnad för just den portionen. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{\"name\": string (livsmedelsnamn på svenska, inkl. uppskattad mängd, t.ex. \"Havregrynsgröt (1 skål)\"), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen)}]. Om texten inte verkar beskriva någon mat, svara med en tom array [].",
-          messages: [{ role: "user", content: text }],
+          text,
+          image: null,
         }),
       });
       const data = await response.json();
-      const textBlock = (data.content || []).find((b) => b.type === "text");
-      const raw = textBlock ? textBlock.text : "";
+      const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
       const items = (Array.isArray(parsed) ? parsed : []).map((p, i) => ({
@@ -1228,41 +1226,28 @@ export default function Portion() {
     if (!query || !query.trim()) return;
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1200,
-          system:
-            "Du är en assistent som hjälper till att hitta näringsvärden, klimatavtryck och kostnad för livsmedel och produkter. Använd webbsökning för att hitta tillförlitlig information, gärna från produktförpackningar, tillverkarens hemsida eller kända näringsdatabaser. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text. Svara med en array av upp till 5 kandidater i denna form: [{\"name\": string (produktnamn på svenska), \"brand\": string (varumärke, tom sträng om okänt), \"kcal_100g\": number, \"protein_100g\": number, \"carbs_100g\": number, \"fat_100g\": number, \"fiber_100g\": number, \"co2_kg_100g\": number (uppskattat klimatavtryck i kg CO2e per 100g), \"cost_sek_100g\": number (uppskattad kostnad i svenska kronor per 100g, baserat på ungefärliga svenska matvarupriser)}]. Näringsvärden ska anges per 100 gram ätbar produkt. Om inget rimligt resultat hittas, svara med en tom array [].",
-          messages: [{ role: "user", content: `Sök efter näringsvärden för: ${query}` }],
-          tools: [{ type: "web_search_20250305", name: "web_search" }],
-        }),
-      });
+      const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
+        query
+      )}&search_simple=1&action=process&json=1&page_size=20&lc=sv`;
+      const res = await fetch(url);
+      const data = await res.json();
 
-      const data = await response.json();
-      const textBlocks = (data.content || [])
-        .filter((b) => b.type === "text")
-        .map((b) => b.text)
-        .join("\n");
-      const cleaned = textBlocks.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-
-      const products = (Array.isArray(parsed) ? parsed : [])
+      const products = (data.products || [])
+        .filter((p) => p.product_name && p.nutriments)
         .map((p) => ({
-          name: p.name || "",
-          brand: p.brand || "",
-          image: null,
-          kcalPer100: Math.round(Number(p.kcal_100g)) || 0,
-          proteinPer100: Math.round(Number(p.protein_100g)) || 0,
-          carbsPer100: Math.round(Number(p.carbs_100g)) || 0,
-          fatPer100: Math.round(Number(p.fat_100g)) || 0,
-          fiberPer100: Math.round(Number(p.fiber_100g)) || 0,
-          co2Per100: Number(p.co2_kg_100g) || 0,
-          costPer100: Number(p.cost_sek_100g) || 0,
+          name: p.product_name,
+          brand: p.brands ? p.brands.split(",")[0].trim() : "",
+          image: p.image_small_url || p.image_url || null,
+          kcalPer100: Math.round(p.nutriments["energy-kcal_100g"] || 0),
+          proteinPer100: Math.round(p.nutriments["proteins_100g"] || 0),
+          carbsPer100: Math.round(p.nutriments["carbohydrates_100g"] || 0),
+          fatPer100: Math.round(p.nutriments["fat_100g"] || 0),
+          fiberPer100: Math.round(p.nutriments["fiber_100g"] || 0),
+          co2Per100: 0,
+          costPer100: 0,
         }))
-        .filter((p) => p.name && p.kcalPer100 > 0);
+        .filter((p) => p.kcalPer100 > 0)
+        .slice(0, 20);
 
       setFlow((f) => (f ? { ...f, searchLoading: false, searchResults: products } : f));
     } catch (e) {
@@ -1389,29 +1374,20 @@ export default function Portion() {
       const compressed = await compressImage(file);
       const base64Data = compressed.split(",")[1];
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
           system:
             "Du är en assistent som uppskattar näringsinnehåll, klimatavtryck och kostnad för mat från bilder. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledning. Använd exakt denna form: {\"name\": string (kort maträttsnamn på svenska), \"portion_note\": string (kort kommentar om uppskattad portionsstorlek, på svenska), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen, baserat på ingredienserna), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen, baserat på ungefärliga svenska matvarupriser), \"confidence\": string (en av 'låg', 'medel', 'hög')}. Om bilden inte visar mat, svara med {\"error\": \"no_food_detected\"}.",
-          messages: [
-            {
-              role: "user",
-              content: [
-                { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64Data } },
-                { type: "text", text: "Analysera den här maträtten." },
-              ],
-            },
-          ],
+          text: "Analysera den här maträtten.",
+          image: base64Data,
+          mimeType: "image/jpeg",
         }),
       });
 
       const data = await response.json();
-      const textBlock = (data.content || []).find((b) => b.type === "text");
-      const raw = textBlock ? textBlock.text : "";
+      const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
 
@@ -1601,29 +1577,20 @@ export default function Portion() {
         budgetLine = `Användaren har ungefär ${remKcal} kcal kvar av sitt dagsmål, samt ca ${remProtein}g protein, ${remCarbs}g kolhydrater och ${remFat}g fett kvar. Föreslå måltider som passar väl in i detta.`;
       }
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1500,
           system:
             `Du är en assistent som hjälper användare att komma på måltidsförslag utifrån vad de har hemma i kylskåp eller skafferi. Titta på bilden och identifiera synliga råvaror. Föreslå sedan 2-3 olika förslag på "${mealLabel}" som huvudsakligen använder dessa råvaror. ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"ingredients": [string, ...], "suggestions": [{"name": string, "description": string (kort, en till två meningar, på svenska), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]}. Om bilden inte visar mat, ett kylskåp eller ett skafferi, svara med {"error": "no_food_detected"}.`,
-          messages: [
-            {
-              role: "user",
-              content: [
-                { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64Data } },
-                { type: "text", text: `Vad kan jag laga till ${mealLabel.toLowerCase()} med det som syns här?` },
-              ],
-            },
-          ],
+          text: `Vad kan jag laga till ${mealLabel.toLowerCase()} med det som syns här?`,
+          image: base64Data,
+          mimeType: "image/jpeg",
         }),
       });
 
       const data = await response.json();
-      const textBlock = (data.content || []).find((b) => b.type === "text");
-      const raw = textBlock ? textBlock.text : "";
+      const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
 
@@ -1674,20 +1641,18 @@ export default function Portion() {
     const targetKcal = Math.max(150, Math.min(500, Math.round(reactiveBurn.surplus / 2)));
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
           system:
             `Du är en assistent som föreslår mellanmål. Föreslå 3 olika, varierade mellanmål på svenska som ligger nära ${targetKcal} kcal styck. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{"name": string, "description": string (kort, en mening), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]`,
-          messages: [{ role: "user", content: `Ge mig 3 mellanmålsförslag på ca ${targetKcal} kcal.` }],
+          text: `Ge mig 3 mellanmålsförslag på ca ${targetKcal} kcal.`,
+          image: null,
         }),
       });
       const data = await response.json();
-      const textBlock = (data.content || []).find((b) => b.type === "text");
-      const raw = textBlock ? textBlock.text : "";
+      const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
       setReactiveSuggestFlow({ step: "results", suggestions: Array.isArray(parsed) ? parsed : [], addedIds: {} });
