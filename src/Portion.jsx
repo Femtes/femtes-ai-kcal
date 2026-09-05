@@ -1713,9 +1713,7 @@ export default function Portion() {
       <div className="w-full max-w-md flex flex-col min-h-screen pb-10">
         {/* Header */}
         <div className="px-5 pt-6 pb-4 flex items-center justify-between gap-3">
-          <span className="text-base font-extrabold truncate" style={{ letterSpacing: "-0.02em" }}>
-            Calio Bite
-          </span>
+          <img src="/logo.png" alt="Calio Bite" className="h-7 w-auto flex-shrink-0" style={{ objectFit: "contain" }} />
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={openCalendarPicker}

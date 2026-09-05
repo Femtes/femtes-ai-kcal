@@ -110,7 +110,11 @@ export default function App() {
           </span>
         </div>
 
-        <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, textAlign: "center" }}>Calio Bite</h1>
+        <img
+          src="/logo.png"
+          alt="Calio Bite"
+          style={{ width: "100%", maxWidth: 280, display: "block", margin: "0 auto 8px" }}
+        />
         <p style={{ fontSize: 13, color: "#8B8D97", marginBottom: 8, textAlign: "center" }}>
           {mode === "login" ? "Logga in på ditt konto" : "Skapa ett nytt konto"}
         </p>
