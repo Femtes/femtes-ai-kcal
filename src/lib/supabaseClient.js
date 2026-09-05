@@ -11,7 +11,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
+    persistSession: true, // sparar sessionen i webbläsaren, håller användaren inloggad
+    autoRefreshToken: true, // förnyar sessionen automatiskt i bakgrunden, ingen ny inloggning behövs
   },
 });

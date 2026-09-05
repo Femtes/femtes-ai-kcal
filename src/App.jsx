@@ -87,11 +87,35 @@ export default function App() {
     >
       <form
         onSubmit={handleSubmit}
-        style={{ width: "100%", maxWidth: 360, backgroundColor: "#1C1E24", borderRadius: 16, padding: 28 }}
+        style={{ width: "100%", maxWidth: 360, backgroundColor: "#1C1E24", borderRadius: 16, padding: 28, position: "relative" }}
       >
-        <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Femtes AI kcal</h1>
-        <p style={{ fontSize: 13, color: "#8B8D97", marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "5px 14px",
+              borderRadius: 999,
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: "0.08em",
+              color: "#8B6BFF",
+              backgroundColor: "rgba(139, 107, 255, 0.14)",
+              border: "1px solid rgba(139, 107, 255, 0.4)",
+              boxShadow: "0 0 14px rgba(139, 107, 255, 0.35)",
+            }}
+          >
+            🧪 BETA
+          </span>
+        </div>
+
+        <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, textAlign: "center" }}>Femtes AI kcal</h1>
+        <p style={{ fontSize: 13, color: "#8B8D97", marginBottom: 8, textAlign: "center" }}>
           {mode === "login" ? "Logga in på ditt konto" : "Skapa ett nytt konto"}
+        </p>
+        <p style={{ fontSize: 11, color: "#8B8D97", marginBottom: 20, textAlign: "center", opacity: 0.8 }}>
+          Appen är under betatest — du kan stöta på buggar, och funktioner kan ändras.
         </p>
 
         <label style={{ fontSize: 12, color: "#8B8D97", display: "block", marginBottom: 4 }}>E-postadress</label>
