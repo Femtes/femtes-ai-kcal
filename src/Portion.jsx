@@ -42,6 +42,7 @@ const TABS = [
   { key: "trends", label: "Trender" },
   { key: "weight", label: "Viktgång" },
   { key: "news", label: "Nyheter" },
+  { key: "help", label: "Hjälp" },
   { key: "legal", label: "Legal" },
 ];
 
@@ -91,6 +92,29 @@ const CHANGELOG = [
 
 const APP_VERSION = CHANGELOG[0].version;
 const LAST_SEEN_VERSION_KEY = "app-last-seen-version";
+const LANGUAGE_KEY = "app-language";
+
+const LANGUAGES = [
+  { code: "sv", flag: "🇸🇪", label: "Svenska" },
+  { code: "en", flag: "🇬🇧", label: "English" },
+];
+
+const TAB_LABELS_EN = {
+  budget: "Overview",
+  scanner: "Meal Scanner",
+  training: "Training",
+  fasting: "Fasting",
+  trends: "Trends",
+  weight: "Weight",
+  news: "News",
+  help: "Help",
+  legal: "Legal",
+};
+
+function getTabLabel(key, language) {
+  if (language === "en" && TAB_LABELS_EN[key]) return TAB_LABELS_EN[key];
+  return TABS.find((t) => t.key === key)?.label || "";
+}
 
 const TAB_INFO = {
   budget:
@@ -106,6 +130,7 @@ const TAB_INFO = {
   weight:
     "Logga din vikt regelbundet för att se utvecklingen som en graf över tid, och håll koll på ditt uträknade BMI högst upp.",
   news: "Allt som är nytt i Calio Bite, senaste versionen överst.",
+  help: "Tryck på ett ämne för att öppna en steg-för-steg-guide för just den delen av appen.",
   legal: "Villkor och ansvarsbegränsning för Calio Bite.",
 };
 
@@ -594,6 +619,9 @@ export default function Portion() {
   const [exerciseFlow, setExerciseFlow] = useState(null);
   const [scannerCategory, setScannerCategory] = useState("dinner");
   const [scannerFlow, setScannerFlow] = useState(null);
+  const [recipeFlow, setRecipeFlow] = useState(null);
+  const [language, setLanguage] = useState("sv");
+  const [helpOpenTopic, setHelpOpenTopic] = useState(null);
   const [nowTick, setNowTick] = useState(Date.now());
   const [fastCompletedMsg, setFastCompletedMsg] = useState(null);
   const fileInputRef = useRef(null);
@@ -614,6 +642,20 @@ export default function Portion() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await window.storage.get(LANGUAGE_KEY, false);
+        if (res && res.value) setLanguage(res.value);
+      } catch (e) {}
+    })();
+  }, []);
+
+  function changeLanguage(code) {
+    setLanguage(code);
+    window.storage.set(LANGUAGE_KEY, code, false).catch(() => {});
+  }
 
   function dismissNewsPopup() {
     setShowNewsPopup(false);
@@ -1792,6 +1834,104 @@ export default function Portion() {
     setReactiveSuggestFlow((f) => (f ? { ...f, addedIds: { ...f.addedIds, [index]: true } } : f));
   }
 
+  function closeRecipeFlow() {
+    setRecipeFlow(null);
+  }
+
+  function openRecipeAI() {
+    setRecipeFlow({ step: "ai-input", ingredients: "", category: "lunch" });
+  }
+
+  function openRecipeManual() {
+    setRecipeFlow({
+      step: "manual",
+      category: "lunch",
+      name: "",
+      ingredientsText: "",
+      instructions: "",
+      kcal: "",
+      protein: "",
+      carbs: "",
+      fat: "",
+      fiber: "",
+    });
+  }
+
+  function updateRecipeFlow(field, value) {
+    setRecipeFlow((f) => ({ ...f, [field]: value }));
+  }
+
+  async function generateRecipeAI() {
+    const ingredients = recipeFlow && recipeFlow.ingredients ? recipeFlow.ingredients.trim() : "";
+    setRecipeFlow((f) => ({ ...f, step: "ai-loading" }));
+
+    let budgetLine = "Föreslå ett balanserat recept med rimliga proportioner.";
+    if (goals) {
+      const remKcal = Math.max(0, goals.kcalGoal - consumed.kcal);
+      budgetLine = `Receptet ska vara en portion på ungefär ${remKcal} kcal eller mindre, så det passar användarens återstående dagsmål.`;
+    }
+    const ingredientLine = ingredients
+      ? `Utgå gärna från dessa ingredienser om möjligt: ${ingredients}.`
+      : "Användaren har inte angett några särskilda ingredienser — hitta på ett gott, enkelt recept.";
+
+    try {
+      const response = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system:
+            `Du är en assistent som skapar recept. ${ingredientLine} ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn på svenska), "ingredients": [string, ...] (varje ingrediens med ungefärlig mängd), "instructions": [string, ...] (steg för steg, korta meningar på svenska), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Värdena för näring ska gälla hela portionen/receptet.`,
+          text: "Skapa ett recept åt mig.",
+          image: null,
+        }),
+      });
+      const data = await response.json();
+      const raw = data.text || "";
+      const cleaned = raw.replace(/```json|```/g, "").trim();
+      const recipe = JSON.parse(cleaned);
+      setRecipeFlow((f) => ({ ...f, step: "ai-result", recipe }));
+    } catch (e) {
+      setRecipeFlow((f) => ({ ...f, step: "ai-error" }));
+    }
+  }
+
+  function saveRecipeToLibraryAndMaybeLog(recipe, categoryKey) {
+    const entry = {
+      id: Date.now(),
+      name: recipe.name,
+      kcal: Math.round(recipe.kcal) || 0,
+      protein: Math.round(recipe.protein_g ?? recipe.protein) || 0,
+      carbs: Math.round(recipe.carbs_g ?? recipe.carbs) || 0,
+      fat: Math.round(recipe.fat_g ?? recipe.fat) || 0,
+      fiber: Math.round(recipe.fiber_g ?? recipe.fiber) || 0,
+      portion_note: Array.isArray(recipe.ingredients) ? recipe.ingredients.join(", ") : "",
+      image: null,
+      emoji: guessFoodEmoji(recipe.name),
+    };
+    upsertFoodLibrary(entry);
+    if (categoryKey) {
+      updateDay({ ...dayData, [categoryKey]: [entry, ...dayData[categoryKey]] });
+    }
+    closeRecipeFlow();
+  }
+
+  function saveManualRecipe(categoryKey) {
+    if (!recipeFlow || !recipeFlow.name || !recipeFlow.name.trim() || recipeFlow.kcal === "") return;
+    const recipe = {
+      name: recipeFlow.name.trim(),
+      ingredients: recipeFlow.ingredientsText
+        ? recipeFlow.ingredientsText.split("\n").map((s) => s.trim()).filter(Boolean)
+        : [],
+      kcal: Number(recipeFlow.kcal) || 0,
+      protein_g: Number(recipeFlow.protein) || 0,
+      carbs_g: Number(recipeFlow.carbs) || 0,
+      fat_g: Number(recipeFlow.fat) || 0,
+      fiber_g: Number(recipeFlow.fiber) || 0,
+    };
+    saveRecipeToLibraryAndMaybeLog(recipe, categoryKey);
+  }
+
+
   const draftValid = flow && flow.draft.name.trim() !== "" && flow.draft.kcal !== "";
   const livePreview = computeGoals(profileDraft);
   const effectiveKcalGoal = weeklyCalc && weeklyCalc.adjustedGoal ? weeklyCalc.adjustedGoal : goals ? goals.kcalGoal : 0;
@@ -1849,9 +1989,27 @@ export default function Portion() {
           />
         </div>
 
+        {/* Language selector */}
+        <div className="px-5 mb-3 flex items-center justify-end gap-1.5">
+          {LANGUAGES.map((l) => (
+            <button
+              key={l.code}
+              onClick={() => changeLanguage(l.code)}
+              aria-label={l.label}
+              className="w-7 h-7 rounded-full flex items-center justify-center text-sm"
+              style={{
+                border: language === l.code ? `1.5px solid ${colors.primary}` : `1px solid ${colors.hairline}`,
+                opacity: language === l.code ? 1 : 0.5,
+              }}
+            >
+              {l.flag}
+            </button>
+          ))}
+        </div>
+
         {/* Current tab label with info icon */}
         <div className="px-5 mb-5 flex items-center justify-between">
-          <h1 className="text-lg font-extrabold">{TABS.find((t) => t.key === activeTab)?.label}</h1>
+          <h1 className="text-lg font-extrabold">{getTabLabel(activeTab, language)}</h1>
           <button onClick={() => setInfoOpen(true)} aria-label="Information om fliken" className="flex-shrink-0">
             <InfoIcon />
           </button>
@@ -1917,7 +2075,7 @@ export default function Portion() {
                       backgroundColor: activeTab === t.key ? colors.primaryLight : "transparent",
                     }}
                   >
-                    {t.label}
+                    {getTabLabel(t.key, language)}
                   </button>
                 ))}
               </div>
@@ -1930,7 +2088,7 @@ export default function Portion() {
                   className="w-full text-left text-sm font-semibold"
                   style={{ color: colors.coral }}
                 >
-                  Logga ut
+                  {language === "en" ? "Log out" : "Logga ut"}
                 </button>
               </div>
             </div>
@@ -2286,6 +2444,53 @@ export default function Portion() {
           </div>
         )}
 
+        {/* Recipe feature — sticks out a bit from the rest */}
+        {!dayLoading && (
+          <div className="px-5 mt-5 mb-1">
+            <div className="relative rounded-2xl overflow-hidden" style={{ backgroundColor: "#0E140A" }}>
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `radial-gradient(circle at 15% 20%, ${colors.primary}33, transparent 60%)`,
+                }}
+              />
+              <div
+                className="absolute inset-0 rounded-2xl"
+                style={{ border: `1px solid ${colors.primary}55` }}
+              />
+              <div className="relative px-5 py-5">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span style={{ fontSize: 16 }}>✨</span>
+                  <span className="text-xs font-bold uppercase tracking-wide" style={{ color: colors.primary, letterSpacing: "0.06em" }}>
+                    Recept
+                  </span>
+                </div>
+                <p className="text-sm font-bold mb-1">Skapa eller spara ett recept</p>
+                <p className="text-xs mb-4" style={{ color: colors.textDim }}>
+                  Låt AI:n komma på ett recept utifrån vad du har eller vill äta, eller spara ditt eget favoritrecept för
+                  att snabbt logga det igen senare.
+                </p>
+                <div className="flex gap-2.5">
+                  <button
+                    onClick={openRecipeAI}
+                    className="flex-1 rounded-xl py-3 text-xs font-bold"
+                    style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
+                  >
+                    🤖 Skapa med AI
+                  </button>
+                  <button
+                    onClick={openRecipeManual}
+                    className="flex-1 rounded-xl py-3 text-xs font-bold"
+                    style={{ border: `1px solid ${colors.primary}66`, color: colors.primary }}
+                  >
+                    ✏️ Eget recept
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Categories */}
         <div className="px-5 mt-2">
           {!dayLoading && goals && (
@@ -2482,6 +2687,8 @@ export default function Portion() {
         )}
 
         {activeTab === "news" && <NewsPanel />}
+
+        {activeTab === "help" && <HelpPanel openTopic={helpOpenTopic} onToggleTopic={setHelpOpenTopic} />}
 
         {activeTab === "legal" && <LegalPanel />}
 
@@ -3360,6 +3567,220 @@ export default function Portion() {
                   style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
                 >
                   Klar
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Recipe overlay */}
+      {recipeFlow && (
+        <div
+          className="fixed inset-0 flex items-end justify-center z-50"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeRecipeFlow();
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-t-2xl px-5 pt-5 pb-6"
+            style={{ backgroundColor: colors.surface, maxHeight: "85vh", overflowY: "auto" }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold">
+                {recipeFlow.step === "manual" ? "Eget recept" : "Recept med AI"}
+              </h3>
+              <button onClick={closeRecipeFlow} className="text-lg" style={{ color: colors.textDim }} aria-label="Stäng">
+                ×
+              </button>
+            </div>
+
+            {recipeFlow.step === "ai-input" && (
+              <div className="pb-4">
+                <p className="text-xs mb-3" style={{ color: colors.textDim }}>
+                  Har du några ingredienser du vill utgå från? Lämna tomt så hittar AI:n på något gott själv.
+                </p>
+                <textarea
+                  autoFocus
+                  value={recipeFlow.ingredients}
+                  onChange={(e) => updateRecipeFlow("ingredients", e.target.value)}
+                  placeholder="T.ex. kyckling, broccoli, ris"
+                  rows={3}
+                  className="w-full rounded-lg px-3 py-2.5 text-sm mb-5"
+                  style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+                />
+                <button
+                  onClick={generateRecipeAI}
+                  className="w-full rounded-xl py-3.5 text-sm font-bold"
+                  style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
+                >
+                  ✨ Skapa recept
+                </button>
+              </div>
+            )}
+
+            {recipeFlow.step === "ai-loading" && (
+              <div className="flex flex-col items-center justify-center gap-3 py-14">
+                <div
+                  className="w-9 h-9 rounded-full animate-spin"
+                  style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
+                />
+                <p className="text-xs" style={{ color: colors.textDim }}>Komponerar ett recept …</p>
+              </div>
+            )}
+
+            {recipeFlow.step === "ai-error" && (
+              <div className="py-6 text-center">
+                <p className="text-sm mb-4" style={{ color: colors.textDim }}>
+                  Något gick fel. Försök igen om en stund.
+                </p>
+                <button onClick={openRecipeAI} className="text-xs font-semibold" style={{ color: colors.primary }}>
+                  Försök igen
+                </button>
+              </div>
+            )}
+
+            {recipeFlow.step === "ai-result" && recipeFlow.recipe && (
+              <div className="pb-2">
+                <h4 className="text-base font-bold mb-2">{recipeFlow.recipe.name}</h4>
+                <p className="text-xs font-bold mb-3" style={{ color: colors.primary }}>
+                  {Math.round(recipeFlow.recipe.kcal)} kcal · P {Math.round(recipeFlow.recipe.protein_g)}g · K{" "}
+                  {Math.round(recipeFlow.recipe.carbs_g)}g · F {Math.round(recipeFlow.recipe.fat_g)}g
+                </p>
+
+                {Array.isArray(recipeFlow.recipe.ingredients) && recipeFlow.recipe.ingredients.length > 0 && (
+                  <>
+                    <p className="text-xs font-bold mb-1.5">Ingredienser</p>
+                    <ul className="mb-4" style={{ paddingLeft: 18 }}>
+                      {recipeFlow.recipe.ingredients.map((ing, i) => (
+                        <li key={i} className="text-xs mb-1" style={{ color: colors.textDim, listStyleType: "disc" }}>
+                          {ing}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+
+                {Array.isArray(recipeFlow.recipe.instructions) && recipeFlow.recipe.instructions.length > 0 && (
+                  <>
+                    <p className="text-xs font-bold mb-1.5">Gör så här</p>
+                    <ol className="mb-5" style={{ paddingLeft: 18 }}>
+                      {recipeFlow.recipe.instructions.map((step, i) => (
+                        <li key={i} className="text-xs mb-1.5" style={{ color: colors.textDim, listStyleType: "decimal" }}>
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  </>
+                )}
+
+                <p className="text-xs font-bold mb-2">Lägg till i</p>
+                <div className="flex gap-1.5 mb-4 flex-wrap">
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c.key}
+                      onClick={() => updateRecipeFlow("category", c.key)}
+                      className="rounded-full px-3 py-1.5 text-xs font-semibold"
+                      style={{
+                        backgroundColor: recipeFlow.category === c.key ? colors.primary : colors.surfaceMuted,
+                        color: recipeFlow.category === c.key ? colors.onPrimary : colors.textDim,
+                      }}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => saveRecipeToLibraryAndMaybeLog(recipeFlow.recipe, recipeFlow.category)}
+                    className="w-full rounded-xl py-3.5 text-sm font-bold"
+                    style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
+                  >
+                    Logga och spara
+                  </button>
+                  <button
+                    onClick={() => saveRecipeToLibraryAndMaybeLog(recipeFlow.recipe, null)}
+                    className="w-full rounded-xl py-3 text-xs font-semibold"
+                    style={{ color: colors.textDim }}
+                  >
+                    Spara bara i biblioteket (logga inte nu)
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {recipeFlow.step === "manual" && (
+              <div className="pb-2">
+                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
+                  Namn på receptet
+                </label>
+                <input
+                  value={recipeFlow.name}
+                  onChange={(e) => updateRecipeFlow("name", e.target.value)}
+                  placeholder="T.ex. Mammas köttbullar"
+                  className="w-full rounded-lg px-3 py-2.5 text-sm mb-3"
+                  style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+                />
+
+                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
+                  Ingredienser (en per rad, valfritt)
+                </label>
+                <textarea
+                  value={recipeFlow.ingredientsText}
+                  onChange={(e) => updateRecipeFlow("ingredientsText", e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg px-3 py-2.5 text-sm mb-3"
+                  style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+                />
+
+                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
+                  Gör så här (valfritt)
+                </label>
+                <textarea
+                  value={recipeFlow.instructions}
+                  onChange={(e) => updateRecipeFlow("instructions", e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg px-3 py-2.5 text-sm mb-4"
+                  style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+                />
+
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  <MacroInput label="Kalorier" value={recipeFlow.kcal} onChange={(v) => updateRecipeFlow("kcal", v)} />
+                  <MacroInput label="Protein (g)" value={recipeFlow.protein} onChange={(v) => updateRecipeFlow("protein", v)} />
+                  <MacroInput label="Kolhydrater (g)" value={recipeFlow.carbs} onChange={(v) => updateRecipeFlow("carbs", v)} />
+                  <MacroInput label="Fett (g)" value={recipeFlow.fat} onChange={(v) => updateRecipeFlow("fat", v)} />
+                </div>
+
+                <p className="text-xs font-bold mb-2">Lägg till i (valfritt)</p>
+                <div className="flex gap-1.5 mb-5 flex-wrap">
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c.key}
+                      onClick={() => updateRecipeFlow("category", recipeFlow.category === c.key ? null : c.key)}
+                      className="rounded-full px-3 py-1.5 text-xs font-semibold"
+                      style={{
+                        backgroundColor: recipeFlow.category === c.key ? colors.primary : colors.surfaceMuted,
+                        color: recipeFlow.category === c.key ? colors.onPrimary : colors.textDim,
+                      }}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => saveManualRecipe(recipeFlow.category)}
+                  disabled={!recipeFlow.name.trim() || recipeFlow.kcal === ""}
+                  className="w-full rounded-xl py-3.5 text-sm font-bold"
+                  style={{
+                    backgroundColor: colors.primary,
+                    color: colors.onPrimary,
+                    opacity: !recipeFlow.name.trim() || recipeFlow.kcal === "" ? 0.5 : 1,
+                  }}
+                >
+                  {recipeFlow.category ? "Logga och spara recept" : "Spara recept"}
                 </button>
               </div>
             )}
@@ -4367,6 +4788,183 @@ const SCANNER_CATEGORIES = [
   { key: "snack", label: "Mellanmål" },
   { key: "dinner", label: "Middag" },
 ];
+
+const HELP_TOPICS = [
+  {
+    title: "Ställa in ditt kalorimål och dina uppgifter",
+    steps: [
+      "Gå till fliken Översikt och tryck på ✎ Redigera uppe till höger.",
+      "Fyll i kön, ålder, vikt, längd och aktivitetsnivå — appen räknar då ut ett rekommenderat kaloriemål åt dig automatiskt.",
+      "Vill du istället bestämma målet själv? Slå på \"Ange eget mål manuellt\" i samma ruta och skriv in det kaloriantal du vill ha.",
+      "Du kan när som helst gå tillbaka hit och ändra uppgifterna — kaloriemålet räknas då om direkt.",
+    ],
+  },
+  {
+    title: "Logga en måltid — fyra olika sätt",
+    steps: [
+      "Tryck på + vid en måltidskategori (Frukost, Lunch, Mellanmål, Middag eller Övrigt) på Översikt-fliken.",
+      "📷 Fota maträtt: ta ett foto så uppskattar AI:n kalorier och näring automatiskt.",
+      "🔍 Sök livsmedel: sök på ett namn, välj mängd i gram — fungerar både mot dina egna sparade livsmedel och mot en öppen produktdatabas.",
+      "🎙️ Beskriv med ord: skriv (eller diktera med tangentbordets mikrofon) en mening om vad du åt, t.ex. \"en skål gröt med banan\" — AI:n delar upp det i separata livsmedel.",
+      "✏️ Manuellt: fyll i namn, kalorier och näringsvärden själv, med möjlighet att lägga till ett eget foto.",
+    ],
+  },
+  {
+    title: "Redigera eller ta bort något du loggat",
+    steps: [
+      "Tryck direkt på en loggad måltid i listan för att öppna den i redigeringsläge.",
+      "Ändra vilket fält du vill (namn, kalorier, näring) och tryck \"Spara ändringar\".",
+      "Vill du ta bort helt? Tryck på × längst till höger på raden istället.",
+    ],
+  },
+  {
+    title: "Ändra hur kalorierna fördelas mellan måltider",
+    steps: [
+      "Tryck på \"Ändra fördelning\" ovanför måltidslistan på Översikt-fliken.",
+      "Skriv in hur många kalorier du vill ha till Frukost, Lunch, Mellanmål, Middag och Övrigt.",
+      "Fördelningen sparas som andelar av din totala kaloribudget, så den skalar automatiskt om du senare ändrar ditt kaloriemål.",
+    ],
+  },
+  {
+    title: "Logga vatten",
+    steps: [
+      "Vattenspåraren finns direkt under din dagliga sammanfattning på Översikt-fliken.",
+      "Tryck på snabbknapparna (t.ex. +250 ml) för att lägga till en klunk i taget.",
+      "Ångra senaste tillägg med pilen om du klickade fel.",
+    ],
+  },
+  {
+    title: "Träning och steg",
+    steps: [
+      "Gå till fliken Träning.",
+      "Ställ in ditt stegmål högst upp och logga dagens steg.",
+      "Tryck på + för att lägga till ett träningspass — välj typ (promenad, löpning, styrketräning m.fl.), så räknas kalorierna du bränt ut automatiskt.",
+      "Bränd energi räknas alltid in i din dagliga kaloribudget på Översikt-fliken.",
+    ],
+  },
+  {
+    title: "Fasta (periodisk fasta)",
+    steps: [
+      "Gå till fliken Fasta.",
+      "Välj en fastemetod, t.ex. 16:8, eller ställ in ett eget antal timmar.",
+      "Tryck \"Starta fasta\" — ringen och texten visar vilken fas du är i just nu.",
+      "Fastan avslutas automatiskt när tiden är ute, och du får en peppande bekräftelse.",
+    ],
+  },
+  {
+    title: "Viktgång och BMI",
+    steps: [
+      "Gå till fliken Viktgång.",
+      "Skriv in dagens vikt och tryck spara — den läggs till i grafen.",
+      "Ditt BMI räknas ut automatiskt utifrån vikten och längden du angett under Översikt → Redigera.",
+    ],
+  },
+  {
+    title: "Flexibel veckobudget",
+    steps: [
+      "Om du ätit mer eller mindre än ditt mål tidigare i veckan jämnar appen automatiskt ut det över resterande dagar.",
+      "Du ser en informationsruta om detta direkt på Översikt-fliken när det är aktuellt.",
+      "Vill du stänga av det och alltid ha exakt samma mål varje dag? Tryck \"Stäng av\" i rutan, eller ändra inställningen under ✎ Redigera.",
+    ],
+  },
+  {
+    title: "Sifferfritt läge",
+    steps: [
+      "Tryck på \"🌿 Sifferfritt läge\" bredvid ✎ Redigera på Översikt-fliken.",
+      "Exakta kalorisiffror döljs och ersätts med färgkodade hjärtan och en enkel status (grönt/gult/rött).",
+      "Perfekt de dagar du vill hålla koll utan att fastna i siffror. Tryck på samma knapp igen för att visa siffrorna.",
+    ],
+  },
+  {
+    title: "Dela en måltid med en vän",
+    steps: [
+      "Tryck på 🤝-ikonen bredvid en loggad måltid.",
+      "En kort kod genereras — skicka den till din vän via SMS eller valfri app.",
+      "Din vän trycker + på en kategori i sin egen app → \"Hämta delad måltid\" → skriver in koden, så dyker hela måltiden upp hos dem.",
+    ],
+  },
+  {
+    title: "Måltids scanner (fota kylskåpet)",
+    steps: [
+      "Gå till fliken Måltids scanner.",
+      "Välj vilken måltid du vill ha förslag till (t.ex. Middag).",
+      "Fota insidan av kylskåpet eller skafferiet — AI:n identifierar ingredienserna och föreslår 2–3 rätter anpassade efter hur mycket du har kvar av dagens kalorimål.",
+      "Gillar du ett förslag? Tryck \"Lägg till\" så loggas det direkt.",
+    ],
+  },
+  {
+    title: "Recept med AI eller eget recept",
+    steps: [
+      "Rutan \"Recept\" finns på Översikt-fliken, mellan vatten och måltider.",
+      "🤖 Skapa med AI: skriv gärna in ingredienser du vill använda (valfritt), så komponerar AI:n ett helt recept med ingredienser, gör-så-här-steg och näringsvärden.",
+      "✏️ Eget recept: skriv in ditt eget recept manuellt, med ingredienser, instruktioner och näringsvärden.",
+      "Båda sparas i ditt livsmedelsbibliotek för snabb återanvändning, och du kan logga dem direkt i valfri måltidskategori samtidigt.",
+    ],
+  },
+  {
+    title: "Klimat- och kostnadsuppskattning",
+    steps: [
+      "När du loggar mat uppskattar appen även klimatavtryck (CO2) och ungefärlig kostnad.",
+      "Vid manuell inmatning kan du själv fylla i egna värden under \"Klimat & plånbok\".",
+      "Dagens totala klimatavtryck och matkostnad visas längst ner i sammanfattningen på Översikt-fliken.",
+    ],
+  },
+  {
+    title: "Konto och utloggning",
+    steps: [
+      "Tryck på de tre strecken (☰) uppe till vänster för att öppna menyn.",
+      "Där hittar du alla flikar samlade, samt knappen \"Logga ut\" längst ner.",
+      "All din data är kopplad till ditt konto och sparas i en databas, så den finns kvar oavsett vilken enhet du loggar in från.",
+    ],
+  },
+];
+
+function HelpPanel({ openTopic, onToggleTopic }) {
+  return (
+    <div className="px-5">
+      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
+        Tryck på ett ämne nedan för att öppna en steg-för-steg-guide för just den delen av appen.
+      </p>
+
+      <div className="flex flex-col gap-2.5">
+        {HELP_TOPICS.map((topic, i) => {
+          const isOpen = openTopic === i;
+          return (
+            <div
+              key={i}
+              className="rounded-2xl overflow-hidden"
+              style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
+            >
+              <button
+                onClick={() => onToggleTopic(isOpen ? null : i)}
+                className="w-full flex items-center justify-between px-4 py-3.5 text-left"
+              >
+                <span className="text-sm font-semibold pr-3">{topic.title}</span>
+                <span
+                  className="flex-shrink-0 text-sm font-bold"
+                  style={{ color: colors.primary, transform: isOpen ? "rotate(180deg)" : "none" }}
+                >
+                  ▾
+                </span>
+              </button>
+              {isOpen && (
+                <div className="px-4 pb-4">
+                  <ol style={{ paddingLeft: 18 }}>
+                    {topic.steps.map((step, j) => (
+                      <li key={j} className="text-xs mb-2" style={{ color: colors.textDim, listStyleType: "decimal", lineHeight: 1.5 }}>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function NewsPanel() {
   return (
