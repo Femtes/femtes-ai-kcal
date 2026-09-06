@@ -92,6 +92,33 @@ const CHANGELOG = [
 const APP_VERSION = CHANGELOG[0].version;
 const LAST_SEEN_VERSION_KEY = "app-last-seen-version";
 
+const TAB_INFO = {
+  budget:
+    "Detta är din dagliga översikt. Bläddra mellan dagar med veckoremsan, se hur mycket kalorier och makron du har kvar, och tryck på + vid en måltid för att logga vad du ätit.",
+  scanner:
+    "Fota insidan av ditt kylskåp eller skafferi, så föreslår Calio Bite måltider utifrån vad du har hemma och hur mycket du har kvar av dagens kalorimål.",
+  training:
+    "Logga steg och träningspass här. Kalorierna du bränner räknas automatiskt in i dagens budget på Översikt-fliken.",
+  fasting:
+    "Välj en fastemetod, tryck \"Starta fasta\" och håll koll på hur länge du fastat. Fastan avslutas automatiskt och du får en fas-uppdatering när målet är nått.",
+  trends:
+    "Här kan du gå tillbaka i historiken vecka för vecka. Tryck på en dag för att se just den dagens kalorier och makron i detalj.",
+  weight:
+    "Logga din vikt regelbundet för att se utvecklingen som en graf över tid, och håll koll på ditt uträknade BMI högst upp.",
+  news: "Allt som är nytt i Calio Bite, senaste versionen överst.",
+  legal: "Villkor och ansvarsbegränsning för Calio Bite.",
+};
+
+function InfoIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9.5" stroke={colors.primary} strokeWidth="2" />
+      <circle cx="12" cy="7.7" r="1.4" fill={colors.primary} />
+      <rect x="10.6" y="10.5" width="2.8" height="7" rx="0.5" fill={colors.primary} />
+    </svg>
+  );
+}
+
 function compareVersions(a, b) {
   const pa = a.split(".").map(Number);
   const pb = b.split(".").map(Number);
@@ -485,20 +512,6 @@ function HeartIcon({ fraction, size = 26 }) {
   );
 }
 
-function InfoBanner({ children }) {
-  return (
-    <div
-      className="rounded-xl px-3.5 py-3 mb-5 flex items-start gap-2.5"
-      style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}` }}
-    >
-      <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>ℹ️</span>
-      <p className="text-xs" style={{ color: colors.textDim, lineHeight: 1.5 }}>
-        {children}
-      </p>
-    </div>
-  );
-}
-
 function SemiGauge({ size, stroke, baseColor, overlayColor, fraction, children }) {
   const r = (size - stroke) / 2;
   const cx = size / 2;
@@ -563,6 +576,7 @@ export default function Portion() {
   const [activeTab, setActiveTab] = useState("budget");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showNewsPopup, setShowNewsPopup] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [trendsData, setTrendsData] = useState(null);
   const [trendsLoading, setTrendsLoading] = useState(false);
   const [trendsMetric, setTrendsMetric] = useState("kcal");
@@ -1835,10 +1849,42 @@ export default function Portion() {
           />
         </div>
 
-        {/* Current tab label (menu row replaced by hamburger above) */}
-        <div className="px-5 mb-5">
+        {/* Current tab label with info icon */}
+        <div className="px-5 mb-5 flex items-center justify-between">
           <h1 className="text-lg font-extrabold">{TABS.find((t) => t.key === activeTab)?.label}</h1>
+          <button onClick={() => setInfoOpen(true)} aria-label="Information om fliken" className="flex-shrink-0">
+            <InfoIcon />
+          </button>
         </div>
+
+        {infoOpen && (
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50 px-6"
+            style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+            onClick={() => setInfoOpen(false)}
+          >
+            <div
+              className="w-full max-w-xs rounded-2xl px-5 py-5"
+              style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <InfoIcon size={18} />
+                <h3 className="text-sm font-bold">{TABS.find((t) => t.key === activeTab)?.label}</h3>
+              </div>
+              <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+                {TAB_INFO[activeTab]}
+              </p>
+              <button
+                onClick={() => setInfoOpen(false)}
+                className="w-full rounded-full py-2.5 text-xs font-bold"
+                style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
+              >
+                Okej
+              </button>
+            </div>
+          </div>
+        )}
 
         {menuOpen && (
           <div
@@ -1894,10 +1940,6 @@ export default function Portion() {
         {activeTab === "budget" && (
           <>
         <div className="px-5">
-          <InfoBanner>
-            Detta är din dagliga översikt. Bläddra mellan dagar med veckoremsan, se hur mycket kalorier och makron du har
-            kvar, och tryck på <strong>+</strong> vid en måltid för att logga vad du ätit.
-          </InfoBanner>
         </div>
         {/* Week strip */}
         <div className="px-5 flex items-center gap-1.5 mb-6">
@@ -3516,11 +3558,6 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
 
   return (
     <div className="px-5">
-      <InfoBanner>
-        Här kan du gå tillbaka i historiken vecka för vecka. Tryck på en dag för att se just den dagens kalorier och
-        makron i detalj.
-      </InfoBanner>
-
       {/* Week strip */}
       <div className="flex items-center gap-1 mb-5">
         <button
@@ -3707,11 +3744,6 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
 
   return (
     <div className="px-5">
-      <InfoBanner>
-        Logga din vikt regelbundet för att se utvecklingen som en graf över tid, och håll koll på ditt uträknade BMI
-        högst upp.
-      </InfoBanner>
-
       {bmi ? (
         <div className="rounded-2xl p-5 mb-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
           <p className="text-xs mb-1" style={{ color: colors.textDim }}>
@@ -3972,10 +4004,6 @@ function TrainingPanel({
       <p className="text-xs mb-4" style={{ color: colors.textDim }}>
         Träning för {dateLabel(selectedDate)}
       </p>
-
-      <InfoBanner>
-        Logga steg och träningspass här. Kalorierna du bränner räknas automatiskt in i dagens budget på Översikt-fliken.
-      </InfoBanner>
 
       <div className="rounded-2xl p-6 mb-6" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
         <div className="flex justify-center mb-1">
@@ -4435,11 +4463,6 @@ function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClo
 
   return (
     <div className="px-5">
-      <InfoBanner>
-        Fota insidan av ditt kylskåp eller skafferi, så föreslår Calio Bite måltider utifrån vad du har hemma och hur
-        mycket du har kvar av dagens kalorimål.
-      </InfoBanner>
-
       <p className="text-xs font-bold mb-2" style={{ color: colors.textDim }}>
         Vad vill du ha förslag på?
       </p>
@@ -4704,11 +4727,6 @@ function FastingPanel({
 
   return (
     <div className="px-5">
-      <InfoBanner>
-        Välj en fastemetod, tryck "Starta fasta" och håll koll på hur länge du fastat. Fastan avslutas automatiskt och du
-        får en fas-uppdatering när målet är nått.
-      </InfoBanner>
-
       {fasting.isFasting && (
         <div className="flex justify-center mb-4">
           <span
