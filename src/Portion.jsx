@@ -41,8 +41,66 @@ const TABS = [
   { key: "fasting", label: "Fasta" },
   { key: "trends", label: "Trender" },
   { key: "weight", label: "Viktgång" },
+  { key: "news", label: "Nyheter" },
   { key: "legal", label: "Legal" },
 ];
+
+const CHANGELOG = [
+  {
+    version: "0.3.0",
+    date: "2026-09-06",
+    headline: "Riktig databas, ny meny och grön design",
+    summary: [
+      "All data sparas nu i en riktig databas — försvinner aldrig vid uppdateringar",
+      "Ny hamburgermeny istället för flikrad",
+      "Möjlighet att logga ut",
+      "Ny grön design som matchar logotypen",
+    ],
+    details: [
+      "Bytt lagring från webbläsarens tillfälliga minne till en riktig databas kopplad till ditt konto — dina uppgifter finns kvar oavsett enhet eller uppdatering.",
+      "Navigeringen är omgjord till en hamburgermeny (☰) till vänster om logotypen istället för en flikrad.",
+      "Lagt till en utloggningsknapp i menyn.",
+      "Hela appens färgschema är omgjort från lila till grönt för att matcha den nya logotypen.",
+      "Lagt till den här nyhetsfliken samt en popup som visar vad som är nytt efter en uppdatering.",
+    ],
+  },
+  {
+    version: "0.2.0",
+    date: "2026-09-05",
+    headline: "Logotyp och juridisk information",
+    summary: ["Ny logotyp på plats", "Juridisk info och copyright tillagt", "Tydlig beta-märkning"],
+    details: [
+      "Lagt till appens riktiga logotyp på inloggningssidan, i headern och som favicon.",
+      "Ny flik 'Legal' med användarvillkor och ansvarsbegränsning.",
+      "Copyright-text tillagd på inloggningssidan.",
+      "Tydlig BETA-markering så användare vet att appen fortfarande testas.",
+    ],
+  },
+  {
+    version: "0.1.0",
+    date: "2026-09-01",
+    headline: "Första betaversionen",
+    summary: ["Kalorispårning, träning, fasta, vikt och trender", "Kontosystem med inloggning"],
+    details: [
+      "Första publika testversionen av Calio Bite.",
+      "Daglig kaloribudget, måltidsloggning, träningsspårning, fasteschema, viktlogg och trender.",
+      "Riktiga konton med registrering och inloggning.",
+    ],
+  },
+];
+
+const APP_VERSION = CHANGELOG[0].version;
+const LAST_SEEN_VERSION_KEY = "app-last-seen-version";
+
+function compareVersions(a, b) {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
 
 const KCAL_PER_KG_PER_KM = 0.7;
 const STEPS_PER_KM = 1333; // ~0,75 m per steg, matchar ca 7,5 km per 10 000 steg
@@ -504,6 +562,7 @@ export default function Portion() {
   const [categorySplitDraft, setCategorySplitDraft] = useState({ breakfast: "", lunch: "", snack: "", dinner: "" });
   const [activeTab, setActiveTab] = useState("budget");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showNewsPopup, setShowNewsPopup] = useState(false);
   const [trendsData, setTrendsData] = useState(null);
   const [trendsLoading, setTrendsLoading] = useState(false);
   const [trendsMetric, setTrendsMetric] = useState("kcal");
@@ -528,6 +587,29 @@ export default function Portion() {
   const scannerFileInputRef = useRef(null);
   const dateInputRef = useRef(null);
   const cacheRef = useRef({});
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await window.storage.get(LAST_SEEN_VERSION_KEY, false);
+        const seen = res && res.value;
+        if (!seen || compareVersions(APP_VERSION, seen) > 0) setShowNewsPopup(true);
+      } catch (e) {
+        // ingen tidigare version sparad — visa popupen (första inloggningen)
+        setShowNewsPopup(true);
+      }
+    })();
+  }, []);
+
+  function dismissNewsPopup() {
+    setShowNewsPopup(false);
+    window.storage.set(LAST_SEEN_VERSION_KEY, APP_VERSION, false).catch(() => {});
+  }
+
+  function openNewsFromPopup() {
+    setActiveTab("news");
+    dismissNewsPopup();
+  }
 
   useEffect(() => {
     (async () => {
@@ -1739,7 +1821,7 @@ export default function Portion() {
               <span style={{ fontSize: 10 }}>▾</span>
             </button>
             <span className="text-[10px]" style={{ color: colors.textDim, opacity: 0.6 }}>
-              v0.0.0.1
+              v{APP_VERSION}
             </span>
           </div>
           <input
@@ -2356,6 +2438,8 @@ export default function Portion() {
             profile={profile}
           />
         )}
+
+        {activeTab === "news" && <NewsPanel />}
 
         {activeTab === "legal" && <LegalPanel />}
 
@@ -3106,6 +3190,46 @@ export default function Portion() {
               style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
             >
               Spara mål
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* What's new popup */}
+      {showNewsPopup && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 px-6"
+          style={{ backgroundColor: "rgba(0,0,0,0.65)" }}
+          onClick={dismissNewsPopup}
+        >
+          <div
+            className="w-full max-w-xs rounded-2xl px-6 py-7"
+            style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span
+              className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full mb-3"
+              style={{ backgroundColor: colors.primaryLight, color: colors.primary }}
+            >
+              NYTT · v{APP_VERSION}
+            </span>
+            <h3 className="text-base font-extrabold mb-3">{CHANGELOG[0].headline}</h3>
+            <ul className="mb-5" style={{ paddingLeft: 18 }}>
+              {CHANGELOG[0].summary.map((line, i) => (
+                <li key={i} className="text-xs mb-1.5" style={{ color: colors.textDim, listStyleType: "disc" }}>
+                  {line}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={openNewsFromPopup}
+              className="w-full rounded-full py-3 text-sm font-bold mb-2"
+              style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
+            >
+              Tryck här för att läsa mer
+            </button>
+            <button onClick={dismissNewsPopup} className="w-full text-xs font-semibold py-1" style={{ color: colors.textDim }}>
+              Stäng
             </button>
           </div>
         </div>
@@ -4215,6 +4339,49 @@ const SCANNER_CATEGORIES = [
   { key: "snack", label: "Mellanmål" },
   { key: "dinner", label: "Middag" },
 ];
+
+function NewsPanel() {
+  return (
+    <div className="px-5">
+      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
+        Allt som är nytt i Calio Bite, senaste versionen överst.
+      </p>
+
+      <div className="flex flex-col gap-4">
+        {CHANGELOG.map((entry, i) => (
+          <div
+            key={entry.version}
+            className="rounded-2xl p-5"
+            style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span
+                className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+                style={{
+                  backgroundColor: i === 0 ? colors.primaryLight : colors.surfaceMuted,
+                  color: i === 0 ? colors.primary : colors.textDim,
+                }}
+              >
+                v{entry.version}
+              </span>
+              <span className="text-[11px]" style={{ color: colors.textDim }}>
+                {entry.date}
+              </span>
+            </div>
+            <h3 className="text-sm font-bold mb-2">{entry.headline}</h3>
+            <ul style={{ paddingLeft: 18 }}>
+              {entry.details.map((line, j) => (
+                <li key={j} className="text-xs mb-1" style={{ color: colors.textDim, listStyleType: "disc" }}>
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function LegalPanel() {
   return (
