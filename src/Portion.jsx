@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from "recharts";
+import { logout } from "./lib/auth.js";
 
 const colors = {
   bg: "#121317",
@@ -8,16 +9,16 @@ const colors = {
   text: "#F5F6F8",
   textDim: "#8B8D97",
   hairline: "#33353D",
-  primary: "#8B6BFF",
-  primaryLight: "#2A2340",
+  primary: "#8DC63F",
+  primaryLight: "#1E2A14",
   water: "#3FB6D3",
-  carbs: "#6FCF57",
+  carbs: "#3FBF7F",
   protein: "#F0924B",
   fat: "#E8C34F",
   fiber: "#B98B5E",
   coral: "#FF6B4A",
   pink: "#F0567F",
-  onPrimary: "#FFFFFF",
+  onPrimary: "#14180D",
 };
 
 const MACRO_BAR_COLORS = { carbs: "#6FCF57", protein: "#4E8CFF", fat: "#F0924B", fiber: "#B98B5E" };
@@ -71,7 +72,7 @@ const ACTIVITY_COLORS = {
   run: "#FF6B4A",
   cycle: "#3FB6D3",
   strength: "#F0924B",
-  swim: "#8B6BFF",
+  swim: "#3FB6D3",
   yoga: "#F0567F",
   jump_rope: "#B98B5E",
   other: "#E8C34F",
@@ -502,6 +503,7 @@ export default function Portion() {
   const [categorySplitOpen, setCategorySplitOpen] = useState(false);
   const [categorySplitDraft, setCategorySplitDraft] = useState({ breakfast: "", lunch: "", snack: "", dinner: "" });
   const [activeTab, setActiveTab] = useState("budget");
+  const [menuOpen, setMenuOpen] = useState(false);
   const [trendsData, setTrendsData] = useState(null);
   const [trendsLoading, setTrendsLoading] = useState(false);
   const [trendsMetric, setTrendsMetric] = useState("kcal");
@@ -1712,8 +1714,21 @@ export default function Portion() {
     >
       <div className="w-full max-w-md flex flex-col min-h-screen pb-10">
         {/* Header */}
-        <div className="px-5 pt-6 pb-4 flex items-center justify-between gap-3">
-          <img src="/logo.png" alt="Calio Bite" className="h-7 w-auto flex-shrink-0" style={{ objectFit: "contain" }} />
+        <div className="px-5 pt-6 pb-4 flex items-center justify-between gap-3 relative">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label="Öppna meny"
+              className="w-8 h-8 flex items-center justify-center flex-shrink-0"
+            >
+              <svg width="20" height="16" viewBox="0 0 20 16" fill="none">
+                <rect y="0" width="20" height="2.4" rx="1.2" fill="#FFFFFF" />
+                <rect y="6.8" width="20" height="2.4" rx="1.2" fill="#FFFFFF" />
+                <rect y="13.6" width="20" height="2.4" rx="1.2" fill="#FFFFFF" />
+              </svg>
+            </button>
+            <img src="/logo.png" alt="Calio Bite" className="h-7 w-auto flex-shrink-0" style={{ objectFit: "contain" }} />
+          </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={openCalendarPicker}
@@ -1738,25 +1753,61 @@ export default function Portion() {
           />
         </div>
 
-        {/* Tabs */}
+        {/* Current tab label (menu row replaced by hamburger above) */}
         <div className="px-5 mb-5">
-          <div className="flex gap-1 p-1 rounded-full" style={{ backgroundColor: colors.surfaceMuted }}>
-            {TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setActiveTab(t.key)}
-                className="flex-1 rounded-full py-2 text-xs font-bold"
-                style={{
-                  backgroundColor: activeTab === t.key ? colors.surface : "transparent",
-                  color: activeTab === t.key ? colors.text : colors.textDim,
-                  boxShadow: activeTab === t.key ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <h1 className="text-lg font-extrabold">{TABS.find((t) => t.key === activeTab)?.label}</h1>
         </div>
+
+        {menuOpen && (
+          <div
+            className="fixed inset-0 z-50 flex"
+            style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+            onClick={() => setMenuOpen(false)}
+          >
+            <div
+              className="h-full flex flex-col"
+              style={{ width: "78%", maxWidth: 300, backgroundColor: "#0B0B0D", borderRight: `1px solid ${colors.hairline}` }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-5 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${colors.hairline}` }}>
+                <img src="/logo.png" alt="Calio Bite" className="h-7 w-auto" style={{ objectFit: "contain" }} />
+                <button onClick={() => setMenuOpen(false)} aria-label="Stäng meny" style={{ color: "#FFFFFF", fontSize: 20 }}>
+                  ×
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto py-2">
+                {TABS.map((t) => (
+                  <button
+                    key={t.key}
+                    onClick={() => {
+                      setActiveTab(t.key);
+                      setMenuOpen(false);
+                    }}
+                    className="w-full text-left px-5 py-3.5 text-sm font-semibold"
+                    style={{
+                      color: activeTab === t.key ? colors.primary : "#FFFFFF",
+                      backgroundColor: activeTab === t.key ? colors.primaryLight : "transparent",
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <div className="px-5 py-4" style={{ borderTop: `1px solid ${colors.hairline}` }}>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full text-left text-sm font-semibold"
+                  style={{ color: colors.coral }}
+                >
+                  Logga ut
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {activeTab === "budget" && (
           <>
@@ -3341,7 +3392,6 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
 
   return (
     <div className="px-5">
-      <h2 className="text-lg font-extrabold mb-1">Trender</h2>
       <InfoBanner>
         Här kan du gå tillbaka i historiken vecka för vecka. Tryck på en dag för att se just den dagens kalorier och
         makron i detalj.
@@ -3533,7 +3583,6 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
 
   return (
     <div className="px-5">
-      <h2 className="text-lg font-extrabold mb-1">Viktgång</h2>
       <InfoBanner>
         Logga din vikt regelbundet för att se utvecklingen som en graf över tid, och håll koll på ditt uträknade BMI
         högst upp.
@@ -3796,7 +3845,6 @@ function TrainingPanel({
 
   return (
     <div className="px-5">
-      <h2 className="text-lg font-extrabold mb-1">Träning</h2>
       <p className="text-xs mb-4" style={{ color: colors.textDim }}>
         Träning för {dateLabel(selectedDate)}
       </p>
@@ -4171,7 +4219,6 @@ const SCANNER_CATEGORIES = [
 function LegalPanel() {
   return (
     <div className="px-5">
-      <h2 className="text-lg font-extrabold mb-1">Legal</h2>
       <p className="text-xs mb-5" style={{ color: colors.textDim }}>
         Villkor och ansvarsbegränsning för Calio Bite.
       </p>
@@ -4221,7 +4268,6 @@ function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClo
 
   return (
     <div className="px-5">
-      <h2 className="text-lg font-extrabold mb-1">Måltids scanner</h2>
       <InfoBanner>
         Fota insidan av ditt kylskåp eller skafferi, så föreslår Calio Bite måltider utifrån vad du har hemma och hur
         mycket du har kvar av dagens kalorimål.
@@ -4491,10 +4537,6 @@ function FastingPanel({
 
   return (
     <div className="px-5">
-      <div className="flex items-center justify-between mb-1">
-        <h2 className="text-lg font-extrabold">Fasta</h2>
-      </div>
-
       <InfoBanner>
         Välj en fastemetod, tryck "Starta fasta" och håll koll på hur länge du fastat. Fastan avslutas automatiskt och du
         får en fas-uppdatering när målet är nått.

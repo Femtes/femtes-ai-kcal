@@ -100,10 +100,10 @@ export default function App() {
               fontSize: 11,
               fontWeight: 800,
               letterSpacing: "0.08em",
-              color: "#8B6BFF",
-              backgroundColor: "rgba(139, 107, 255, 0.14)",
-              border: "1px solid rgba(139, 107, 255, 0.4)",
-              boxShadow: "0 0 14px rgba(139, 107, 255, 0.35)",
+              color: "#8DC63F",
+              backgroundColor: "rgba(141, 198, 63, 0.14)",
+              border: "1px solid rgba(141, 198, 63, 0.4)",
+              boxShadow: "0 0 14px rgba(141, 198, 63, 0.35)",
             }}
           >
             🧪 BETA
@@ -169,8 +169,8 @@ export default function App() {
             padding: "12px 0",
             borderRadius: 999,
             border: "none",
-            backgroundColor: "#8B6BFF",
-            color: "#FFFFFF",
+            backgroundColor: "#8DC63F",
+            color: "#14180D",
             fontWeight: 700,
             fontSize: 14,
             cursor: "pointer",
@@ -229,7 +229,7 @@ const inputStyle = {
 const linkStyle = {
   background: "none",
   border: "none",
-  color: "#8B6BFF",
+  color: "#8DC63F",
   fontSize: 13,
   fontWeight: 600,
   cursor: "pointer",
