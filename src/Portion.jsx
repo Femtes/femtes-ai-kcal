@@ -48,6 +48,32 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.4.2",
+    date: "2026-09-07",
+    headline: "Rimligare receptportioner",
+    headline_en: "More realistic recipe portions",
+    summary: [
+      "AI-recept kunde bli familjestora men märkta som '1 portion'",
+      "Receptet tar nu hänsyn till ditt mål och din aktivitetsnivå",
+      "En måltid använder aldrig hela dagens kalorier längre",
+    ],
+    summary_en: [
+      "AI recipes could turn out family-sized while still labelled '1 serving'",
+      "Recipes now factor in your goal and activity level",
+      "A single meal no longer uses your entire day's calories",
+    ],
+    details: [
+      "AI:n instrueras nu att sätta realistiska ingrediensmängder per portion (t.ex. ca 80–100g torr pasta eller 120–180g kött/fisk/kyckling per person) istället för att gissa fel på antalet portioner.",
+      "Måltidens kalorimål begränsas nu till max ca 35 % av dagsmålet istället för att kunna använda hela den återstående dagsbudgeten på en enda måltid.",
+      "Receptförslagen anpassas nu efter om du vill gå ner, upp eller behålla vikten, samt din aktivitetsnivå (t.ex. mer protein vid hög aktivitet).",
+    ],
+    details_en: [
+      "The AI is now instructed to use realistic ingredient amounts per serving (e.g. approx. 80–100g dry pasta or 120–180g meat/fish/chicken per person) instead of guessing the serving count incorrectly.",
+      "A meal's calorie target is now capped at roughly 35% of the daily goal instead of being able to use the entire remaining daily budget on a single meal.",
+      "Recipe suggestions now adapt to whether your goal is to lose, gain or maintain weight, as well as your activity level (e.g. more protein for high activity).",
+    ],
+  },
+  {
     version: "0.4.1",
     date: "2026-09-07",
     headline: "Portionsval för recept",
@@ -2252,11 +2278,28 @@ export default function Portion() {
     const ingredients = recipeFlow && recipeFlow.ingredients ? recipeFlow.ingredients.trim() : "";
     setRecipeFlow((f) => ({ ...f, step: "ai-loading" }));
 
-    let budgetLine = "Föreslå ett balanserat recept med rimliga proportioner.";
+    let budgetLine = "Föreslå ett balanserat recept med rimliga proportioner för en enskild måltid, inte en hel dags mat.";
     if (goals) {
       const remKcal = Math.max(0, goals.kcalGoal - consumed.kcal);
-      budgetLine = `En portion av receptet ska vara på ungefär ${remKcal} kcal eller mindre per person, så det passar användarens återstående dagsmål.`;
+      const mealCeiling = Math.round(goals.kcalGoal * 0.35);
+      const targetKcal = Math.max(300, Math.min(remKcal, mealCeiling));
+      budgetLine = `En portion av receptet (dvs vad EN person äter vid EN måltid) ska vara på ungefär ${targetKcal} kcal — inte mer. Använd INTE hela användarens återstående dagsbudget på en enda måltid, även om det skulle rymmas; en måltid ska bara vara en rimlig andel av dagen.`;
     }
+
+    let goalLine = "";
+    if (profile?.goalType === "lose") {
+      goalLine =
+        " Användarens mål är att gå ner i vikt — prioritera mättande, proteinrika och relativt näringstäta recept utan onödigt mycket tillsatt fett eller socker, med rimliga (inte överdrivet stora) portionsstorlekar.";
+    } else if (profile?.goalType === "gain") {
+      goalLine =
+        " Användarens mål är att gå upp i vikt — receptet får gärna vara något mer energitätt, men fortfarande en rimlig portion för en måltid, inte en hel dags mat.";
+    } else if (profile?.goalType === "maintain") {
+      goalLine = " Användarens mål är att behålla sin vikt — sikta på ett balanserat, måttligt recept.";
+    }
+    if (profile?.activity === "active" || profile?.activity === "moderate") {
+      goalLine += " Användaren är fysiskt aktiv, så en något högre proteinandel är bra.";
+    }
+
     const ingredientLine = ingredients
       ? `Utgå gärna från dessa ingredienser om möjligt: ${ingredients}.`
       : "Användaren har inte angett några särskilda ingredienser — hitta på ett gott, enkelt recept.";
@@ -2267,7 +2310,7 @@ export default function Portion() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system:
-            `Du är en assistent som skapar recept. ${ingredientLine} ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn), "servings": number (hur många portioner/personer receptet räcker till, t.ex. 4), "ingredients": [string, ...] (mängderna ska gälla HELA receptet, dvs alla portioner tillsammans), "instructions": [string, ...] (steg för steg, korta meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Kcal- och näringsvärdena ska gälla HELA receptet (alla portioner tillsammans), inte bara en portion — appen räknar själv ut värdet per portion genom att dela med "servings".` +
+            `Du är en assistent som skapar recept för en enskild måltid. ${ingredientLine} ${budgetLine}${goalLine} Sätt ALLTID "servings" till 1 om du inte har en tydlig anledning (t.ex. att receptet är opraktiskt att laga i mindre skala, som en hel gryta eller bakverk) att göra fler portioner — och om du anger fler portioner MÅSTE ingrediensmängderna vara realistiska för det totala antalet portioner (t.ex. en portion pasta är ca 80–100g torr pasta och en portion kött/fisk/kyckling är ca 120–180g per person — skala ingredienserna korrekt utifrån antalet portioner du anger). Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn), "servings": number, "ingredients": [string, ...] (mängderna ska gälla HELA receptet, dvs alla portioner tillsammans), "instructions": [string, ...] (steg för steg, korta meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Kcal- och näringsvärdena ska gälla HELA receptet (alla portioner tillsammans) — appen räknar själv ut värdet per portion genom att dela med "servings".` +
             aiLangInstruction(language),
           text: "Skapa ett recept åt mig.",
           image: null,
