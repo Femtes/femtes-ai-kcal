@@ -1599,6 +1599,10 @@ export default function Portion() {
         }),
       });
       const data = await response.json();
+      if (data.error) {
+        console.error("Gemini-fel (röstinmatning):", data.error);
+        throw new Error(data.error);
+      }
       const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
@@ -1615,6 +1619,7 @@ export default function Portion() {
       }));
       setFlow((f) => (f ? { ...f, step: "voice-results", voiceItems: items, voiceLoading: false } : f));
     } catch (e) {
+      console.error("Röstinmatning misslyckades:", e);
       setFlow((f) => (f ? { ...f, step: "voice-results", voiceItems: [], voiceLoading: false, voiceError: true } : f));
     }
   }
@@ -1830,6 +1835,10 @@ export default function Portion() {
       });
 
       const data = await response.json();
+      if (data.error) {
+        console.error("Gemini-fel (fotoanalys):", data.error);
+        throw new Error(data.error);
+      }
       const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
@@ -1860,6 +1869,7 @@ export default function Portion() {
         },
       }));
     } catch (err) {
+      console.error("Fotoanalys misslyckades:", err);
       setFlow((f) => ({
         ...f,
         step: "error",
@@ -2034,6 +2044,10 @@ export default function Portion() {
       });
 
       const data = await response.json();
+      if (data.error) {
+        console.error("Gemini-fel (scanner):", data.error);
+        throw new Error(data.error);
+      }
       const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
@@ -2054,6 +2068,7 @@ export default function Portion() {
         addedIds: {},
       });
     } catch (err) {
+      console.error("Scanner-analys misslyckades:", err);
       setScannerFlow({
         step: "error",
         errorMsg: "Något gick fel vid analysen. Försök igen.",
@@ -2097,11 +2112,16 @@ export default function Portion() {
         }),
       });
       const data = await response.json();
+      if (data.error) {
+        console.error("Gemini-fel (mellanmålsförslag):", data.error);
+        throw new Error(data.error);
+      }
       const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(cleaned);
       setReactiveSuggestFlow({ step: "results", suggestions: Array.isArray(parsed) ? parsed : [], addedIds: {} });
     } catch (e) {
+      console.error("Mellanmålsförslag misslyckades:", e);
       setReactiveSuggestFlow({ step: "error", suggestions: [], addedIds: {} });
     }
   }
@@ -2177,11 +2197,16 @@ export default function Portion() {
         }),
       });
       const data = await response.json();
+      if (data.error) {
+        console.error("Gemini-fel (recept):", data.error);
+        throw new Error(data.error);
+      }
       const raw = data.text || "";
       const cleaned = raw.replace(/```json|```/g, "").trim();
       const recipe = JSON.parse(cleaned);
       setRecipeFlow((f) => ({ ...f, step: "ai-result", recipe }));
     } catch (e) {
+      console.error("Receptgenerering misslyckades:", e);
       setRecipeFlow((f) => ({ ...f, step: "ai-error" }));
     }
   }
