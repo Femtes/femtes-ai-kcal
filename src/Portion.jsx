@@ -48,6 +48,40 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.4.0",
+    date: "2026-09-07",
+    headline: "Fullständig engelsk översättning och juridiska villkor",
+    headline_en: "Full English translation and legal terms",
+    summary: [
+      "Hela appen kan nu användas fullt ut på engelska",
+      "Ny sektion under Legal: fullständiga användarvillkor (Terms of Service)",
+      "Bytt AI-modell efter att Google pensionerade den gamla",
+      "Massor av kvarvarande svenska texter i Fasta, Trender och Viktgång hittade och översatta",
+    ],
+    summary_en: [
+      "The entire app can now be used fully in English",
+      "New section under Legal: full Terms of Service",
+      "Switched AI model after Google retired the old one",
+      "Found and translated many remaining Swedish texts across Fasting, Trends and Weight",
+    ],
+    details: [
+      "Lagt till en språkväljare (svenska/engelska) med flaggor, och byggt ut översättningen till att täcka i princip hela appens gränssnitt, inklusive Hjälp-avsnittet och Nyheter-fliken.",
+      "AI-genererat innehåll (fotoanalys, röstinmatning, Scanner-förslag, recept, mellanmålsförslag) svarar nu på rätt språk beroende på vad som är valt.",
+      "Lagt till en ny 'Terms of Service'-sektion under Legal, anpassad med rätt appnamn och jurisdiktion (Sverige/EU istället för Singapore).",
+      "Bytt AI-modell från gemini-2.0-flash (pensionerad av Google) till gemini-3.6-flash i den säkra serverfunktionen — påverkar foto, sökning, röst, Scanner, recept och mellanmålsförslag.",
+      "Lagt till tydligare felmeddelanden i webbläsarens konsol när ett AI-anrop misslyckas, för snabbare felsökning.",
+      "Fixat kvarvarande otranslaterade texter: datumetiketten 'Idag/Igår', 'Sifferfritt läge'-knappen, dagens sammanfattnings-rubrik, alla faser under Fasta-fliken, makronäringstabellen på Trender, samt BMI-kategorier och rubriker på Viktgång.",
+    ],
+    details_en: [
+      "Added a language selector (Swedish/English) with flags, and extended the translation to cover essentially the entire app interface, including the Help section and News tab.",
+      "AI-generated content (photo analysis, voice input, Scanner suggestions, recipes, snack suggestions) now responds in the correct language depending on what's selected.",
+      "Added a new 'Terms of Service' section under Legal, adapted with the correct app name and jurisdiction (Sweden/EU instead of Singapore).",
+      "Switched the AI model from gemini-2.0-flash (retired by Google) to gemini-3.6-flash in the secure server function — affects photo analysis, search, voice input, Scanner, recipes and snack suggestions.",
+      "Added clearer error messages in the browser console when an AI call fails, for faster troubleshooting.",
+      "Fixed remaining untranslated text: the 'Today/Yesterday' date label, the 'Number-free mode' button, the daily summary heading, all phases on the Fasting tab, the macro breakdown table on Trends, and BMI categories and headings on Weight.",
+    ],
+  },
+  {
     version: "0.3.0",
     date: "2026-09-06",
     headline: "Riktig databas, ny meny och grön design",
@@ -355,6 +389,7 @@ const EN_STRINGS = {
   "Hälsosam vikt": "Healthy weight",
   "Övervikt": "Overweight",
   "Fetma": "Obesity",
+  "Hälsosam": "Healthy",
   "Visa mer": "Show more",
   "Visa mindre": "Show less",
   "BMI-kategorier": "BMI categories",
@@ -371,6 +406,18 @@ const EN_STRINGS = {
   "Dagsmål": "Daily goal",
   "Uppskattad förbränning": "Estimated calories burned",
   "Antal kilometer": "Number of kilometres",
+  "Redigera träning": "Edit exercise",
+  "Lägg till träning": "Add exercise",
+  "Fastemål uppnått 🎉": "Fasting goal reached 🎉",
+  "Avsluta fasta": "End fast",
+  "Senast avslutad": "Last ended",
+  "Fastat i": "Fasted for",
+  "Redo att fasta": "Ready to fast",
+  "extra": "extra",
+  "Spara": "Save",
+  "Avbryt": "Cancel",
+  "Faser under en fasta": "Phases during a fast",
+  "g kvar": "g left",
   "Så länge du är i den gröna zonen är allt bra — inga siffror att fixera vid idag.":
     "As long as you're in the green zone, everything's fine — no numbers to fixate on today.",
   "Inga träffar. Prova ett annat sökord, eller lägg till maträtten manuellt.":
@@ -746,13 +793,13 @@ function getMonthDateKeys(key) {
   return keys;
 }
 
-function dateLabel(key) {
+function dateLabel(key, language) {
   const todayKey = dateKey(new Date());
   const yesterdayKey = shiftDateKey(todayKey, -1);
-  if (key === todayKey) return "Idag";
-  if (key === yesterdayKey) return "Igår";
+  if (key === todayKey) return language === "en" ? "Today" : "Idag";
+  if (key === yesterdayKey) return language === "en" ? "Yesterday" : "Igår";
   const d = parseDateKey(key);
-  const label = d.toLocaleDateString("sv-SE", { weekday: "short", day: "numeric", month: "short" });
+  const label = d.toLocaleDateString(language === "en" ? "en-GB" : "sv-SE", { weekday: "short", day: "numeric", month: "short" });
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
@@ -2257,7 +2304,17 @@ export default function Portion() {
   const budgetZone = consumedFraction <= 0.5 ? "green" : consumedFraction < 1.0 ? "amber" : "red";
   const zoneColor = budgetZone === "green" ? colors.carbs : budgetZone === "amber" ? colors.fat : colors.coral;
   const zoneText =
-    budgetZone === "green" ? "Bra flyt idag 🌿" : budgetZone === "amber" ? "Nästan vid målet ⚡" : "Över idag — helt okej 💜";
+    language === "en"
+      ? budgetZone === "green"
+        ? "Great flow today 🌿"
+        : budgetZone === "amber"
+        ? "Close to the goal ⚡"
+        : "Over today — totally okay 💜"
+      : budgetZone === "green"
+      ? "Bra flyt idag 🌿"
+      : budgetZone === "amber"
+      ? "Nästan vid målet ⚡"
+      : "Över idag — helt okej 💜";
 
   return (
     <div
@@ -2287,7 +2344,7 @@ export default function Portion() {
               className="flex items-center gap-1 text-sm font-semibold"
               style={{ color: colors.textDim }}
             >
-              {dateLabel(selectedDate)}
+              {dateLabel(selectedDate, language)}
               <span style={{ fontSize: 10 }}>▾</span>
             </button>
             <span className="text-[10px]" style={{ color: colors.textDim, opacity: 0.6 }}>
@@ -2519,7 +2576,7 @@ export default function Portion() {
               <h2 className="text-lg font-extrabold">{tr("Dagens mål", language)}</h2>
               <div className="flex items-center gap-3">
                 <button onClick={toggleVisualMode} className="text-xs font-semibold" style={{ color: colors.primary }}>
-                  {visualMode ? "🔢 Visa siffror" : "🌿 Sifferfritt läge"}
+                  {visualMode ? tr("🔢 Visa siffror", language) : tr("🌿 Sifferfritt läge", language)}
                 </button>
                 <button onClick={openProfile} className="text-xs font-semibold" style={{ color: colors.primary }}>{tr("✎ Redigera", language)}</button>
               </div>
@@ -2543,7 +2600,7 @@ export default function Portion() {
                 style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
               >
                 <p className="text-xs font-bold text-center mb-2" style={{ color: colors.primary, letterSpacing: "0.02em" }}>
-                  DAGLIG SAMMANFATTNING
+                  {language === "en" ? "DAILY SUMMARY" : "DAGLIG SAMMANFATTNING"}
                 </p>
 
                 {visualMode ? (
@@ -3054,7 +3111,7 @@ export default function Portion() {
                 {flow.editId ? "Redigera – " : ""}
                 {CATEGORIES.find((c) => c.key === flow.category)?.label}
                 <span className="text-xs font-normal ml-2" style={{ color: colors.textDim }}>
-                  {dateLabel(selectedDate)}
+                  {dateLabel(selectedDate, language)}
                 </span>
               </h3>
               <button onClick={closeFlow} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
@@ -3116,7 +3173,7 @@ export default function Portion() {
                     opacity: !flow.receiveCode || !flow.receiveCode.trim() ? 0.5 : 1,
                   }}
                 >
-                  {flow.receiveLoading ? "Hämtar …" : "Hämta måltid"}
+                  {flow.receiveLoading ? tr("Hämtar …", language) : tr("Hämta måltid", language)}
                 </button>
               </div>
             )}
@@ -3143,7 +3200,7 @@ export default function Portion() {
                     opacity: !flow.voiceText || !flow.voiceText.trim() ? 0.5 : 1,
                   }}
                 >
-                  {flow.voiceLoading ? "Analyserar …" : "Analysera"}
+                  {flow.voiceLoading ? tr("Analyserar …", language) : tr("Analysera", language)}
                 </button>
               </div>
             )}
@@ -3237,7 +3294,7 @@ export default function Portion() {
                   return (
                     <div className="mb-5">
                       <p className="text-xs font-bold mb-2" style={{ color: colors.textDim }}>
-                        {q ? "Mina livsmedel" : "Dina senaste"}
+                        {q ? tr("Mina livsmedel", language) : tr("Dina senaste", language)}
                       </p>
                       <div className="flex flex-col gap-2">
                         {libraryMatches.map((f) => (
@@ -3577,7 +3634,7 @@ export default function Portion() {
                     color: profileDraft.sex === s ? colors.surface : colors.text,
                   }}
                 >
-                  {s === "female" ? "Kvinna" : "Man"}
+                  {s === "female" ? tr("Kvinna", language) : tr("Man", language)}
                 </button>
               ))}
             </div>
@@ -3822,7 +3879,7 @@ export default function Portion() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold">
-                {recipeFlow.step === "manual" ? "Eget recept" : "Recept med AI"}
+                {recipeFlow.step === "manual" ? tr("Eget recept", language) : tr("Recept med AI", language)}
               </h3>
               <button onClick={closeRecipeFlow} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
@@ -3995,7 +4052,7 @@ export default function Portion() {
                     opacity: !recipeFlow.name.trim() || recipeFlow.kcal === "" ? 0.5 : 1,
                   }}
                 >
-                  {recipeFlow.category ? "Logga och spara recept" : "Spara recept"}
+                  {recipeFlow.category ? tr("Logga och spara recept", language) : tr("Spara recept", language)}
                 </button>
               </div>
             )}
@@ -4070,7 +4127,7 @@ export default function Portion() {
                           color: added ? colors.textDim : colors.onPrimary,
                         }}
                       >
-                        {added ? "Tillagt ✓" : "Lägg till i mellanmål"}
+                        {added ? tr("Tillagt ✓", language) : tr("Lägg till i mellanmål", language)}
                       </button>
                     </div>
                   );
@@ -4237,14 +4294,14 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
         </button>
       </div>
 
-      <h3 className="text-sm font-bold mb-3">Sammanfattning – {dateLabel(selectedDay)}</h3>
+      <h3 className="text-sm font-bold mb-3">{tr("Sammanfattning", language)} – {dateLabel(selectedDay, language)}</h3>
       {goals ? (
         <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
           <div className="grid grid-cols-2 gap-y-6">
-            <DarkMacroRing color={colors.carbs} label={tr("Kolhydrater", language)} consumed={selectedData.carbs} goal={goals.carbsGoal} />
-            <DarkMacroRing color={colors.protein} label="Protein" consumed={selectedData.protein} goal={goals.proteinGoal} />
-            <DarkMacroRing color={colors.fat} label={tr("Fett", language)} consumed={selectedData.fat} goal={goals.fatGoal} />
-            <DarkMacroRing color={colors.fiber} label="Fiber" consumed={selectedData.fiber} goal={goals.fiberGoal} />
+            <DarkMacroRing color={colors.carbs} label={tr("Kolhydrater", language)} consumed={selectedData.carbs} goal={goals.carbsGoal} language={language} />
+            <DarkMacroRing color={colors.protein} label="Protein" consumed={selectedData.protein} goal={goals.proteinGoal} language={language} />
+            <DarkMacroRing color={colors.fat} label={tr("Fett", language)} consumed={selectedData.fat} goal={goals.fatGoal} language={language} />
+            <DarkMacroRing color={colors.fiber} label="Fiber" consumed={selectedData.fiber} goal={goals.fiberGoal} language={language} />
           </div>
         </div>
       ) : (
@@ -4281,9 +4338,9 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
                   ◆
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold">{row.label}</p>
+                  <p className="text-sm font-bold">{language === "en" ? row.label_en : row.label}</p>
                   <p className="text-xs" style={{ color: colors.textDim }}>
-                    {row.func}
+                    {language === "en" ? row.func_en : row.func}
                   </p>
                 </div>
               </div>
@@ -4302,13 +4359,13 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
 }
 
 const SPEC_ROWS = [
-  { key: "protein", label: "Protein", func: "Muskelreparation & mättnad", color: colors.protein, calPerGram: 4 },
-  { key: "carbs", label: "Kolhydrater", func: "Hjärnans & musklernas primära bränsle", color: colors.carbs, calPerGram: 4 },
-  { key: "fat", label: "Fett", func: "Hormonreglering & essentiella fettsyror", color: colors.fat, calPerGram: 9 },
-  { key: "fiber", label: "Kostfiber", func: "Matsmältning & jämn blodsockerreglering", color: colors.fiber, calPerGram: 2 },
+  { key: "protein", label: "Protein", label_en: "Protein", func: "Muskelreparation & mättnad", func_en: "Muscle repair & satiety", color: colors.protein, calPerGram: 4 },
+  { key: "carbs", label: "Kolhydrater", label_en: "Carbs", func: "Hjärnans & musklernas primära bränsle", func_en: "Primary fuel for brain & muscles", color: colors.carbs, calPerGram: 4 },
+  { key: "fat", label: "Fett", label_en: "Fat", func: "Hormonreglering & essentiella fettsyror", func_en: "Hormone regulation & essential fatty acids", color: colors.fat, calPerGram: 9 },
+  { key: "fiber", label: "Kostfiber", label_en: "Fiber", func: "Matsmältning & jämn blodsockerreglering", func_en: "Digestion & steady blood sugar", color: colors.fiber, calPerGram: 2 },
 ];
 
-function DarkMacroRing({ color, label, consumed, goal }) {
+function DarkMacroRing({ color, label, consumed, goal, language }) {
   const safeGoal = goal || 0;
   const remaining = Math.max(0, Math.round(safeGoal - consumed));
   const fraction = safeGoal ? Math.min(1, consumed / safeGoal) : 0;
@@ -4322,22 +4379,22 @@ function DarkMacroRing({ color, label, consumed, goal }) {
         <div className="flex flex-col items-center">
           <span className="text-2xl font-extrabold leading-tight">{remaining}</span>
           <span className="text-[10px]" style={{ color: colors.textDim }}>
-            g kvar
+            {tr("g kvar", language)}
           </span>
         </div>
       </SemiGauge>
       <p className="text-xs mt-1" style={{ color: colors.textDim }}>
-        Mål {Math.round(goal) || 0}g
+        {tr("Mål", language)} {Math.round(goal) || 0}g
       </p>
     </div>
   );
 }
 
 const BMI_CATEGORIES = [
-  { label: "Undervikt", min: 0, max: 18.5, color: colors.water, rangeText: "12,0-18,5" },
-  { label: "Hälsosam", min: 18.5, max: 25, color: colors.carbs, rangeText: "18,5-25,0" },
-  { label: "Övervikt", min: 25, max: 30, color: colors.fat, rangeText: "25,0-30,0" },
-  { label: "Fetma", min: 30, max: Infinity, color: colors.coral, rangeText: ">30,0" },
+  { label: "Undervikt", label_en: "Underweight", min: 0, max: 18.5, color: colors.water, rangeText: "12,0-18,5" },
+  { label: "Hälsosam", label_en: "Healthy", min: 18.5, max: 25, color: colors.carbs, rangeText: "18,5-25,0" },
+  { label: "Övervikt", label_en: "Overweight", min: 25, max: 30, color: colors.fat, rangeText: "25,0-30,0" },
+  { label: "Fetma", label_en: "Obesity", min: 30, max: Infinity, color: colors.coral, rangeText: ">30,0" },
 ];
 
 function computeBMI(weightKg, heightCm) {
@@ -4369,7 +4426,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
       {bmi ? (
         <div className="rounded-2xl p-5 mb-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
           <p className="text-xs mb-1" style={{ color: colors.textDim }}>
-            Nuvarande BMI
+            {tr("Nuvarande BMI", language)}
           </p>
           <div className="flex items-center gap-2 mb-4">
             <span className="text-4xl font-extrabold" style={{ letterSpacing: "-0.02em" }}>
@@ -4379,7 +4436,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
               className="text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ backgroundColor: `${bmiCat.color}22`, color: bmiCat.color }}
             >
-              {bmiCat.label}
+              {language === "en" ? bmiCat.label_en : bmiCat.label}
             </span>
           </div>
 
@@ -4541,7 +4598,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
                 style={{ backgroundColor: colors.surface, borderTop: i === 0 ? "none" : `1px solid ${colors.hairline}` }}
               >
                 <span className="text-sm" style={{ color: colors.textDim }}>
-                  {dateLabel(e.date)}
+                  {dateLabel(e.date, language)}
                 </span>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-bold">{e.kg} kg</span>
@@ -4618,7 +4675,7 @@ function TrainingPanel({
   return (
     <div className="px-5">
       <p className="text-xs mb-4" style={{ color: colors.textDim }}>
-        Träning för {dateLabel(selectedDate)}
+        {tr("Träning för", language)} {dateLabel(selectedDate, language)}
       </p>
 
       <div className="rounded-2xl p-6 mb-6" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
@@ -4830,7 +4887,7 @@ function TrainingPanel({
             style={{ backgroundColor: colors.surface, maxHeight: "88vh", overflowY: "auto" }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold">{flow.editId ? "Redigera träning" : "Lägg till träning"}</h3>
+              <h3 className="text-base font-bold">{flow.editId ? tr("Redigera träning", language) : tr("Lägg till träning", language)}</h3>
               <button onClick={onClose} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
               </button>
@@ -4936,7 +4993,7 @@ function TrainingPanel({
                     opacity: !previewKcal ? 0.5 : 1,
                   }}
                 >
-                  {flow.editId ? "Spara ändringar" : "Lägg till"}
+                  {flow.editId ? tr("Spara ändringar", language) : tr("Lägg till", language)}
                 </button>
               </div>
             )}
@@ -5949,59 +6006,75 @@ function formatHoursMinutes(totalSeconds) {
 const FASTING_STAGE_GROUPS = [
   {
     title: "Kortare fasta (0–24 timmar)",
+    title_en: "Shorter fast (0–24 hours)",
     stages: [
       {
         minH: 0,
         maxH: 4,
         title: "Det mätta tillståndet",
+        title_en: "The fed state",
         text: "Kroppen bryter ner den senaste måltiden. Blodsocker och insulin stiger för att transportera ut energi till cellerna.",
+        text_en: "The body breaks down the most recent meal. Blood sugar and insulin rise to transport energy to the cells.",
         color: colors.fat,
       },
       {
         minH: 4,
         maxH: 12,
         title: "Nedbrytningsfasen",
+        title_en: "The breakdown phase",
         text: "Blodsocker och insulin börjar sjunka. Kroppen övergår till att använda lagrad energi (glykogen) från lever och muskler.",
+        text_en: "Blood sugar and insulin start to fall. The body switches to using stored energy (glycogen) from the liver and muscles.",
         color: colors.protein,
       },
       {
         minH: 12,
         maxH: 16,
         title: "Fettförbränningen startar",
+        title_en: "Fat burning begins",
         text: "Glykogenlagren börjar sina. Kroppen ökar fettförbränningen och börjar bilda små mängder ketoner som energi till hjärnan.",
+        text_en: "Glycogen stores start to run low. The body increases fat burning and starts producing small amounts of ketones for brain energy.",
         color: colors.coral,
       },
       {
         minH: 16,
         maxH: 24,
         title: "Autofagi påbörjas",
+        title_en: "Autophagy begins",
         text: "Kroppen går in i tidig autofagi, cellernas eget städsystem. Gamla, skadade proteiner och celldelar börjar brytas ner och återvinnas.",
+        text_en: "The body enters early autophagy, the cells' own cleanup system. Old, damaged proteins and cell parts start being broken down and recycled.",
         color: colors.pink,
       },
     ],
   },
   {
     title: "Förlängd fasta (24–72+ timmar)",
+    title_en: "Extended fast (24–72+ hours)",
     stages: [
       {
         minH: 24,
         maxH: 48,
         title: "Ketos och glukoneogenes",
+        title_en: "Ketosis and gluconeogenesis",
         text: "Leverns glykogenlager är tomma. Kroppen tillverkar nu socker själv via glukoneogenes och går in i en djupare ketos där fett är det primära bränslet. Autofagin ökar.",
+        text_en: "The liver's glycogen stores are empty. The body now makes its own sugar via gluconeogenesis and enters a deeper ketosis where fat is the primary fuel. Autophagy increases.",
         color: colors.primary,
       },
       {
         minH: 48,
         maxH: 72,
         title: "Tillväxthormon och cellförnyelse",
+        title_en: "Growth hormone and cell renewal",
         text: "Nivåerna av tillväxthormon stiger för att skydda muskelmassa. Inflammation i kroppen minskar och cellsignaleringen förbättras.",
+        text_en: "Growth hormone levels rise to protect muscle mass. Inflammation in the body decreases and cell signalling improves.",
         color: colors.water,
       },
       {
         minH: 72,
         maxH: Infinity,
         title: "Immunförsvaret förnyas",
+        title_en: "The immune system renews",
         text: "Efter tre dygns fasta börjar kroppen bryta ner gamla immunceller och stimulerar stamceller till att skapa nya vita blodkroppar.",
+        text_en: "After three days of fasting, the body starts breaking down old immune cells and stimulates stem cells to create new white blood cells.",
         color: colors.carbs,
       },
     ],
@@ -6047,13 +6120,13 @@ function FastingPanel({
   const overGoal = elapsedSeconds > goalSeconds;
 
   const startParts = fasting.startTime
-    ? { day: dateLabel(dateKey(new Date(fasting.startTime))), time: new Date(fasting.startTime).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" }) }
+    ? { day: dateLabel(dateKey(new Date(fasting.startTime)), language), time: new Date(fasting.startTime).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" }) }
     : null;
   const targetEndDate = fasting.startTime ? new Date(new Date(fasting.startTime).getTime() + goalSeconds * 1000) : null;
   const endParts = fasting.isFasting && targetEndDate
-    ? { day: dateLabel(dateKey(targetEndDate)), time: targetEndDate.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" }) }
+    ? { day: dateLabel(dateKey(targetEndDate), language), time: targetEndDate.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" }) }
     : fasting.lastEnd
-    ? { day: dateLabel(dateKey(new Date(fasting.lastEnd))), time: new Date(fasting.lastEnd).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" }) }
+    ? { day: dateLabel(dateKey(new Date(fasting.lastEnd)), language), time: new Date(fasting.lastEnd).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" }) }
     : null;
 
   const elapsedHours = elapsedSeconds / 3600;
@@ -6071,7 +6144,7 @@ function FastingPanel({
             className="rounded-full px-4 py-1.5 text-xs font-bold"
             style={{ backgroundColor: colors.primaryLight, color: colors.primary }}
           >
-            {overGoal ? "Fastemål uppnått 🎉" : "Du fastar"}
+            {overGoal ? tr("Fastemål uppnått 🎉", language) : tr("Du fastar", language)}
           </span>
         </div>
       )}
@@ -6089,14 +6162,14 @@ function FastingPanel({
               className="text-xs font-semibold text-center"
               style={{ color: fasting.isFasting && currentStage ? currentStage.color : colors.textDim }}
             >
-              {fasting.isFasting ? currentStage?.title || "Fastat i" : "Redo att fasta"}
+              {fasting.isFasting ? (language === "en" ? currentStage?.title_en : currentStage?.title) || tr("Fastat i", language) : tr("Redo att fasta", language)}
             </span>
             <span className="text-3xl font-extrabold mt-1" style={{ letterSpacing: "-0.02em" }}>
               {fasting.isFasting ? formatHMS(elapsedSeconds) : fasting.method}
             </span>
             {fasting.isFasting && (
               <span className="text-xs mt-1" style={{ color: colors.textDim }}>
-                {overGoal ? `${formatHoursMinutes(elapsedSeconds - goalSeconds)} extra` : `Återstår: ${formatHoursMinutes(remainingSeconds)}`}
+                {overGoal ? `${formatHoursMinutes(elapsedSeconds - goalSeconds)} ${tr("extra", language)}` : `${tr("Återstår", language)}: ${formatHoursMinutes(remainingSeconds)}`}
               </span>
             )}
           </div>
@@ -6120,7 +6193,7 @@ function FastingPanel({
           className="w-full rounded-full py-3.5 text-sm font-bold mb-6 flex items-center justify-center gap-2"
           style={{ backgroundColor: colors.primaryLight, color: colors.primary }}
         >
-          ⏸ Avsluta fastan
+          ⏸ {tr("Avsluta fastan", language)}
         </button>
       ) : (
         <button
@@ -6145,10 +6218,10 @@ function FastingPanel({
                 />
                 <div className="flex gap-2">
                   <button onClick={onSaveStart} className="text-xs font-bold" style={{ color: colors.primary }}>
-                    Spara
+                    {tr("Spara", language)}
                   </button>
                   <button onClick={onCancelEditStart} className="text-xs" style={{ color: colors.textDim }}>
-                    Avbryt
+                    {tr("Avbryt", language)}
                   </button>
                 </div>
               </div>
@@ -6173,7 +6246,7 @@ function FastingPanel({
 
           <div className="rounded-2xl p-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
             <p className="text-xs mb-1" style={{ color: colors.textDim }}>
-              {fasting.isFasting ? "Avsluta fasta" : "Senast avslutad"}
+              {fasting.isFasting ? tr("Avsluta fasta", language) : tr("Senast avslutad", language)}
             </p>
             {endParts ? (
               <>
@@ -6190,7 +6263,7 @@ function FastingPanel({
       )}
 
       <div className="mt-8">
-        <h3 className="text-base font-extrabold mb-1">Faser under en fasta</h3>
+        <h3 className="text-base font-extrabold mb-1">{tr("Faser under en fasta", language)}</h3>
         <p className="text-xs mb-4" style={{ color: colors.textDim }}>
           {tr("Generell översikt över vad som händer i kroppen ju längre en fasta pågår", language)}
         </p>
@@ -6198,12 +6271,13 @@ function FastingPanel({
         {FASTING_STAGE_GROUPS.map((group) => (
           <div key={group.title} className="mb-5">
             <p className="text-[10px] font-bold uppercase tracking-wide mb-2" style={{ color: colors.textDim }}>
-              {group.title}
+              {language === "en" ? group.title_en : group.title}
             </p>
             <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${colors.hairline}` }}>
               {group.stages.map((s, i) => {
                 const isCurrent = fasting.isFasting && elapsedSeconds / 3600 >= s.minH && elapsedSeconds / 3600 < s.maxH;
-                const rangeLabel = s.maxH === Infinity ? `${s.minH}+ timmar` : `${s.minH}–${s.maxH} timmar`;
+                const timmarWord = tr("timmar", language);
+                const rangeLabel = s.maxH === Infinity ? `${s.minH}+ ${timmarWord}` : `${s.minH}–${s.maxH} ${timmarWord}`;
                 return (
                   <div
                     key={s.title}
@@ -6226,10 +6300,10 @@ function FastingPanel({
                       )}
                     </div>
                     <p className="text-sm font-bold mb-1" style={{ color: isCurrent ? s.color : colors.text }}>
-                      {s.title}
+                      {language === "en" ? s.title_en : s.title}
                     </p>
                     <p className="text-xs" style={{ color: colors.textDim }}>
-                      {s.text}
+                      {language === "en" ? s.text_en : s.text}
                     </p>
                   </div>
                 );
