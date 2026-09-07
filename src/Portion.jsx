@@ -48,6 +48,20 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.4.5",
+    date: "2026-09-07",
+    headline: "Versionsnummer på startsidan",
+    headline_en: "Version number on the start page",
+    summary: ["Versionsnumret syns nu även på inloggningssidan, uppe till höger"],
+    summary_en: ["The version number is now also shown on the login page, top right"],
+    details: [
+      "Lagt till versionsnumret (t.ex. v0.4.5) högst upp till höger på inloggnings-/registreringssidan, hämtat från samma källa som resten av appen så det aldrig kan komma ur synk.",
+    ],
+    details_en: [
+      "Added the version number (e.g. v0.4.5) to the top right of the login/registration page, pulled from the same source as the rest of the app so it can never fall out of sync.",
+    ],
+  },
+  {
     version: "0.4.4",
     date: "2026-09-07",
     headline: "Receptet skalas nu på riktigt med antal portioner",
@@ -251,7 +265,7 @@ const CHANGELOG = [
   },
 ];
 
-const APP_VERSION = CHANGELOG[0].version;
+export const APP_VERSION = CHANGELOG[0].version;
 const LAST_SEEN_VERSION_KEY = "app-last-seen-version";
 const LANGUAGE_KEY = "app-language";
 
