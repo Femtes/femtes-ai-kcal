@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from "recharts";
 import { logout } from "./lib/auth.js";
+import { supabase } from "./lib/supabaseClient.js";
 
 const colors = {
   bg: "#121317",
@@ -47,6 +48,32 @@ const TABS = [
 ];
 
 const CHANGELOG = [
+  {
+    version: "0.5.0",
+    date: "2026-09-07",
+    headline: "Foton sparas i ditt eget bibliotek",
+    headline_en: "Photos are now saved to your own library",
+    summary: [
+      "Foton du fotar (manuellt eller AI-analys) sparas nu i ditt personliga livsmedelsbibliotek",
+      "Nästa gång du loggar samma sak visas den riktiga bilden istället för en emoji",
+      "Bilder lagras separat från databasen så sökningen inte blir tyngre ju mer du samlar på dig",
+    ],
+    summary_en: [
+      "Photos you take (manually or via AI analysis) are now saved to your personal food library",
+      "Next time you log the same thing, the real photo shows up instead of an emoji",
+      "Images are stored separately from the database so search doesn't get heavier as your library grows",
+    ],
+    details: [
+      "Kopplat in riktig bildlagring (Supabase Storage) — foton laddas upp till en egen lagringsplats och bara en länk sparas i databasen, istället för hela bilden.",
+      "Ditt personliga livsmedelsbibliotek ('Mina livsmedel' i sökningen) visar nu den riktiga bilden när en finns sparad, annars en emoji som tidigare.",
+      "Detta gör att biblioteket kan växa sig stort utan att sökningarna blir långsammare — precis tvärtom, ju mer du loggar desto snabbare hittar du det igen.",
+    ],
+    details_en: [
+      "Connected real image storage (Supabase Storage) — photos are uploaded to their own storage space and only a link is saved in the database, instead of the whole image.",
+      "Your personal food library ('My foods' in search) now shows the real photo when one is saved, otherwise an emoji as before.",
+      "This means the library can grow large without searches getting slower — quite the opposite, the more you log the faster you'll find it again.",
+    ],
+  },
   {
     version: "0.4.5",
     date: "2026-09-07",
@@ -531,6 +558,7 @@ const EN_STRINGS = {
   "Faser under en fasta": "Phases during a fast",
   "g kvar": "g left",
   "Välj datum": "Choose date",
+  "Sparar bild …": "Saving photo …",
   "portion": "serving",
   "portioner": "servings",
   "Hur många lagar du till?": "How many are you cooking for?",
@@ -1597,6 +1625,7 @@ export default function Portion() {
         fiber: item.fiber || 0,
         co2: item.co2 || 0,
         cost: item.cost || 0,
+        image: item.image && !item.image.startsWith("data:") ? item.image : null,
         emoji: item.image ? "" : item.emoji || guessFoodEmoji(item.name),
         useCount: existingIndex >= 0 ? (prev[existingIndex].useCount || 1) + 1 : 1,
         lastUsed: Date.now(),
@@ -1917,8 +1946,8 @@ export default function Portion() {
       co2: libItem.co2 || 0,
       cost: libItem.cost || 0,
       portion_note: "",
-      image: null,
-      emoji: libItem.emoji || guessFoodEmoji(libItem.name),
+      image: libItem.image || null,
+      emoji: libItem.image ? "" : libItem.emoji || guessFoodEmoji(libItem.name),
     };
     updateDay({ ...dayData, [flow.category]: [entry, ...dayData[flow.category]] });
     upsertFoodLibrary(entry);
@@ -2045,10 +2074,38 @@ export default function Portion() {
     setFlow((f) => ({ ...f, draft: { ...f.draft, [field]: value } }));
   }
 
-  function saveDraft() {
+  async function uploadFoodImage(dataUrl) {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData?.user?.id;
+      if (!userId) return dataUrl;
+
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const fileName = `${userId}/${Date.now()}.jpg`;
+      const { error } = await supabase.storage.from("food-images").upload(fileName, blob, {
+        contentType: "image/jpeg",
+        upsert: false,
+      });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("food-images").getPublicUrl(fileName);
+      return urlData.publicUrl;
+    } catch (e) {
+      console.error("Bilduppladdning misslyckades, sparar bilden lokalt istället:", e);
+      return dataUrl;
+    }
+  }
+
+  async function saveDraft() {
     if (!flow) return;
     const d = flow.draft;
     if (!d.name || d.kcal === "") return;
+
+    let imageUrl = d.image;
+    if (d.image && d.image.startsWith("data:")) {
+      setFlow((f) => (f ? { ...f, savingImage: true } : f));
+      imageUrl = await uploadFoodImage(d.image);
+    }
 
     const entry = {
       id: flow.editId || Date.now(),
@@ -2061,8 +2118,8 @@ export default function Portion() {
       co2: Number(d.co2) || 0,
       cost: Number(d.cost) || 0,
       portion_note: d.portion_note,
-      image: d.image,
-      emoji: d.image ? "" : d.emoji || guessFoodEmoji(d.name),
+      image: imageUrl,
+      emoji: imageUrl ? "" : d.emoji || guessFoodEmoji(d.name),
     };
 
     if (flow.editId) {
@@ -3457,9 +3514,13 @@ export default function Portion() {
                             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left"
                             style={{ backgroundColor: colors.surfaceMuted }}
                           >
-                            <span style={{ fontSize: 20 }} className="flex-shrink-0">
-                              {f.emoji || "🍽️"}
-                            </span>
+                            {f.image ? (
+                              <img src={f.image} alt={f.name} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+                            ) : (
+                              <span style={{ fontSize: 20 }} className="flex-shrink-0">
+                                {f.emoji || "🍽️"}
+                              </span>
+                            )}
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{f.name}</p>
                               <p className="text-xs" style={{ color: colors.textDim }}>
@@ -3744,11 +3805,15 @@ export default function Portion() {
 
                 <button
                   onClick={saveDraft}
-                  disabled={!draftValid}
+                  disabled={!draftValid || flow.savingImage}
                   className="w-full rounded-xl py-3.5 text-sm font-bold"
-                  style={{ backgroundColor: colors.primary, color: colors.onPrimary, opacity: draftValid ? 1 : 0.5 }}
+                  style={{ backgroundColor: colors.primary, color: colors.onPrimary, opacity: draftValid && !flow.savingImage ? 1 : 0.5 }}
                 >
-                  {flow.editId ? "Spara ändringar" : `Lägg till i ${CATEGORIES.find((c) => c.key === flow.category)?.label.toLowerCase()}`}
+                  {flow.savingImage
+                    ? tr("Sparar bild …", language)
+                    : flow.editId
+                    ? tr("Spara ändringar", language)
+                    : `${tr("Lägg till i", language)} ${tr(CATEGORIES.find((c) => c.key === flow.category)?.label, language).toLowerCase()}`}
                 </button>
               </div>
             )}
