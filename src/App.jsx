@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Portion from "./Portion.jsx";
+import Portion, { APP_VERSION } from "./Portion.jsx";
 import { getCurrentSession, onAuthChange, loginWithPassword, registerAccount, requestPasswordReset } from "./lib/auth.js";
 
 export default function App() {
@@ -89,6 +89,18 @@ export default function App() {
         onSubmit={handleSubmit}
         style={{ width: "100%", maxWidth: 360, backgroundColor: "#1C1E24", borderRadius: 16, padding: 28, position: "relative" }}
       >
+        <span
+          style={{
+            position: "absolute",
+            top: 14,
+            right: 16,
+            fontSize: 10,
+            color: "#8B8D97",
+            opacity: 0.6,
+          }}
+        >
+          v{APP_VERSION}
+        </span>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
           <span
             style={{
