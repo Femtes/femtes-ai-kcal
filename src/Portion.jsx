@@ -48,6 +48,54 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.4.4",
+    date: "2026-09-07",
+    headline: "Receptet skalas nu på riktigt med antal portioner",
+    headline_en: "The recipe now actually scales with serving count",
+    summary: [
+      "Ändrar du portioner räknas nu ingredienserna om, inte bara näringsvärdena",
+      "Tydlig skillnad mellan 'hela receptet' och 'per portion (loggas)'",
+    ],
+    summary_en: [
+      "Changing the serving count now recalculates the ingredients too, not just the nutrition",
+      "Clear distinction between 'whole recipe' and 'per serving (logged)'",
+    ],
+    details: [
+      "AI-recept levererar nu ingredienser som strukturerad data (mängd, enhet, namn) istället för fri text, vilket gör att appen kan räkna om exakta mängder.",
+      "Portionsväljaren fungerar nu som ett riktigt kokboks-skalverktyg: ändra till t.ex. 2 så dubblas alla ingrediensmängder och 'hela receptet'-summan i realtid.",
+      "'Per portion (loggas)' visas separat och ändras aldrig av skalningen — det är alltid vad EN portion innehåller som faktiskt sparas i din logg, oavsett hur många du lagar till.",
+    ],
+    details_en: [
+      "AI recipes now deliver ingredients as structured data (amount, unit, name) instead of free text, letting the app recalculate exact quantities.",
+      "The serving-size stepper now works as a proper cookbook scaling tool: change it to e.g. 2 and every ingredient amount and the 'whole recipe' total doubles in real time.",
+      "'Per serving (logged)' is shown separately and never changes with scaling — it's always what ONE serving contains that actually gets saved to your log, regardless of how many you cook for.",
+    ],
+  },
+  {
+    version: "0.4.3",
+    date: "2026-09-07",
+    headline: "Fixat datumväljaren på mobil",
+    headline_en: "Fixed the date picker on mobile",
+    summary: [
+      "\"Idag\"-knappen öppnade inte kalendern på mobil, men logotypen gjorde det av misstag",
+      "Datumväljaren ligger nu exakt ovanpå \"Idag\"-texten istället för löst i headern",
+    ],
+    summary_en: [
+      "The \"Today\" button didn't open the calendar on mobile, but the logo accidentally did",
+      "The date picker now sits exactly on top of the \"Today\" text instead of floating loose in the header",
+    ],
+    details: [
+      "Den dolda datumväljaren var tidigare en fristående osynlig ruta i headern som kunde hamna fel på mobila webbläsare, ibland ovanpå logotypen istället för \"Idag\"-knappen.",
+      "Bytt till att lägga det osynliga datumfältet direkt ovanpå \"Idag ▾\"-texten, så tryckytan alltid stämmer exakt oavsett skärmstorlek eller webbläsare.",
+      "Tar bort beroendet av JavaScript-anropet showPicker(), som inte stöds tillförlitligt i alla mobila webbläsare — nu öppnas datumväljaren av webbläsarens egen, garanterat fungerande beteende.",
+    ],
+    details_en: [
+      "The hidden date picker used to be a separate invisible box in the header that could end up misplaced on mobile browsers, sometimes landing on the logo instead of the \"Today\" button.",
+      "Switched to placing the invisible date field directly on top of the \"Today ▾\" text, so the tap target always lines up correctly regardless of screen size or browser.",
+      "Removed the dependency on the showPicker() JavaScript call, which isn't reliably supported on all mobile browsers — the date picker now opens via the browser's own guaranteed native behaviour.",
+    ],
+  },
+  {
     version: "0.4.2",
     date: "2026-09-07",
     headline: "Rimligare receptportioner",
@@ -468,6 +516,11 @@ const EN_STRINGS = {
   "Avbryt": "Cancel",
   "Faser under en fasta": "Phases during a fast",
   "g kvar": "g left",
+  "Välj datum": "Choose date",
+  "portion": "serving",
+  "portioner": "servings",
+  "Hur många lagar du till?": "How many are you cooking for?",
+  "Per portion (loggas)": "Per serving (logged)",
   "Hela receptet": "Whole recipe",
   "Antal portioner receptet räcker till": "Number of servings the recipe makes",
   "Bara jag äter": "Just me eating",
@@ -1395,12 +1448,6 @@ export default function Portion() {
     setSelectedDate(key);
   }
 
-  function openCalendarPicker() {
-    if (!dateInputRef.current) return;
-    if (dateInputRef.current.showPicker) dateInputRef.current.showPicker();
-    else dateInputRef.current.click();
-  }
-
   function addWater(ml) {
     const entry = { id: Date.now(), ml };
     updateDay({ ...dayData, water: [...waterEntries, entry] });
@@ -2310,7 +2357,7 @@ export default function Portion() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system:
-            `Du är en assistent som skapar recept för en enskild måltid. ${ingredientLine} ${budgetLine}${goalLine} Sätt ALLTID "servings" till 1 om du inte har en tydlig anledning (t.ex. att receptet är opraktiskt att laga i mindre skala, som en hel gryta eller bakverk) att göra fler portioner — och om du anger fler portioner MÅSTE ingrediensmängderna vara realistiska för det totala antalet portioner (t.ex. en portion pasta är ca 80–100g torr pasta och en portion kött/fisk/kyckling är ca 120–180g per person — skala ingredienserna korrekt utifrån antalet portioner du anger). Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn), "servings": number, "ingredients": [string, ...] (mängderna ska gälla HELA receptet, dvs alla portioner tillsammans), "instructions": [string, ...] (steg för steg, korta meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Kcal- och näringsvärdena ska gälla HELA receptet (alla portioner tillsammans) — appen räknar själv ut värdet per portion genom att dela med "servings".` +
+            `Du är en assistent som skapar recept för en enskild måltid. ${ingredientLine} ${budgetLine}${goalLine} Sätt ALLTID "servings" till 1 om du inte har en tydlig anledning (t.ex. att receptet är opraktiskt att laga i mindre skala, som en hel gryta eller bakverk) att göra fler portioner — och om du anger fler portioner MÅSTE ingrediensmängderna vara realistiska för det totala antalet portioner (t.ex. en portion pasta är ca 80–100g torr pasta och en portion kött/fisk/kyckling är ca 120–180g per person — skala ingredienserna korrekt utifrån antalet portioner du anger). Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn), "servings": number, "ingredients": [{"amount": number (numeriskt mått, t.ex. 400 eller 2), "unit": string (t.ex. "g", "dl", "msk", "st" — tom sträng "" om ingrediensen inte mäts i en enhet, t.ex. "efter smak"), "name": string (ingrediensens namn, utan mängd)}, ...], "instructions": [string, ...] (steg för steg, korta meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Varje ingrediens MÅSTE ha "amount" som ett rent nummer (aldrig text eller intervall) så att mängden går att räkna om exakt vid annat antal portioner. Kcal- och näringsvärdena ska gälla HELA receptet (alla portioner tillsammans) — appen räknar själv ut värdet per portion genom att dela med "servings".` +
             aiLangInstruction(language),
           text: "Skapa ett recept åt mig.",
           image: null,
@@ -2340,6 +2387,15 @@ export default function Portion() {
     const totalFat = Number(recipe.fat_g ?? recipe.fat) || 0;
     const totalFiber = Number(recipe.fiber_g ?? recipe.fiber) || 0;
     const servingsNote = div > 1 ? ` (1 av ${div} portioner)` : "";
+    const ingredientsText = Array.isArray(recipe.ingredients)
+      ? recipe.ingredients
+          .map((ing) =>
+            typeof ing === "object" && ing !== null
+              ? `${ing.amount != null ? ing.amount : ""}${ing.unit ? " " + ing.unit : ""} ${ing.name}`.trim()
+              : ing
+          )
+          .join(", ")
+      : "";
     const entry = {
       id: Date.now(),
       name: recipe.name + servingsNote,
@@ -2348,7 +2404,7 @@ export default function Portion() {
       carbs: Math.round(totalCarbs / div),
       fat: Math.round(totalFat / div),
       fiber: Math.round(totalFiber / div),
-      portion_note: Array.isArray(recipe.ingredients) ? recipe.ingredients.join(", ") : "",
+      portion_note: ingredientsText,
       image: null,
       emoji: guessFoodEmoji(recipe.name),
     };
@@ -2420,27 +2476,29 @@ export default function Portion() {
             <img src="/logo.png" alt="Calio Bite" className="h-7 w-auto flex-shrink-0" style={{ objectFit: "contain" }} />
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={openCalendarPicker}
-              className="flex items-center gap-1 text-sm font-semibold"
-              style={{ color: colors.textDim }}
-            >
-              {dateLabel(selectedDate, language)}
-              <span style={{ fontSize: 10 }}>▾</span>
-            </button>
+            <div className="relative flex items-center">
+              <span
+                className="flex items-center gap-1 text-sm font-semibold pointer-events-none"
+                style={{ color: colors.textDim }}
+              >
+                {dateLabel(selectedDate, language)}
+                <span style={{ fontSize: 10 }}>▾</span>
+              </span>
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={selectedDate}
+                max={todayKey}
+                onChange={(e) => e.target.value && goToDate(e.target.value)}
+                aria-label={tr("Välj datum", language)}
+                className="absolute inset-0 w-full h-full opacity-0"
+                style={{ cursor: "pointer" }}
+              />
+            </div>
             <span className="text-[10px]" style={{ color: colors.textDim, opacity: 0.6 }}>
               v{APP_VERSION}
             </span>
           </div>
-          <input
-            ref={dateInputRef}
-            type="date"
-            value={selectedDate}
-            max={todayKey}
-            onChange={(e) => e.target.value && goToDate(e.target.value)}
-            className="w-0 h-0 opacity-0 absolute"
-            tabIndex={-1}
-          />
         </div>
 
         {/* Language selector */}
@@ -4004,110 +4062,137 @@ export default function Portion() {
               </div>
             )}
 
-            {recipeFlow.step === "ai-result" && recipeFlow.recipe && (
-              <div className="pb-2">
-                <h4 className="text-base font-bold mb-2">{recipeFlow.recipe.name}</h4>
-                <p className="text-xs mb-3" style={{ color: colors.textDim }}>
-                  {tr("Hela receptet", language)}: {Math.round(recipeFlow.recipe.kcal)} kcal · P{" "}
-                  {Math.round(recipeFlow.recipe.protein_g)}g · {language === "en" ? "C" : "K"}{" "}
-                  {Math.round(recipeFlow.recipe.carbs_g)}g · F {Math.round(recipeFlow.recipe.fat_g)}g
-                </p>
-
-                <div className="rounded-xl px-4 py-3 mb-4" style={{ backgroundColor: colors.surfaceMuted }}>
-                  <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                    {tr("Antal portioner receptet räcker till", language)}
-                  </label>
-                  <div className="flex items-center gap-3 mb-3">
-                    <button
-                      onClick={() => updateRecipeFlow("servings", Math.max(1, (Number(recipeFlow.servings) || 1) - 1))}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                      style={{ backgroundColor: colors.surface, color: colors.text }}
-                    >
-                      −
-                    </button>
-                    <span className="text-lg font-extrabold w-8 text-center">{recipeFlow.servings || 1}</span>
-                    <button
-                      onClick={() => updateRecipeFlow("servings", (Number(recipeFlow.servings) || 1) + 1)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                      style={{ backgroundColor: colors.surface, color: colors.text }}
-                    >
-                      +
-                    </button>
-                    <button
-                      onClick={() => updateRecipeFlow("servings", 1)}
-                      className="text-xs font-semibold ml-auto"
-                      style={{ color: colors.primary }}
-                    >
-                      {tr("Bara jag äter", language)}
-                    </button>
-                  </div>
-                  <p className="text-xs font-bold" style={{ color: colors.primary }}>
-                    {tr("Per portion", language)}:{" "}
-                    {Math.round(recipeFlow.recipe.kcal / (Number(recipeFlow.servings) || 1))} kcal · P{" "}
-                    {Math.round(recipeFlow.recipe.protein_g / (Number(recipeFlow.servings) || 1))}g ·{" "}
-                    {language === "en" ? "C" : "K"}{" "}
-                    {Math.round(recipeFlow.recipe.carbs_g / (Number(recipeFlow.servings) || 1))}g · F{" "}
-                    {Math.round(recipeFlow.recipe.fat_g / (Number(recipeFlow.servings) || 1))}g
+            {recipeFlow.step === "ai-result" && recipeFlow.recipe && (() => {
+              const baseServings = Math.max(1, Math.round(Number(recipeFlow.recipe.servings)) || 1);
+              const cookServings = Math.max(1, Number(recipeFlow.servings) || 1);
+              const scale = cookServings / baseServings;
+              const perPortion = {
+                kcal: recipeFlow.recipe.kcal / baseServings,
+                protein: recipeFlow.recipe.protein_g / baseServings,
+                carbs: recipeFlow.recipe.carbs_g / baseServings,
+                fat: recipeFlow.recipe.fat_g / baseServings,
+              };
+              const scaledTotal = {
+                kcal: perPortion.kcal * cookServings,
+                protein: perPortion.protein * cookServings,
+                carbs: perPortion.carbs * cookServings,
+                fat: perPortion.fat * cookServings,
+              };
+              function formatAmount(n) {
+                if (n >= 10) return String(Math.round(n));
+                return String(Math.round(n * 10) / 10).replace(/\.0$/, "");
+              }
+              return (
+                <div className="pb-2">
+                  <h4 className="text-base font-bold mb-2">{recipeFlow.recipe.name}</h4>
+                  <p className="text-xs mb-3" style={{ color: colors.textDim }}>
+                    {tr("Hela receptet", language)} ({cookServings} {cookServings === 1 ? tr("portion", language) : tr("portioner", language)}
+                    ): {Math.round(scaledTotal.kcal)} kcal · P {Math.round(scaledTotal.protein)}g ·{" "}
+                    {language === "en" ? "C" : "K"} {Math.round(scaledTotal.carbs)}g · F {Math.round(scaledTotal.fat)}g
                   </p>
-                </div>
 
-                {Array.isArray(recipeFlow.recipe.ingredients) && recipeFlow.recipe.ingredients.length > 0 && (
-                  <>
-                    <p className="text-xs font-bold mb-1.5">{tr("Ingredienser", language)}</p>
-                    <ul className="mb-4" style={{ paddingLeft: 18 }}>
-                      {recipeFlow.recipe.ingredients.map((ing, i) => (
-                        <li key={i} className="text-xs mb-1" style={{ color: colors.textDim, listStyleType: "disc" }}>
-                          {ing}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
+                  <div className="rounded-xl px-4 py-3 mb-4" style={{ backgroundColor: colors.surfaceMuted }}>
+                    <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
+                      {tr("Hur många lagar du till?", language)}
+                    </label>
+                    <div className="flex items-center gap-3 mb-3">
+                      <button
+                        onClick={() => updateRecipeFlow("servings", Math.max(1, cookServings - 1))}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                        style={{ backgroundColor: colors.surface, color: colors.text }}
+                      >
+                        −
+                      </button>
+                      <span className="text-lg font-extrabold w-8 text-center">{cookServings}</span>
+                      <button
+                        onClick={() => updateRecipeFlow("servings", cookServings + 1)}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                        style={{ backgroundColor: colors.surface, color: colors.text }}
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() => updateRecipeFlow("servings", 1)}
+                        className="text-xs font-semibold ml-auto"
+                        style={{ color: colors.primary }}
+                      >
+                        {tr("Bara jag äter", language)}
+                      </button>
+                    </div>
+                    <p className="text-xs font-bold" style={{ color: colors.primary }}>
+                      {tr("Per portion (loggas)", language)}: {Math.round(perPortion.kcal)} kcal · P{" "}
+                      {Math.round(perPortion.protein)}g · {language === "en" ? "C" : "K"} {Math.round(perPortion.carbs)}g · F{" "}
+                      {Math.round(perPortion.fat)}g
+                    </p>
+                  </div>
 
-                {Array.isArray(recipeFlow.recipe.instructions) && recipeFlow.recipe.instructions.length > 0 && (
-                  <>
-                    <p className="text-xs font-bold mb-1.5">{tr("Gör så här", language)}</p>
-                    <ol className="mb-5" style={{ paddingLeft: 18 }}>
-                      {recipeFlow.recipe.instructions.map((step, i) => (
-                        <li key={i} className="text-xs mb-1.5" style={{ color: colors.textDim, listStyleType: "decimal" }}>
-                          {step}
-                        </li>
-                      ))}
-                    </ol>
-                  </>
-                )}
+                  {Array.isArray(recipeFlow.recipe.ingredients) && recipeFlow.recipe.ingredients.length > 0 && (
+                    <>
+                      <p className="text-xs font-bold mb-1.5">
+                        {tr("Ingredienser", language)}{" "}
+                        <span className="font-normal" style={{ color: colors.textDim }}>
+                          ({cookServings} {cookServings === 1 ? tr("portion", language) : tr("portioner", language)})
+                        </span>
+                      </p>
+                      <ul className="mb-4" style={{ paddingLeft: 18 }}>
+                        {recipeFlow.recipe.ingredients.map((ing, i) => (
+                          <li key={i} className="text-xs mb-1" style={{ color: colors.textDim, listStyleType: "disc" }}>
+                            {typeof ing === "object" && ing !== null
+                              ? `${ing.amount != null ? formatAmount(Number(ing.amount) * scale) : ""}${
+                                  ing.unit ? " " + ing.unit : ""
+                                } ${ing.name}`.trim()
+                              : ing}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
 
-                <p className="text-xs font-bold mb-2">{tr("Lägg till i", language)}</p>
-                <div className="flex gap-1.5 mb-4 flex-wrap">
-                  {CATEGORIES.map((c) => (
+                  {Array.isArray(recipeFlow.recipe.instructions) && recipeFlow.recipe.instructions.length > 0 && (
+                    <>
+                      <p className="text-xs font-bold mb-1.5">{tr("Gör så här", language)}</p>
+                      <ol className="mb-5" style={{ paddingLeft: 18 }}>
+                        {recipeFlow.recipe.instructions.map((step, i) => (
+                          <li key={i} className="text-xs mb-1.5" style={{ color: colors.textDim, listStyleType: "decimal" }}>
+                            {step}
+                          </li>
+                        ))}
+                      </ol>
+                    </>
+                  )}
+
+                  <p className="text-xs font-bold mb-2">{tr("Lägg till i", language)}</p>
+                  <div className="flex gap-1.5 mb-4 flex-wrap">
+                    {CATEGORIES.map((c) => (
+                      <button
+                        key={c.key}
+                        onClick={() => updateRecipeFlow("category", c.key)}
+                        className="rounded-full px-3 py-1.5 text-xs font-semibold"
+                        style={{
+                          backgroundColor: recipeFlow.category === c.key ? colors.primary : colors.surfaceMuted,
+                          color: recipeFlow.category === c.key ? colors.onPrimary : colors.textDim,
+                        }}
+                      >
+                        {tr(c.label, language)}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col gap-2">
                     <button
-                      key={c.key}
-                      onClick={() => updateRecipeFlow("category", c.key)}
-                      className="rounded-full px-3 py-1.5 text-xs font-semibold"
-                      style={{
-                        backgroundColor: recipeFlow.category === c.key ? colors.primary : colors.surfaceMuted,
-                        color: recipeFlow.category === c.key ? colors.onPrimary : colors.textDim,
-                      }}
-                    >
-                      {tr(c.label, language)}
-                    </button>
-                  ))}
+                      onClick={() => saveRecipeToLibraryAndMaybeLog(recipeFlow.recipe, recipeFlow.category, baseServings)}
+                      className="w-full rounded-xl py-3.5 text-sm font-bold"
+                      style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
+                    >{tr("Logga och spara", language)}</button>
+                    <button
+                      onClick={() => saveRecipeToLibraryAndMaybeLog(recipeFlow.recipe, null, baseServings)}
+                      className="w-full rounded-xl py-3 text-xs font-semibold"
+                      style={{ color: colors.textDim }}
+                    >{tr("Spara bara i biblioteket (logga inte nu)", language)}</button>
+                  </div>
                 </div>
-
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={() => saveRecipeToLibraryAndMaybeLog(recipeFlow.recipe, recipeFlow.category, recipeFlow.servings)}
-                    className="w-full rounded-xl py-3.5 text-sm font-bold"
-                    style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                  >{tr("Logga och spara", language)}</button>
-                  <button
-                    onClick={() => saveRecipeToLibraryAndMaybeLog(recipeFlow.recipe, null, recipeFlow.servings)}
-                    className="w-full rounded-xl py-3 text-xs font-semibold"
-                    style={{ color: colors.textDim }}
-                  >{tr("Spara bara i biblioteket (logga inte nu)", language)}</button>
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {recipeFlow.step === "manual" && (
               <div className="pb-2">
