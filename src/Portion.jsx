@@ -5301,45 +5301,467 @@ function NewsPanel({ language }) {
 }
 
 function LegalPanel({ language }) {
+  const [section, setSection] = useState("disclaimer");
+
   return (
     <div className="px-5">
-      <p className="text-xs mb-5" style={{ color: colors.textDim }}>{tr("Villkor och ansvarsbegränsning för Calio Bite.", language)}</p>
+      <p className="text-xs mb-4" style={{ color: colors.textDim }}>{tr("Villkor och ansvarsbegränsning för Calio Bite.", language)}</p>
 
-      <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
-        <h3 className="text-base font-bold mb-4">Disclaimer and Limitation of Liability</h3>
-
-        <p className="text-sm font-bold mb-1">1. For Educational and Informational Purposes Only</p>
-        <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
-          The information provided by this application, including but not limited to caloric calculations,
-          nutritional data, and dietary suggestions, is for general educational and informational purposes only. It
-          is not intended as medical advice, diagnosis, or treatment.
-        </p>
-
-        <p className="text-sm font-bold mb-1">2. Not Medical Advice</p>
-        <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
-          Always seek the advice of a qualified healthcare professional or dietitian before starting any new diet,
-          nutrition program, or making changes to your lifestyle. Never disregard professional medical advice
-          because of something you have read or calculated in this application.
-        </p>
-
-        <p className="text-sm font-bold mb-1">3. Accuracy of Data and "As Is" Basis</p>
-        <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
-          This application is provided on an "as is" and "as available" basis without any warranties of any kind.
-          While we strive to provide accurate nutritional data, we cannot guarantee that the calculations, food
-          databases, or metrics are 100% correct or up to date. Nutritional values can vary significantly.
-        </p>
-
-        <p className="text-sm font-bold mb-1">4. Limitation of Liability</p>
-        <p className="text-xs" style={{ color: colors.textDim, lineHeight: 1.6 }}>
-          In no event shall the creators, developers, or owners of this application be liable for any direct,
-          indirect, incidental, or consequential damages resulting from the use of, or inability to use, this
-          application, including but not limited to reliance on any information obtained herein. You use this
-          application entirely at your own risk.
-        </p>
+      <div className="flex gap-2 mb-5">
+        <button
+          onClick={() => setSection("disclaimer")}
+          className="rounded-full px-4 py-2 text-xs font-bold"
+          style={{
+            backgroundColor: section === "disclaimer" ? colors.primary : colors.surfaceMuted,
+            color: section === "disclaimer" ? colors.onPrimary : colors.textDim,
+          }}
+        >
+          Disclaimer
+        </button>
+        <button
+          onClick={() => setSection("terms")}
+          className="rounded-full px-4 py-2 text-xs font-bold"
+          style={{
+            backgroundColor: section === "terms" ? colors.primary : colors.surfaceMuted,
+            color: section === "terms" ? colors.onPrimary : colors.textDim,
+          }}
+        >
+          Terms of Service
+        </button>
       </div>
+
+      {section === "disclaimer" && (
+        <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+          <h3 className="text-base font-bold mb-4">Disclaimer and Limitation of Liability</h3>
+
+          <p className="text-sm font-bold mb-1">1. For Educational and Informational Purposes Only</p>
+          <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+            The information provided by this application, including but not limited to caloric calculations,
+            nutritional data, and dietary suggestions, is for general educational and informational purposes only. It
+            is not intended as medical advice, diagnosis, or treatment.
+          </p>
+
+          <p className="text-sm font-bold mb-1">2. Not Medical Advice</p>
+          <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+            Always seek the advice of a qualified healthcare professional or dietitian before starting any new diet,
+            nutrition program, or making changes to your lifestyle. Never disregard professional medical advice
+            because of something you have read or calculated in this application.
+          </p>
+
+          <p className="text-sm font-bold mb-1">3. Accuracy of Data and "As Is" Basis</p>
+          <p className="text-xs mb-4" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+            This application is provided on an "as is" and "as available" basis without any warranties of any kind.
+            While we strive to provide accurate nutritional data, we cannot guarantee that the calculations, food
+            databases, or metrics are 100% correct or up to date. Nutritional values can vary significantly.
+          </p>
+
+          <p className="text-sm font-bold mb-1">4. Limitation of Liability</p>
+          <p className="text-xs" style={{ color: colors.textDim, lineHeight: 1.6 }}>
+            In no event shall the creators, developers, or owners of this application be liable for any direct,
+            indirect, incidental, or consequential damages resulting from the use of, or inability to use, this
+            application, including but not limited to reliance on any information obtained herein. You use this
+            application entirely at your own risk.
+          </p>
+        </div>
+      )}
+
+      {section === "terms" && <TermsOfServiceContent />}
 
       <p className="text-[11px] text-center mt-5" style={{ color: colors.textDim }}>
         © {new Date().getFullYear()} Femtes. {tr("Alla rättigheter förbehållna.", language)}
+      </p>
+    </div>
+  );
+}
+
+function TermsOfServiceContent() {
+  const h = "text-sm font-bold mt-5 mb-1.5";
+  const h0 = "text-base font-bold mt-6 mb-2";
+  const p = "text-xs mb-3";
+  const pStyle = { color: colors.textDim, lineHeight: 1.6 };
+  const li = "text-xs mb-1.5";
+
+  return (
+    <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+      <h3 className="text-base font-bold mb-1">Terms of Service</h3>
+      <p className="text-xs mb-4" style={{ color: colors.textDim }}>Last Updated Date: 7th September, 2026</p>
+
+      <h4 className={h0}>General Terms – All Users</h4>
+      <p className={p} style={pStyle}>
+        Welcome to Calio Bite (the "Platform"), which is provided and controlled by Femtes (the "Company", "we" or
+        "us").
+      </p>
+      <p className={p} style={pStyle}>
+        You are reading the Terms of Service (the "Terms"), which govern the relationship and serve as an agreement
+        between you and the Company and set forth the terms and conditions by which you may access and use the
+        Platform and our related websites, services, applications, products and content (collectively, the
+        "Services"). Our Services are provided for private, non-commercial use. For purposes of these Terms, "you"
+        and "your" means you as the user of the Services.
+      </p>
+      <p className={p} style={pStyle}>
+        The Terms form a legally binding agreement between you and the Company. Please take the time to read them
+        carefully. By accessing or using the Services you agree to be bound by these Terms. If you disagree with any
+        part of the Terms, then you may not access the Service. The calculation results are for reference only and
+        do not constitute medical advice. The user shall be solely responsible for any actions and consequences
+        resulting from the output information of this product.
+      </p>
+
+      <h4 className={h0}>I. Your Agreement with the Company</h4>
+      <p className={p} style={pStyle}>
+        1. Individual users. CALIO BITE IS NOT AVAILABLE TO PERSONS UNDER THE AGE OF 16. If you are under the age of
+        16, you must have permission from your legal guardian before using Calio Bite.
+      </p>
+      <p className={p} style={pStyle}>
+        2. Non-individual users. If you are accessing or using the Services on behalf of a business or entity, then
+        (a) "you" and "your" includes you and that business or entity, (b) you represent and warrant that you are an
+        authorized representative of the business or entity with the authority to bind the business or entity to
+        these Terms and that you agree to these Terms on behalf of the business or entity, and (c) your business or
+        entity is legally and financially responsible for your access or use of the Services as well as for the
+        access or use of your account by others affiliated with your business or entity, including any employees,
+        agents or contractors.
+      </p>
+      <p className={p} style={pStyle}>
+        3. Supplemental Terms. If you access or use the Services from a jurisdiction for which there are separate
+        supplemental terms, you also hereby agree to the supplemental terms applicable to users in each jurisdiction
+        as outlined in the relevant "Supplemental Terms – Jurisdiction Specific" section below. In the event of a
+        conflict between the provisions of the Supplemental Terms – Jurisdiction Specific that is relevant to your
+        jurisdiction from which you access or use the Services, and the rest of these Terms, the relevant
+        jurisdiction's Supplemental Terms – Jurisdiction Specific will supersede and control with respect to your use
+        of the Services from that jurisdiction.
+      </p>
+      <p className={p} style={pStyle}>
+        4. Changes to the Terms. We may amend these Terms from time to time, for instance when we update the
+        functionality of our Services, when we combine apps or services operated by us or our affiliates into one
+        single combined service or app, or when there are regulatory changes. We use commercially reasonable efforts
+        to generally notify all users of any material changes to these Terms, such as through a notice on the
+        Platform, however, you should look at the Terms regularly to check for such changes. We will also update the
+        "Last Updated" date at the top of these Terms, which reflects the effective date of such Terms. Your
+        continued access or use of the Services after the date of the new Terms constitutes your acceptance of the
+        new Terms. If you do not agree to the new Terms, you must stop accessing or using the Services.
+      </p>
+
+      <h4 className={h0}>II. Use of the Services</h4>
+      <p className={h}>1. License</p>
+      <p className={p} style={pStyle}>
+        Subject to the Terms, you are hereby granted a non-exclusive, limited, non-transferable, non-sublicensable,
+        revocable license to access and use the Services, including to download the Platform onto a permitted
+        device, and to access the Company's Content (defined below) solely for your personal, non-commercial use
+        through your use of the Services and solely in compliance with these Terms. The Company reserves all rights
+        not expressly granted herein in the Services and the Company's Content. You acknowledge and agree that the
+        Company may terminate this license at any time for any reason or no reason.
+      </p>
+      <p className={p} style={pStyle}>
+        NO RIGHTS ARE LICENSED WITH RESPECT TO SOUND RECORDINGS AND THE MUSICAL WORKS EMBODIED THEREIN THAT ARE MADE
+        AVAILABLE FROM OR THROUGH THE SERVICE.
+      </p>
+      <p className={h}>2. Restrictions on Use</p>
+      <p className={p} style={pStyle}>
+        Your access to and use of the Services shall be subject to these Terms and all applicable laws and
+        regulations. You may not:
+      </p>
+      <ul style={{ paddingLeft: 18 }} className="mb-3">
+        {[
+          "access or use the Services if you are not fully able and legally competent to agree to these Terms or are authorized to use the Services by your parent or legal guardian;",
+          "make unauthorized copies, modify, adapt, translate, reverse engineer, disassemble, decompile or create any derivative works of the Services or any content included therein, including any files, tables, or documentation (or any portion thereof) or determine or attempt to determine any source code, algorithms, methods or techniques embodied by the Services or any derivative works thereof;",
+          "incorporate the Services or any portion thereof into any other program or product;",
+          "distribute, license, transfer, or sell, in whole or in part, any of the Services or any derivative works thereof;",
+          "market, rent or lease the Services for a fee or charge, or use the Services to advertise or perform any commercial solicitation;",
+          "use the Services, without our express written consent, for any commercial or unauthorized purpose, including communicating or facilitating any commercial advertisement or solicitation or spamming;",
+          "interfere with or attempt to interfere with the proper working of the Services, disrupt our website or any networks connected to the Services, or bypass any measures we may use to prevent or restrict access to the Services;",
+          "use automated scripts to collect information from or otherwise interact with the Services;",
+          "impersonate any person or entity, or falsely state or otherwise misrepresent you or your affiliation with any person or entity, including giving the impression that any content you upload, post, transmit, distribute or otherwise make available emanates from the Services;",
+          "promote sexually explicit material, violence, or discrimination based on race, sex, religion, nationality, disability, sexual orientation, or age;",
+          "use the services to upload, transmit, distribute, store or otherwise make available in any way files that contain viruses, trojans, worms, logic bombs, or other material that is malicious or technologically harmful;",
+          "hack into, or insert malicious code, including viruses, or harmful data, into, our services;",
+          "use the Services in a manner that violates or infringes on someone else's rights of publicity, privacy, copyright, trademark, or other intellectual property rights;",
+          "use the Services in a manner that is harmful, fraudulent, deceptive, threatening, abusive, harassing, tortious, defamatory, vulgar, obscene, libelous, or otherwise objectionable;",
+          "in any way promote or incite anyone to commit or assist in any unlawful or criminal activity or anti-social behavior, or encourage activities which could endanger the safety or wellbeing of others;",
+          "disclose anyone's personal information or invade their privacy;",
+          "engage in any other conduct that restricts or inhibits any person from using or enjoying the Services, or that, in our sole judgment, exposes us or any of our users, affiliates, or any other third party to any liability, damages, or detriment.",
+        ].map((item, i) => (
+          <li key={i} className={li} style={{ ...pStyle, listStyleType: "disc" }}>
+            {item}
+          </li>
+        ))}
+      </ul>
+      <p className={p} style={pStyle}>
+        Violations of system or network security may result in civil or criminal liability. We may investigate and
+        work with law enforcement authorities to prosecute users who violate the Terms. We may also suspend or
+        terminate your access to the Services at any time without notice for any reason.
+      </p>
+
+      <h4 className={h0}>III. Payment</h4>
+      <p className={h}>1. Fees</p>
+      <p className={p} style={pStyle}>
+        Certain Services, features or contents are only offered for payment (such as paid content and VIP account).
+        You agree to pay whatever fees and other charges are presented to you when you decide to purchase such paid
+        services (collectively the "Fees"). If you download the App from the Apple App Store, refunds are permissible
+        following Apple's refund policy; otherwise, refunds are not allowed following our refund policies. Except as
+        stated in those policies or stipulated in applicable laws, all Fees are non-refundable and non-cancellable.
+      </p>
+      <p className={h}>2. Payment Methods and Processing</p>
+      <p className={p} style={pStyle}>
+        Payments may be processed via the relevant App Marketplace, as well as any other third-party payment methods
+        which we make available (such as via PayPal and certain supported payment cards). You must provide accurate
+        billing information, and promptly update any changes to it (such as card numbers and expiry dates). If you
+        are paying via credit or debit card, you represent that you are the authorized user of the card, and you
+        authorize us (and any third-party payment processor) to collect payment from you, on a recurring basis (if
+        applicable), and to take all other necessary billing actions. If payment is made via a third-party payment
+        processor, you will also be subject to its terms and conditions (over which we have no control) – so
+        carefully read those terms.
+      </p>
+
+      <h4 className={h0}>IV. Intellectual Property Rights</h4>
+      <p className={p} style={pStyle}>
+        The Services are protected under the laws of copyright, patent, trademarks and other intellectual property
+        rights of the countries where Services are available. All copyrights in the Services are owned by us or our
+        third-party licensors to the full extent permitted under all applicable laws. Consistent with the other terms
+        in this document, you may not publish, reproduce, distribute, display, perform, edit, adapt, modify, or
+        otherwise exploit any part of the Services without our written consent.
+      </p>
+      <p className={p} style={pStyle}>
+        We respect intellectual property rights and require you to do the same. As a condition of your access to and
+        use of the Services, you agree not to infringe on any intellectual property rights while accessing or using
+        the Services or use any content therein for any commercial or unauthorized purposes. We reserve the right,
+        with or without notice, at any time and in our sole discretion to block access to the Services, including
+        without limitation for any user who infringes or is alleged to infringe any intellectual property rights or
+        proprietary rights.
+      </p>
+
+      <h4 className={h0}>V. Content</h4>
+      <p className={h}>1. The Company's Content</p>
+      <p className={p} style={pStyle}>
+        As between you and the Company, all content, software, images, text, graphics, illustrations, logos,
+        stickers, filters, patents, trademarks, service marks, copyrights, photographs, audio, videos, music on and
+        "look and feel" of the Services, and all intellectual property rights related thereto (the "Company's
+        Content"), are either owned or licensed by the Company. Use of the Company's Content or materials on the
+        Services for any purpose not expressly permitted by these Terms is strictly prohibited. The Company's Content
+        may not be downloaded, copied, reproduced, distributed, transmitted, broadcast, displayed, sold, licensed or
+        otherwise exploited for any purpose whatsoever without our or, where applicable, our licensors' prior written
+        consent. We and our licensors reserve all rights not expressly granted in and to their content.
+      </p>
+      <p className={p} style={pStyle}>
+        We make no representations, warranties or guarantees, whether express or implied, that any Company's Content
+        is accurate, complete or up to date. Where our Services contain links to other sites and resources provided
+        by third parties, these links are provided for your information only. We have no control over the contents
+        of those sites or resources. Such links should not be interpreted as approval by us of those linked websites
+        or information you may obtain from them.
+      </p>
+      <p className={h}>2. User-Generated Content</p>
+      <p className={p} style={pStyle}>
+        By using our Services, you provide us with information, photos, entries and other material that you submit
+        to and create on the Platform (collectively your "User Content").
+      </p>
+      <p className={p} style={pStyle}>
+        You retain full ownership to your User Content. We don't claim any ownership to any of it. These Terms do not
+        grant us any rights to your User Content or intellectual property except for the limited rights that are
+        needed to provide the Services, as explained below.
+      </p>
+      <p className={p} style={pStyle}>
+        In order to provide the Services, we need your permission to host, store, and process your User Content. This
+        is called a license. By uploading User Content to the Services, you grant us this license solely as is
+        necessary to provide the corresponding Services, including where you actively choose to share a logged meal
+        with another user via the sharing feature.
+      </p>
+      <p className={p} style={pStyle}>
+        You are solely responsible for maintaining and protecting all of your User Content. We will not be liable for
+        any loss or damage of your User Content, or for any costs or expenses associated with backing up or restoring
+        any of your User Content.
+      </p>
+      <p className={h}>3. Input and Generative AI</p>
+      <p className={p} style={pStyle}>
+        You retain any copyright and other proprietary rights that you may hold in the Input (including photos,
+        text descriptions, and ingredients) that you upload to the Services, subject to the licenses granted in this
+        Agreement. You are responsible for your Input, including its content and accuracy, and will comply with
+        applicable laws when using the Services. You represent and warrant that you have obtained all rights,
+        consents, and permissions necessary for us to collect, access, use, disclose, transfer, transmit, store,
+        host, or otherwise process Input as set forth in this Agreement without violating or infringing any laws or
+        third-party rights.
+      </p>
+      <p className={p} style={pStyle}>
+        You must not upload Input if you are not the owner of or are not fully authorized to grant rights in all of
+        the elements of that Input. We disclaim any and all liability in connection with Input. You are solely
+        responsible for your Input and the consequences of providing Input via the Services. By providing Input via
+        the Services (such as photos of meals or ingredients, or written descriptions), you affirm, represent, and
+        warrant to us that: (1) you are the creator and owner of the Input, or have the necessary rights and
+        permissions to provide it; (2) the Input does not infringe, violate, misappropriate, or otherwise breach any
+        third-party right; (3) the Input could not be deemed by a reasonable person to be objectionable, profane,
+        indecent, pornographic, harassing, threatening, embarrassing, hateful, or otherwise inappropriate.
+      </p>
+      <p className={h}>4. Input Disclaimer</p>
+      <p className={p} style={pStyle}>
+        We are under no obligation to edit or control any Output (such as AI-estimated nutrition values, recipes, or
+        suggestions) or any Input that you or other users upload, and we will not be in any way responsible or liable
+        for Input or Output. We may, however, at any time and without prior notice, screen, remove, edit, or block
+        any Input or Output that in our sole judgment violates this Agreement, is alleged to violate the rights of
+        third parties, or is otherwise objectionable. You understand that Output generated by artificial intelligence
+        may be inaccurate, incomplete, or objectionable, and you agree to waive any legal or equitable right or
+        remedy you have or may have against us with respect to Input or Output.
+      </p>
+      <p className={h}>5. Output</p>
+      <p className={p} style={pStyle}>
+        YOU HEREBY ACKNOWLEDGE AND AGREE THAT: (A) THERE MAY BE ERRORS, INCONSISTENCIES, OR INACCURACIES IN OUTPUT
+        (INCLUDING ESTIMATED CALORIES, MACRONUTRIENTS, CLIMATE IMPACT, OR COST) FOR VARIOUS REASONS, INCLUDING THE
+        QUALITY OF THE INPUT AND THE INHERENT TECHNICAL LIMITATIONS AND PROBABILISTIC NATURE OF THE ARTIFICIAL
+        INTELLIGENCE TECHNOLOGY USED IN CONNECTION WITH THE SERVICES; (B) OUTPUT MAY NOT BE UNIQUE OR EXCLUSIVE TO YOU
+        AND OTHER USERS MAY RECEIVE SIMILAR OUTPUT; AND (C) WE MAKE NO REPRESENTATION OR WARRANTY THAT THE OUTPUT WILL
+        BE ACCURATE, RELIABLE, OR FREE FROM ERRORS OR OTHER DEFECTS. YOU WILL BE SOLELY RESPONSIBLE FOR VERIFYING THE
+        ACCURACY OF THE OUTPUT, INCLUDING BEFORE MAKING ANY HEALTH, DIETARY, OR MEDICAL DECISIONS BASED ON IT, AND ARE
+        SOLELY LIABLE FOR ANY RELIANCE PLACED THEREON.
+      </p>
+
+      <h4 className={h0}>VI. Indemnify</h4>
+      <p className={p} style={pStyle}>
+        You agree to defend, indemnify, and hold harmless the Company, its parents, subsidiaries, and affiliates, and
+        each of their respective officers, directors, employees, agents, assigns, and advisors from and against any
+        and all loss, claims, liabilities, damages, costs, and expenses, including, but not limited to, attorneys'
+        fees and expenses, arising out of a breach by you or any user of your account of these Terms or arising out
+        of a breach of your obligations, representations and warranties under these Terms.
+      </p>
+
+      <h4 className={h0}>VII. Exclusion of Warranties</h4>
+      <p className={p} style={pStyle}>
+        NOTHING IN THESE TERMS SHALL AFFECT ANY STATUTORY RIGHTS THAT YOU CANNOT CONTRACTUALLY AGREE TO ALTER OR WAIVE
+        AND ARE LEGALLY ALWAYS ENTITLED TO AS A CONSUMER.
+      </p>
+      <p className={p} style={pStyle}>
+        THE SERVICES ARE PROVIDED "AS IS" AND WE MAKE NO WARRANTY OR REPRESENTATION OF ANY KIND, EITHER EXPRESS OR
+        IMPLIED, TO YOU WITH RESPECT TO THEM. IN PARTICULAR WE DO NOT REPRESENT OR WARRANT TO YOU THAT: YOUR USE OF
+        THE SERVICES WILL MEET YOUR REQUIREMENTS; YOUR USE OF THE SERVICES WILL BE UNINTERRUPTED, TIMELY, SECURE OR
+        FREE FROM ERROR; ANY INFORMATION OBTAINED BY YOU AS A RESULT OF YOUR USE OF THE SERVICES WILL BE ACCURATE OR
+        RELIABLE; OR DEFECTS IN THE OPERATION OR FUNCTIONALITY OF ANY SOFTWARE PROVIDED TO YOU AS PART OF THE SERVICES
+        WILL BE CORRECTED.
+      </p>
+      <p className={p} style={pStyle}>
+        NO CONDITIONS, WARRANTIES OR OTHER TERMS (INCLUDING ANY IMPLIED TERMS OR WARRANTIES AS TO SATISFACTORY
+        QUALITY, MERCHANTABILITY, FITNESS FOR PURPOSE, CONFORMANCE WITH DESCRIPTION, NON-INFRINGEMENT, OR OTHER
+        VIOLATION OF RIGHTS) APPLY TO THE SERVICES EXCEPT TO THE EXTENT THAT THEY ARE EXPRESSLY SET OUT IN THE TERMS.
+        WE MAY CHANGE, SUSPEND, WITHDRAW OR RESTRICT THE AVAILABILITY OF ALL OR ANY PART OF THE PLATFORM FOR BUSINESS
+        AND OPERATIONAL REASONS AT ANY TIME WITHOUT NOTICE.
+      </p>
+
+      <h4 className={h0}>VIII. Limitation of Liability</h4>
+      <p className={p} style={pStyle}>
+        NOTHING IN THESE TERMS SHALL EXCLUDE OR LIMIT OUR LIABILITY FOR LOSSES WHICH MAY NOT BE LAWFULLY EXCLUDED OR
+        LIMITED BY APPLICABLE LAW, INCLUDING MANDATORY CONSUMER PROTECTION LAW OF THE EUROPEAN UNION. THIS INCLUDES
+        LIABILITY FOR DEATH OR PERSONAL INJURY CAUSED DIRECTLY BY OUR NEGLIGENCE OR THE NEGLIGENCE OF OUR EMPLOYEES OR
+        AGENTS AND FOR FRAUD OR FRAUDULENT MISREPRESENTATION.
+      </p>
+      <p className={p} style={pStyle}>
+        SUBJECT TO THE PARAGRAPH ABOVE, WE SHALL NOT BE LIABLE TO YOU FOR: (I) ANY LOSS OF PROFIT; (II) ANY LOSS OF
+        GOODWILL; (III) ANY LOSS OF OPPORTUNITY; (IV) ANY LOSS, MISUSE, MANIPULATION OR OTHER UTILIZATION OF DATA
+        SUFFERED BY YOU OR COMPUTER VIRUS; OR (V) ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL OR PUNITIVE DAMAGES
+        WHATSOEVER WHICH MAY BE INCURRED BY YOU, INCLUDING LOSS OR DAMAGE ARISING FROM ANY CHANGES WE MAY MAKE TO THE
+        SERVICES, ANY CESSATION OF THE SERVICES, OR THE DELETION OF, CORRUPTION OF, OR FAILURE TO STORE ANY CONTENT.
+      </p>
+      <p className={p} style={pStyle}>
+        THESE LIMITATIONS ON OUR LIABILITY TO YOU SHALL APPLY WHETHER OR NOT WE HAVE BEEN ADVISED OF OR SHOULD HAVE
+        BEEN AWARE OF THE POSSIBILITY OF ANY SUCH LOSSES ARISING. YOU ARE RESPONSIBLE FOR ANY MOBILE OR DATA CHARGES
+        THAT MAY APPLY TO YOUR USE OF OUR SERVICE. IF YOU'RE UNSURE WHAT THOSE CHARGES MAY BE, YOU SHOULD ASK YOUR
+        SERVICE PROVIDER BEFORE USING THE SERVICE.
+      </p>
+
+      <h4 className={h0}>IX. Termination</h4>
+      <p className={p} style={pStyle}>
+        1. Termination by us. We reserve the right to suspend and/or terminate our Services at any time, with or
+        without cause, and with or without notice.
+      </p>
+      <p className={p} style={pStyle}>
+        2. Termination by you. You may stop using the Services at any time via the functionality offered or by
+        cancelling your Account (see the "Log out" option in the menu, or contact us to request account deletion).
+        Termination will take effect immediately, so please confirm there's no unused property interests in your
+        account. We are not responsible for any loss of your rights and interests caused by your voluntary
+        termination of the Services. Termination of your account does not relieve you of any obligation to pay any
+        outstanding fees.
+      </p>
+      <p className={p} style={pStyle}>
+        3. Survival. Upon the expiration or termination of the Terms, some or all of the Services may cease to
+        operate without prior notice. Your indemnification obligations, our warranty disclaimers and limitations of
+        liabilities, and dispute resolution provisions stated in the Terms will survive.
+      </p>
+
+      <h4 className={h0}>X. Miscellaneous</h4>
+      <p className={p} style={pStyle}>
+        1. Applicable Law and Jurisdiction. Calio Bite is operated by Femtes, based in Sweden. These Terms shall be
+        construed in accordance with the laws of Sweden, without regard to its conflict of laws rules. Any dispute
+        arising out of or in connection with these Terms, including any question regarding the existence, validity
+        or termination of these Terms, shall be subject to the non-exclusive jurisdiction of the courts of Sweden.
+        This does not deprive you, as a consumer, of the protection afforded to you by mandatory provisions of the
+        law of the European Union member state in which you are resident, which cannot be derogated from by
+        agreement.
+      </p>
+      <p className={p} style={pStyle}>
+        2. Open Source. The Platform contains certain open source software. Each item of open source software is
+        subject to its own applicable license terms.
+      </p>
+      <p className={p} style={pStyle}>
+        3. Entire Agreement. These Terms constitute the whole legal agreement between you and the Company and govern
+        your use of the Services, superseding any prior or contemporaneous communications and proposals (whether
+        oral, written or electronic) between you and us.
+      </p>
+      <p className={p} style={pStyle}>
+        4. No Waiver. Our failure to enforce any provisions of these Terms or respond to a violation by any party
+        does not waive our right to subsequently enforce any terms or conditions of the Terms or respond to any
+        violations.
+      </p>
+      <p className={p} style={pStyle}>
+        5. Security. We do not guarantee that our Services will be secure or free from bugs or viruses. You are
+        responsible for configuring your information technology, computer programs and platform to access our
+        Services. You should use your own virus protection software.
+      </p>
+      <p className={p} style={pStyle}>
+        6. Severability. If any court of law, having jurisdiction to decide on this matter, rules that any provision
+        of these Terms is invalid, then that provision will be removed from the Terms without affecting the rest of
+        the Terms, and the remaining provisions of the Terms will continue to be valid and enforceable.
+      </p>
+      <p className={p} style={pStyle}>
+        7. Assignment. You may not assign these Terms or assign any rights or delegate any obligations hereunder, in
+        whole or in part, without our prior written consent. We may assign these Terms or any rights hereunder
+        without your consent and without notice.
+      </p>
+      <p className={p} style={pStyle}>
+        8. Third-Party Services. Our Services may include links to features and services provided by third parties
+        (such as Open Food Facts for product data, and Google's Gemini for AI-based photo and text analysis). We do
+        not control such third-party services and are not responsible for their content or functionality. The terms
+        applicable to such third-party services will apply, and we will not be responsible for anything done by you
+        or the third-party service provider in connection with your use of their service.
+      </p>
+      <p className={p} style={pStyle}>
+        9. Privacy Policy. Your privacy is very important to us. Please refer to our Privacy Policy for information
+        on how we collect, use and disclose personal information.
+      </p>
+      <p className={p} style={pStyle}>
+        10. Contact. If you have any questions regarding these Terms, please feel free to contact us at:{" "}
+        support@caliobite.com.
+      </p>
+
+      <h4 className={h0}>Supplemental Terms – Jurisdiction Specific</h4>
+      <p className={h}>European Union</p>
+      <p className={p} style={pStyle}>The following terms apply if you reside in the European Union:</p>
+      <p className={p} style={pStyle}>
+        Dispute Resolution. If you are a "consumer" as defined under EU Directive 2011/83/EU, any dispute,
+        controversy or claim (whether in contract, tort or otherwise) between us and you, arising out of, relating
+        to, or in connection with these Terms, may be referred to and finally resolved by the court of your place of
+        residence or domicile, in addition to the courts of Sweden. You can also file a complaint at the online
+        platform for alternative dispute resolution (ODR platform), which you can find at:{" "}
+        https://ec.europa.eu/consumers/odr.
+      </p>
+      <p className={p} style={pStyle}>
+        Loss or damage. If any Calio Bite services or features which we have supplied damage a device or digital
+        content belonging to you, and this is caused by our failure to use reasonable care and skill, we will either
+        repair the damage or pay you reasonable compensation for such damage. However, we will not be liable for
+        damage which you could have avoided by following our advice to apply an update offered to you free of
+        charge, or for damage caused by you failing to correctly follow installation instructions or to have in place
+        the minimum system requirements advised by us. We only supply the Services accessible via the Platform for
+        domestic and private use. If you use the Services for any commercial or business purpose, we will have no
+        liability to you for any loss of profit, loss of business, business interruption, or loss of business
+        opportunity.
+      </p>
+      <p className={p} style={pStyle}>
+        Nothing in these Terms affects any legal rights that you are entitled to as a consumer under European Union
+        member state laws which cannot be contractually altered or waived. Accordingly, some of the exclusions and
+        limitations in Sections VII and VIII of these Terms will not apply to you if you are a consumer living in a
+        European Union country.
       </p>
     </div>
   );
