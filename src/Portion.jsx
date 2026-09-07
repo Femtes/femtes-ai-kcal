@@ -51,11 +51,18 @@ const CHANGELOG = [
     version: "0.3.0",
     date: "2026-09-06",
     headline: "Riktig databas, ny meny och grön design",
+    headline_en: "Real database, new menu and green design",
     summary: [
       "All data sparas nu i en riktig databas — försvinner aldrig vid uppdateringar",
       "Ny hamburgermeny istället för flikrad",
       "Möjlighet att logga ut",
       "Ny grön design som matchar logotypen",
+    ],
+    summary_en: [
+      "All data is now saved in a real database — never disappears when the app is updated",
+      "New hamburger menu instead of a tab row",
+      "Ability to log out",
+      "New green design matching the logo",
     ],
     details: [
       "Bytt lagring från webbläsarens tillfälliga minne till en riktig databas kopplad till ditt konto — dina uppgifter finns kvar oavsett enhet eller uppdatering.",
@@ -64,28 +71,50 @@ const CHANGELOG = [
       "Hela appens färgschema är omgjort från lila till grönt för att matcha den nya logotypen.",
       "Lagt till den här nyhetsfliken samt en popup som visar vad som är nytt efter en uppdatering.",
     ],
+    details_en: [
+      "Switched storage from the browser's temporary memory to a real database tied to your account — your data stays put no matter the device or update.",
+      "Navigation has been redesigned into a hamburger menu (☰) to the left of the logo instead of a tab row.",
+      "Added a log-out button in the menu.",
+      "The entire app colour scheme has been changed from purple to green to match the new logo.",
+      "Added this news tab as well as a popup showing what's new after an update.",
+    ],
   },
   {
     version: "0.2.0",
     date: "2026-09-05",
     headline: "Logotyp och juridisk information",
+    headline_en: "Logo and legal information",
     summary: ["Ny logotyp på plats", "Juridisk info och copyright tillagt", "Tydlig beta-märkning"],
+    summary_en: ["New logo in place", "Legal info and copyright added", "Clear beta labelling"],
     details: [
       "Lagt till appens riktiga logotyp på inloggningssidan, i headern och som favicon.",
       "Ny flik 'Legal' med användarvillkor och ansvarsbegränsning.",
       "Copyright-text tillagd på inloggningssidan.",
       "Tydlig BETA-markering så användare vet att appen fortfarande testas.",
     ],
+    details_en: [
+      "Added the app's real logo to the login screen, the header and as the favicon.",
+      "New 'Legal' tab with terms of use and disclaimer.",
+      "Copyright text added to the login screen.",
+      "Clear BETA labelling so users know the app is still being tested.",
+    ],
   },
   {
     version: "0.1.0",
     date: "2026-09-01",
     headline: "Första betaversionen",
+    headline_en: "First beta version",
     summary: ["Kalorispårning, träning, fasta, vikt och trender", "Kontosystem med inloggning"],
+    summary_en: ["Calorie tracking, training, fasting, weight and trends", "Account system with login"],
     details: [
       "Första publika testversionen av Calio Bite.",
       "Daglig kaloribudget, måltidsloggning, träningsspårning, fasteschema, viktlogg och trender.",
       "Riktiga konton med registrering och inloggning.",
+    ],
+    details_en: [
+      "First public test version of Calio Bite.",
+      "Daily calorie budget, meal logging, training tracking, fasting schedule, weight log and trends.",
+      "Real accounts with sign-up and login.",
     ],
   },
 ];
@@ -114,6 +143,263 @@ const TAB_LABELS_EN = {
 function getTabLabel(key, language) {
   if (language === "en" && TAB_LABELS_EN[key]) return TAB_LABELS_EN[key];
   return TABS.find((t) => t.key === key)?.label || "";
+}
+
+const EN_STRINGS = {
+  "Idag": "Today",
+  "Igår": "Yesterday",
+  "✎ Redigera": "✎ Edit",
+  "🌿 Sifferfritt läge": "🌿 Number-free mode",
+  "🔢 Visa siffror": "🔢 Show numbers",
+  "Dagens mål": "Today's goal",
+  "Lägg in vikt och längd för att räkna ut ditt dagliga kalorimål": "Enter your weight and height to calculate your daily calorie goal",
+  "Ställ in mål": "Set goal",
+  "Konsumerat": "Consumed",
+  "Bränt": "Burned",
+  "kcal kvar": "kcal left",
+  "kcal över": "kcal over",
+  "Mål": "Goal",
+  "Mål idag": "Goal today",
+  "Stäng av": "Turn off",
+  "Kolhydrater": "Carbs",
+  "Protein": "Protein",
+  "Fett": "Fat",
+  "Fiber": "Fiber",
+  "kg CO2e idag": "kg CO2e today",
+  "kr på mat idag": "spent on food today",
+  "Vatten": "Water",
+  "ml": "ml",
+  "Ångra senaste": "Undo last",
+  "Skapa eller spara ett recept": "Create or save a recipe",
+  "Låt AI:n komma på ett recept utifrån vad du har eller vill äta, eller spara ditt eget favoritrecept för att snabbt logga det igen senare.":
+    "Let AI come up with a recipe based on what you have or want to eat, or save your own favourite recipe to quickly log it again later.",
+  "🤖 Skapa med AI": "🤖 Create with AI",
+  "✏️ Eget recept": "✏️ My own recipe",
+  "Recept": "Recipe",
+  "Recept med AI": "AI recipe",
+  "Eget recept": "My recipe",
+  "Har du några ingredienser du vill utgå från? Lämna tomt så hittar AI:n på något gott själv.":
+    "Do you have any ingredients you'd like to use? Leave it blank and AI will come up with something tasty on its own.",
+  "T.ex. kyckling, broccoli, ris": "E.g. chicken, broccoli, rice",
+  "✨ Skapa recept": "✨ Create recipe",
+  "Komponerar ett recept …": "Composing a recipe …",
+  "Något gick fel. Försök igen om en stund.": "Something went wrong. Please try again shortly.",
+  "Försök igen": "Try again",
+  "Ingredienser": "Ingredients",
+  "Gör så här": "Instructions",
+  "Lägg till i": "Add to",
+  "Logga och spara": "Log and save",
+  "Spara bara i biblioteket (logga inte nu)": "Only save to library (don't log now)",
+  "Namn på receptet": "Recipe name",
+  "T.ex. Mammas köttbullar": "E.g. Grandma's meatballs",
+  "Ingredienser (en per rad, valfritt)": "Ingredients (one per line, optional)",
+  "Gör så här (valfritt)": "Instructions (optional)",
+  "Kalorier": "Calories",
+  "Kalorier (kcal)": "Calories (kcal)",
+  "Protein (g)": "Protein (g)",
+  "Kolhydrater (g)": "Carbs (g)",
+  "Fett (g)": "Fat (g)",
+  "Fibrer (g)": "Fiber (g)",
+  "Lägg till i (valfritt)": "Add to (optional)",
+  "Logga och spara recept": "Log and save recipe",
+  "Spara recept": "Save recipe",
+  "Måltider": "Meals",
+  "Ändra fördelning": "Edit distribution",
+  "Frukost": "Breakfast",
+  "Lunch": "Lunch",
+  "Mellanmål": "Snack",
+  "Middag": "Dinner",
+  "Övrigt": "Other",
+  "Inget tillagt än": "Nothing added yet",
+  "Lägg till manuellt": "Add manually",
+  "Fota maträtt": "Photograph meal",
+  "🔍 Sök livsmedel": "🔍 Search food",
+  "🎙️ Beskriv med ord": "🎙️ Describe with words",
+  "🤝 Hämta delad måltid": "🤝 Get a shared meal",
+  "Läser av maträtten …": "Analysing the meal …",
+  "Kunde inte identifiera någon mat i bilden. Försök igen med bättre belysning, eller lägg in maträtten manuellt.":
+    "Couldn't identify any food in the photo. Try again with better lighting, or add the meal manually.",
+  "Något gick fel vid analysen. Försök igen, eller lägg in maträtten manuellt.":
+    "Something went wrong during analysis. Try again, or add the meal manually.",
+  "Försök fota igen": "Try photographing again",
+  "Maträtt": "Meal",
+  "T.ex. Kycklingsallad": "E.g. Chicken salad",
+  "Kalorier (kcal)v2": "Calories (kcal)",
+  "Klimat & plånbok (valfritt)": "Climate & wallet (optional)",
+  "CO2 (kg)": "CO2 (kg)",
+  "Kostnad (kr)": "Cost",
+  "Spara ändringar": "Save changes",
+  "Beskriv vad du åt med egna ord — tryck gärna på mikrofonen i din tangentbord för att diktera istället för att skriva.":
+    "Describe what you ate in your own words — feel free to use your keyboard's microphone to dictate instead of typing.",
+  "Analyserar …": "Analysing …",
+  "Analysera": "Analyse",
+  "Vi tolkade det här — ta bort något som blev fel innan du lägger till": "Here's what we understood — remove anything that's wrong before adding",
+  "Kunde inte tolka någon mat ur texten. Försök beskriva det lite tydligare.": "Couldn't understand any food from the text. Try describing it a bit more clearly.",
+  "Något gick fel vid tolkningen. Försök igen, eller lägg till manuellt.": "Something went wrong while interpreting. Try again, or add manually.",
+  "livsmedel": "items",
+  "Sök efter livsmedel": "Search for food",
+  "Sök livsmedel, t.ex. mjölk": "Search for food, e.g. milk",
+  "Sök": "Search",
+  "Söker …": "Searching …",
+  "Mina livsmedel": "My foods",
+  "Dina senaste": "Your recent items",
+  "Eller sök på nätet": "Or search online",
+  "valda — sök gärna på fler rätter att lägga till i samma måltid": "selected — feel free to search for more dishes to add to the same meal",
+  "Inga träffar. Prova ett annat sökord.": "No results. Try a different search term.",
+  "Namnge kombinationen (valfritt)": "Name the combination (optional)",
+  "Lägg till": "Add",
+  "Be din vän om koden de fick när de delade måltiden, och skriv in den här.": "Ask your friend for the code they got when sharing the meal, and enter it here.",
+  "T.ex. A7K2M": "E.g. A7K2M",
+  "Hittade ingen måltid med den koden. Kolla att den stämmer, eller be din vän dela igen.": "Couldn't find a meal with that code. Double-check it, or ask your friend to share again.",
+  "Hämtar …": "Fetching …",
+  "Hämta måltid": "Get meal",
+  "Dela måltid": "Share meal",
+  "Skicka den här koden till din vän (t.ex. via SMS) — de kan hämta måltiden i sin egen app under": "Send this code to your friend (e.g. via text) — they can get the meal in their own app under",
+  "Koden lagras i ett delat utrymme som tekniskt sett går att nå av andra som använder samma app om de gissar koden — dela den bara med personer du litar på.":
+    "The code is stored in a shared space that could technically be reached by others using the same app if they guess the code — only share it with people you trust.",
+  "Klar": "Done",
+  "Kunde inte dela just nu. Försök igen om en stund.": "Couldn't share right now. Please try again shortly.",
+  "Dina mål": "Your goals",
+  "Kvinna": "Female",
+  "Man": "Male",
+  "Ålder": "Age",
+  "Vikt (kg)": "Weight (kg)",
+  "Längd (cm)": "Height (cm)",
+  "Aktivitetsnivå": "Activity level",
+  "Stillasittande": "Sedentary",
+  "Lite eller ingen träning": "Little or no exercise",
+  "Lätt aktiv": "Lightly active",
+  "Träning 1–3 ggr/vecka": "Exercise 1–3 times/week",
+  "Måttligt aktiv": "Moderately active",
+  "Träning 3–5 ggr/vecka": "Exercise 3–5 times/week",
+  "Mycket aktiv": "Very active",
+  "Träning 6–7 ggr/vecka": "Exercise 6–7 times/week",
+  "Gå ner i vikt": "Lose weight",
+  "Behålla vikt": "Maintain weight",
+  "Gå upp i vikt": "Gain weight",
+  "Beräknat dagsmål": "Calculated daily goal",
+  "Justera målen manuellt": "Adjust goals manually",
+  "Använd beräknat mål istället": "Use calculated goal instead",
+  "Spara mål": "Save goal",
+  "Fördelning per måltid": "Distribution per meal",
+  "Som standard delas ditt dagsmål upp automatiskt. Fått andra siffror av t.ex. en dietist? Ange dem här så används de istället.":
+    "By default your daily goal is split up automatically. Got different numbers from e.g. a dietitian? Enter them here to use those instead.",
+  "Spara fördelning": "Save distribution",
+  "Återställ till automatisk fördelning": "Reset to automatic distribution",
+  "Hämtar loggen …": "Loading the log …",
+  "Hämtar kalender …": "Loading calendar …",
+  "Bra jobbat! 🔥": "Nice work! 🔥",
+  "Du har bränt": "You've burned",
+  "kcal mer än vanligt idag. Det ger marginal för ett större mellanmål.": "kcal more than usual today. That leaves room for a bigger snack.",
+  "Visa förslag →": "Show suggestions →",
+  "Förslag på mellanmål": "Snack suggestions",
+  "Tillagt ✓": "Added ✓",
+  "Lägg till i mellanmål": "Add to snacks",
+  "Ta bort": "Remove",
+  "Stäng": "Close",
+  "Öppna meny": "Open menu",
+  "Stäng meny": "Close menu",
+  "Information om fliken": "Information about this tab",
+  "Okej": "Got it",
+  "NYTT": "NEW",
+  "Tryck här för att läsa mer": "Tap here to read more",
+  "Allt som är nytt i Calio Bite, senaste versionen överst.": "Everything new in Calio Bite, latest version first.",
+  "Tryck på ett ämne nedan för att öppna en steg-för-steg-guide för just den delen av appen.":
+    "Tap a topic below to open a step-by-step guide for that part of the app.",
+  "Villkor och ansvarsbegränsning för Calio Bite.": "Terms and disclaimer for Calio Bite.",
+  "Alla rättigheter förbehållna.": "All rights reserved.",
+  "Träning för": "Training for",
+  "Steg idag": "Steps today",
+  "Stegmål": "Step goal",
+  "Bränt idag": "Burned today",
+  "Lägg till träningspass": "Add exercise",
+  "Redigera träningspass": "Edit exercise",
+  "Typ av träning": "Type of exercise",
+  "Minuter": "Minutes",
+  "Kilometer": "Kilometres",
+  "Antal steg": "Number of steps",
+  "Beräknat kaloriförbrukning": "Estimated calories burned",
+  "Spara pass": "Save session",
+  "Inga träningspass loggade idag": "No exercise logged today",
+  "Fördelning per aktivitet": "Breakdown per activity",
+  "Du fastar": "You're fasting",
+  "Återstår": "Remaining",
+  "Starta fasta": "Start fast",
+  "Avsluta fastan": "End fast",
+  "Fastemetod": "Fasting method",
+  "Eget antal timmar": "Custom number of hours",
+  "timmar": "hours",
+  "Startade": "Started",
+  "Ändra starttid": "Change start time",
+  "Nu": "Now",
+  "Bläddra mellan veckor och tryck på en dag för att se detaljer": "Browse between weeks and tap a day to see details",
+  "Sammanfattning": "Summary",
+  "Ställ in dina mål under": "Set your goals under",
+  "för att se sammanfattningen": "to see the summary",
+  "kvar": "left",
+  "Specifikation & Makrovärden": "Breakdown & Macro values",
+  "Näringsämne": "Nutrient",
+  "Mängd / Energiandel": "Amount / Energy share",
+  "Muskelreparation & mättnad": "Muscle repair & satiety",
+  "Hjärnans & musklernas primära bränsle": "Primary fuel for brain & muscles",
+  "Hormonreglering & essentiella fettsyror": "Hormone regulation & essential fatty acids",
+  "Matsmältning & jämn blodsockerreglering": "Digestion & steady blood sugar",
+  "Kostfiber": "Dietary fiber",
+  "Logga din vikt för att se utvecklingen över tid": "Log your weight to see progress over time",
+  "Lägg in din längd under": "Enter your height under",
+  "och logga en vikt för att se ditt BMI": "and log a weight to see your BMI",
+  "Vikt (kg)v2": "Weight (kg)",
+  "Datum": "Date",
+  "Ingen vikt loggad än": "No weight logged yet",
+  "Undervikt": "Underweight",
+  "Hälsosam vikt": "Healthy weight",
+  "Övervikt": "Overweight",
+  "Fetma": "Obesity",
+  "Visa mer": "Show more",
+  "Visa mindre": "Show less",
+  "BMI-kategorier": "BMI categories",
+  "BMI räknas ut som vikt (kg) delat med längd (m) i kvadrat. Det är ett grovt mått och tar t.ex. inte hänsyn till muskelmassa.":
+    "BMI is calculated as weight (kg) divided by height (m) squared. It's a rough measure and doesn't account for e.g. muscle mass.",
+  "Fota insidan av ditt kylskåp eller skafferi": "Photograph the inside of your fridge or pantry",
+  "Vad kan du laga": "What can you cook",
+  "Identifierade ingredienser": "Identified ingredients",
+  "Läser av kylskåpet …": "Reading the fridge …",
+  "Kunde inte identifiera mat i bilden. Försök med bättre belysning.": "Couldn't identify food in the photo. Try better lighting.",
+  "Förslag": "Suggestions",
+  "Du låg": "You were",
+  "Summa": "Total",
+  "Dagsmål": "Daily goal",
+  "Uppskattad förbränning": "Estimated calories burned",
+  "Antal kilometer": "Number of kilometres",
+  "Så länge du är i den gröna zonen är allt bra — inga siffror att fixera vid idag.":
+    "As long as you're in the green zone, everything's fine — no numbers to fixate on today.",
+  "Inga träffar. Prova ett annat sökord, eller lägg till maträtten manuellt.":
+    "No results. Try a different search term, or add the meal manually.",
+  "Hittar du inte det du söker? Lägg till manuellt": "Can't find what you're looking for? Add manually",
+  "Namn på måltiden": "Name of the meal",
+  "📷 Lägg till bild (valfritt)": "📷 Add photo (optional)",
+  "Äter du för mycket en dag jämnas det ut med ett lite lägre mål resten av veckan":
+    "If you eat too much one day, it's evened out with a slightly lower goal for the rest of the week",
+  "Beräkning av BMI": "How BMI is calculated",
+  "dagligt mål": "daily goal",
+  "Träningspass": "Exercise session",
+  "Vad vill du ha förslag på?": "What would you like suggestions for?",
+  "så kan förslagen anpassas efter hur mycket du har kvar att äta.": "so suggestions can be tailored to how much you have left to eat.",
+  "📷 Fota kylskåp / skafferi": "📷 Photograph fridge / pantry",
+  "Analyserar innehållet …": "Analysing the contents …",
+  "Generell översikt över vad som händer i kroppen ju längre en fasta pågår": "General overview of what happens in the body the longer a fast continues",
+  "Välj fastemetod": "Choose fasting method",
+};
+
+function tr(text, language) {
+  if (language === "en") return EN_STRINGS[text] || text;
+  return text;
+}
+
+function aiLangInstruction(language) {
+  return language === "en"
+    ? " Respond in English (all text fields, names and descriptions should be in English)."
+    : " Svara på svenska.";
 }
 
 const TAB_INFO = {
@@ -1306,7 +1592,8 @@ export default function Portion() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system:
-            "Du är en assistent som tolkar en fritextbeskrivning av en måltid och delar upp den i separata livsmedel. Användaren kan nämna flera saker i en och samma mening, t.ex. \"Åt en skål havregrynsgröt med en banan och en skvätt lättmjölk\". Identifiera varje separat livsmedel som nämns, uppskatta en rimlig portionsstorlek utifrån beskrivningen (t.ex. \"en skål\", \"en banan\", \"en skvätt\") och ange näringsvärden, klimatavtryck och kostnad för just den portionen. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{\"name\": string (livsmedelsnamn på svenska, inkl. uppskattad mängd, t.ex. \"Havregrynsgröt (1 skål)\"), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen)}]. Om texten inte verkar beskriva någon mat, svara med en tom array [].",
+            "Du är en assistent som tolkar en fritextbeskrivning av en måltid och delar upp den i separata livsmedel. Användaren kan nämna flera saker i en och samma mening, t.ex. \"Åt en skål havregrynsgröt med en banan och en skvätt lättmjölk\". Identifiera varje separat livsmedel som nämns, uppskatta en rimlig portionsstorlek utifrån beskrivningen (t.ex. \"en skål\", \"en banan\", \"en skvätt\") och ange näringsvärden, klimatavtryck och kostnad för just den portionen. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{\"name\": string (livsmedelsnamn, inkl. uppskattad mängd, t.ex. \"Havregrynsgröt (1 skål)\"), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen)}]. Om texten inte verkar beskriva någon mat, svara med en tom array []." +
+            aiLangInstruction(language),
           text,
           image: null,
         }),
@@ -1534,7 +1821,8 @@ export default function Portion() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system:
-            "Du är en assistent som uppskattar näringsinnehåll, klimatavtryck och kostnad för mat från bilder. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledning. Använd exakt denna form: {\"name\": string (kort maträttsnamn på svenska), \"portion_note\": string (kort kommentar om uppskattad portionsstorlek, på svenska), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen, baserat på ingredienserna), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen, baserat på ungefärliga svenska matvarupriser), \"confidence\": string (en av 'låg', 'medel', 'hög')}. Om bilden inte visar mat, svara med {\"error\": \"no_food_detected\"}.",
+            "Du är en assistent som uppskattar näringsinnehåll, klimatavtryck och kostnad för mat från bilder. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledning. Använd exakt denna form: {\"name\": string (kort maträttsnamn), \"portion_note\": string (kort kommentar om uppskattad portionsstorlek), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen, baserat på ingredienserna), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen, baserat på ungefärliga svenska matvarupriser), \"confidence\": string (en av 'låg', 'medel', 'hög')}. Om bilden inte visar mat, svara med {\"error\": \"no_food_detected\"}." +
+            aiLangInstruction(language),
           text: "Analysera den här maträtten.",
           image: base64Data,
           mimeType: "image/jpeg",
@@ -1737,7 +2025,8 @@ export default function Portion() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system:
-            `Du är en assistent som hjälper användare att komma på måltidsförslag utifrån vad de har hemma i kylskåp eller skafferi. Titta på bilden och identifiera synliga råvaror. Föreslå sedan 2-3 olika förslag på "${mealLabel}" som huvudsakligen använder dessa råvaror. ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"ingredients": [string, ...], "suggestions": [{"name": string, "description": string (kort, en till två meningar, på svenska), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]}. Om bilden inte visar mat, ett kylskåp eller ett skafferi, svara med {"error": "no_food_detected"}.`,
+            `Du är en assistent som hjälper användare att komma på måltidsförslag utifrån vad de har hemma i kylskåp eller skafferi. Titta på bilden och identifiera synliga råvaror. Föreslå sedan 2-3 olika förslag på "${mealLabel}" som huvudsakligen använder dessa råvaror. ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"ingredients": [string, ...], "suggestions": [{"name": string, "description": string (kort, en till två meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]}. Om bilden inte visar mat, ett kylskåp eller ett skafferi, svara med {"error": "no_food_detected"}.` +
+            aiLangInstruction(language),
           text: `Vad kan jag laga till ${mealLabel.toLowerCase()} med det som syns här?`,
           image: base64Data,
           mimeType: "image/jpeg",
@@ -1801,7 +2090,8 @@ export default function Portion() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system:
-            `Du är en assistent som föreslår mellanmål. Föreslå 3 olika, varierade mellanmål på svenska som ligger nära ${targetKcal} kcal styck. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{"name": string, "description": string (kort, en mening), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]`,
+            `Du är en assistent som föreslår mellanmål. Föreslå 3 olika, varierade mellanmål som ligger nära ${targetKcal} kcal styck. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{"name": string, "description": string (kort, en mening), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]` +
+            aiLangInstruction(language),
           text: `Ge mig 3 mellanmålsförslag på ca ${targetKcal} kcal.`,
           image: null,
         }),
@@ -1880,7 +2170,8 @@ export default function Portion() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system:
-            `Du är en assistent som skapar recept. ${ingredientLine} ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn på svenska), "ingredients": [string, ...] (varje ingrediens med ungefärlig mängd), "instructions": [string, ...] (steg för steg, korta meningar på svenska), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Värdena för näring ska gälla hela portionen/receptet.`,
+            `Du är en assistent som skapar recept. ${ingredientLine} ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn), "ingredients": [string, ...] (varje ingrediens med ungefärlig mängd), "instructions": [string, ...] (steg för steg, korta meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Värdena för näring ska gälla hela portionen/receptet.` +
+            aiLangInstruction(language),
           text: "Skapa ett recept åt mig.",
           image: null,
         }),
@@ -1954,7 +2245,7 @@ export default function Portion() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMenuOpen(true)}
-              aria-label="Öppna meny"
+              aria-label={tr("Öppna meny", language)}
               className="w-8 h-8 flex items-center justify-center flex-shrink-0"
             >
               <svg width="20" height="16" viewBox="0 0 20 16" fill="none">
@@ -2010,7 +2301,7 @@ export default function Portion() {
         {/* Current tab label with info icon */}
         <div className="px-5 mb-5 flex items-center justify-between">
           <h1 className="text-lg font-extrabold">{getTabLabel(activeTab, language)}</h1>
-          <button onClick={() => setInfoOpen(true)} aria-label="Information om fliken" className="flex-shrink-0">
+          <button onClick={() => setInfoOpen(true)} aria-label={tr("Information om fliken", language)} className="flex-shrink-0">
             <InfoIcon />
           </button>
         </div>
@@ -2037,9 +2328,7 @@ export default function Portion() {
                 onClick={() => setInfoOpen(false)}
                 className="w-full rounded-full py-2.5 text-xs font-bold"
                 style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-              >
-                Okej
-              </button>
+              >{tr("Okej", language)}</button>
             </div>
           </div>
         )}
@@ -2057,7 +2346,7 @@ export default function Portion() {
             >
               <div className="px-5 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${colors.hairline}` }}>
                 <img src="/logo.png" alt="Calio Bite" className="h-7 w-auto" style={{ objectFit: "contain" }} />
-                <button onClick={() => setMenuOpen(false)} aria-label="Stäng meny" style={{ color: "#FFFFFF", fontSize: 20 }}>
+                <button onClick={() => setMenuOpen(false)} aria-label={tr("Stäng meny", language)} style={{ color: "#FFFFFF", fontSize: 20 }}>
                   ×
                 </button>
               </div>
@@ -2177,12 +2466,12 @@ export default function Portion() {
             <div className="rounded-xl px-4 py-3.5" style={{ backgroundColor: colors.primaryLight }}>
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm" style={{ color: colors.text }}>
-                  <span className="font-bold">Bra jobbat! 🔥</span> Du har bränt {reactiveBurn.surplus} kcal mer än vanligt
+                  <span className="font-bold">{tr("Bra jobbat! 🔥", language)}</span> Du har bränt {reactiveBurn.surplus} kcal mer än vanligt
                   idag. Det ger marginal för ett större mellanmål.
                 </p>
                 <button
                   onClick={() => setReactiveDismissed(true)}
-                  aria-label="Stäng"
+                  aria-label={tr("Stäng", language)}
                   className="flex-shrink-0 text-sm"
                   style={{ color: colors.textDim }}
                 >
@@ -2193,9 +2482,7 @@ export default function Portion() {
                 onClick={loadReactiveSuggestions}
                 className="text-xs font-bold mt-2"
                 style={{ color: colors.primary }}
-              >
-                Visa förslag →
-              </button>
+              >{tr("Visa förslag →", language)}</button>
             </div>
           </div>
         )}
@@ -2204,14 +2491,12 @@ export default function Portion() {
         {!dayLoading && !profileLoading && (
           <div className="px-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-extrabold">Dagens mål</h2>
+              <h2 className="text-lg font-extrabold">{tr("Dagens mål", language)}</h2>
               <div className="flex items-center gap-3">
                 <button onClick={toggleVisualMode} className="text-xs font-semibold" style={{ color: colors.primary }}>
                   {visualMode ? "🔢 Visa siffror" : "🌿 Sifferfritt läge"}
                 </button>
-                <button onClick={openProfile} className="text-xs font-semibold" style={{ color: colors.primary }}>
-                  ✎ Redigera
-                </button>
+                <button onClick={openProfile} className="text-xs font-semibold" style={{ color: colors.primary }}>{tr("✎ Redigera", language)}</button>
               </div>
             </div>
 
@@ -2220,16 +2505,12 @@ export default function Portion() {
                 className="rounded-2xl px-4 py-6 text-center"
                 style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
               >
-                <p className="text-sm mb-3" style={{ color: colors.textDim }}>
-                  Lägg in vikt och längd för att räkna ut ditt dagliga kalorimål
-                </p>
+                <p className="text-sm mb-3" style={{ color: colors.textDim }}>{tr("Lägg in vikt och längd för att räkna ut ditt dagliga kalorimål", language)}</p>
                 <button
                   onClick={openProfile}
                   className="rounded-full px-5 py-2.5 text-sm font-bold"
                   style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                >
-                  Ställ in mål
-                </button>
+                >{tr("Ställ in mål", language)}</button>
               </div>
             ) : (
               <div
@@ -2251,7 +2532,7 @@ export default function Portion() {
                       {zoneText}
                     </p>
                     <p className="text-xs text-center mt-1" style={{ color: colors.textDim }}>
-                      Så länge du är i den gröna zonen är allt bra — inga siffror att fixera vid idag.
+                      {tr("Så länge du är i den gröna zonen är allt bra — inga siffror att fixera vid idag.", language)}
                     </p>
                   </>
                 ) : (
@@ -2262,9 +2543,7 @@ export default function Portion() {
                         <span className="text-[10px] font-medium" style={{ color: colors.textDim }}>
                           kcal
                         </span>
-                        <span className="text-[10px] mt-1" style={{ color: colors.textDim }}>
-                          Konsumerat
-                        </span>
+                        <span className="text-[10px] mt-1" style={{ color: colors.textDim }}>{tr("Konsumerat", language)}</span>
                       </div>
 
                       <SemiGauge
@@ -2277,7 +2556,7 @@ export default function Portion() {
                         <div className="flex flex-col items-center">
                           <span className="text-2xl font-extrabold leading-tight">{Math.max(0, remaining)}</span>
                           <span className="text-[10px] font-medium" style={{ color: colors.textDim }}>
-                            {consumed.kcal > goals.kcalGoal ? "kcal över" : "kcal kvar"}
+                            {consumed.kcal > goals.kcalGoal ? tr("kcal över", language) : tr("kcal kvar", language)}
                           </span>
                         </div>
                       </SemiGauge>
@@ -2287,19 +2566,17 @@ export default function Portion() {
                         <span className="text-[10px] font-medium" style={{ color: colors.textDim }}>
                           kcal
                         </span>
-                        <span className="text-[10px] mt-1" style={{ color: colors.textDim }}>
-                          Bränt
-                        </span>
+                        <span className="text-[10px] mt-1" style={{ color: colors.textDim }}>{tr("Bränt", language)}</span>
                       </div>
                     </div>
                     <p className="text-xs text-center -mt-1 mb-1" style={{ color: colors.textDim }}>
                       {weeklyCalc && weeklyCalc.adjustedGoal !== goals.kcalGoal ? (
                         <>
-                          Mål idag {effectiveKcalGoal} kcal{" "}
+                          {tr("Mål idag", language)} {effectiveKcalGoal} kcal{" "}
                           <span style={{ textDecoration: "line-through", opacity: 0.6 }}>{goals.kcalGoal}</span>
                         </>
                       ) : (
-                        <>Mål {goals.kcalGoal} kcal</>
+                        <>{tr("Mål", language)} {goals.kcalGoal} kcal</>
                       )}
                     </p>
 
@@ -2308,22 +2585,23 @@ export default function Portion() {
                         <p className="text-xs" style={{ color: colors.textDim }}>
                           {weeklyCalc.pastSurplus > 0 ? (
                             <>
-                              Du låg <span className="font-bold" style={{ color: colors.text }}>{weeklyCalc.pastSurplus} kcal</span>{" "}
-                              över tidigare i veckan. Vi jämnar ut det med ett något lägre mål de {weeklyCalc.remainingDaysCount} dagar
-                              som är kvar.
+                              {tr("Du låg", language)} <span className="font-bold" style={{ color: colors.text }}>{weeklyCalc.pastSurplus} kcal</span>{" "}
+                              {language === "en"
+                                ? `over earlier this week. We're evening it out with a slightly lower goal for the ${weeklyCalc.remainingDaysCount} days left.`
+                                : <>över tidigare i veckan. Vi jämnar ut det med ett något lägre mål de {weeklyCalc.remainingDaysCount} dagar som är kvar.</>}
                             </>
                           ) : (
                             <>
-                              Du låg{" "}
+                              {tr("Du låg", language)}{" "}
                               <span className="font-bold" style={{ color: colors.text }}>
                                 {Math.abs(weeklyCalc.pastSurplus)} kcal
                               </span>{" "}
-                              under tidigare i veckan. Du har lite extra utrymme idag utan att tappa veckomålet.
+                              {language === "en"
+                                ? "under earlier this week. You have a little extra room today without losing the weekly goal."
+                                : "under tidigare i veckan. Du har lite extra utrymme idag utan att tappa veckomålet."}
                             </>
                           )}{" "}
-                          <button onClick={toggleFlexibleBudget} className="font-semibold underline" style={{ color: colors.primary }}>
-                            Stäng av
-                          </button>
+                          <button onClick={toggleFlexibleBudget} className="font-semibold underline" style={{ color: colors.primary }}>{tr("Stäng av", language)}</button>
                         </p>
                       </div>
                     )}
@@ -2331,9 +2609,9 @@ export default function Portion() {
                 )}
 
                 <div className="mt-5 flex flex-col gap-3.5">
-                  <MacroBar label="Kolhydrater" color={MACRO_BAR_COLORS.carbs} value={consumed.carbs} goal={goals.carbsGoal} hideNumbers={visualMode} />
+                  <MacroBar label={tr("Kolhydrater", language)} color={MACRO_BAR_COLORS.carbs} value={consumed.carbs} goal={goals.carbsGoal} hideNumbers={visualMode} />
                   <MacroBar label="Protein" color={MACRO_BAR_COLORS.protein} value={consumed.protein} goal={goals.proteinGoal} hideNumbers={visualMode} />
-                  <MacroBar label="Fett" color={MACRO_BAR_COLORS.fat} value={consumed.fat} goal={goals.fatGoal} hideNumbers={visualMode} />
+                  <MacroBar label={tr("Fett", language)} color={MACRO_BAR_COLORS.fat} value={consumed.fat} goal={goals.fatGoal} hideNumbers={visualMode} />
                   <MacroBar label="Fiber" color={MACRO_BAR_COLORS.fiber} value={consumed.fiber} goal={goals.fiberGoal} hideNumbers={visualMode} />
                 </div>
 
@@ -2347,18 +2625,14 @@ export default function Portion() {
                         <span style={{ fontSize: 16 }}>🌍</span>
                         <span className="text-lg font-extrabold">{Math.round(consumed.co2 * 100) / 100}</span>
                       </div>
-                      <span className="text-[10px] mt-0.5" style={{ color: colors.textDim }}>
-                        kg CO2e idag
-                      </span>
+                      <span className="text-[10px] mt-0.5" style={{ color: colors.textDim }}>{tr("kg CO2e idag", language)}</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <div className="flex items-center gap-1.5">
                         <span style={{ fontSize: 16 }}>💰</span>
                         <span className="text-lg font-extrabold">{Math.round(consumed.cost)}</span>
                       </div>
-                      <span className="text-[10px] mt-0.5" style={{ color: colors.textDim }}>
-                        kr på mat idag
-                      </span>
+                      <span className="text-[10px] mt-0.5" style={{ color: colors.textDim }}>{tr("kr på mat idag", language)}</span>
                     </div>
                   </div>
                 )}
@@ -2377,7 +2651,7 @@ export default function Portion() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-baseline gap-2">
                   <span style={{ color: colors.water }}>●</span>
-                  <h3 className="text-sm font-bold">Vatten</h3>
+                  <h3 className="text-sm font-bold">{tr("Vatten", language)}</h3>
                 </div>
 
                 {editingGoal ? (
@@ -2390,9 +2664,7 @@ export default function Portion() {
                       className="w-16 rounded-lg px-2 py-1 text-xs text-right"
                       style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
                     />
-                    <span className="text-xs" style={{ color: colors.textDim }}>
-                      ml
-                    </span>
+                    <span className="text-xs" style={{ color: colors.textDim }}>{tr("ml", language)}</span>
                     <button onClick={saveWaterGoal} className="text-xs font-bold" style={{ color: colors.primary }}>
                       Spara
                     </button>
@@ -2432,7 +2704,7 @@ export default function Portion() {
                 {waterEntries.length > 0 && (
                   <button
                     onClick={undoLastWater}
-                    aria-label="Ångra senaste"
+                    aria-label={tr("Ångra senaste", language)}
                     className="w-9 h-9 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
                     style={{ border: `1px solid ${colors.hairline}`, color: colors.textDim }}
                   >
@@ -2461,30 +2733,21 @@ export default function Portion() {
               <div className="relative px-5 py-5">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span style={{ fontSize: 16 }}>✨</span>
-                  <span className="text-xs font-bold uppercase tracking-wide" style={{ color: colors.primary, letterSpacing: "0.06em" }}>
-                    Recept
-                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wide" style={{ color: colors.primary, letterSpacing: "0.06em" }}>{tr("Recept", language)}</span>
                 </div>
-                <p className="text-sm font-bold mb-1">Skapa eller spara ett recept</p>
-                <p className="text-xs mb-4" style={{ color: colors.textDim }}>
-                  Låt AI:n komma på ett recept utifrån vad du har eller vill äta, eller spara ditt eget favoritrecept för
-                  att snabbt logga det igen senare.
-                </p>
+                <p className="text-sm font-bold mb-1">{tr("Skapa eller spara ett recept", language)}</p>
+                <p className="text-xs mb-4" style={{ color: colors.textDim }}>{tr("Låt AI:n komma på ett recept utifrån vad du har eller vill äta, eller spara ditt eget favoritrecept för att snabbt logga det igen senare.", language)}</p>
                 <div className="flex gap-2.5">
                   <button
                     onClick={openRecipeAI}
                     className="flex-1 rounded-xl py-3 text-xs font-bold"
                     style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                  >
-                    🤖 Skapa med AI
-                  </button>
+                  >{tr("🤖 Skapa med AI", language)}</button>
                   <button
                     onClick={openRecipeManual}
                     className="flex-1 rounded-xl py-3 text-xs font-bold"
                     style={{ border: `1px solid ${colors.primary}66`, color: colors.primary }}
-                  >
-                    ✏️ Eget recept
-                  </button>
+                  >{tr("✏️ Eget recept", language)}</button>
                 </div>
               </div>
             </div>
@@ -2495,10 +2758,8 @@ export default function Portion() {
         <div className="px-5 mt-2">
           {!dayLoading && goals && (
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-lg font-extrabold">Måltider</h2>
-              <button onClick={openCategorySplit} className="text-xs font-semibold" style={{ color: colors.primary }}>
-                Ändra fördelning
-              </button>
+              <h2 className="text-lg font-extrabold">{tr("Måltider", language)}</h2>
+              <button onClick={openCategorySplit} className="text-xs font-semibold" style={{ color: colors.primary }}>{tr("Ändra fördelning", language)}</button>
             </div>
           )}
           {dayLoading ? (
@@ -2507,9 +2768,7 @@ export default function Portion() {
                 className="w-8 h-8 rounded-full animate-spin"
                 style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
               />
-              <p className="text-sm" style={{ color: colors.textDim }}>
-                Hämtar loggen …
-              </p>
+              <p className="text-sm" style={{ color: colors.textDim }}>{tr("Hämtar loggen …", language)}</p>
             </div>
           ) : (
             CATEGORIES.map((cat) => {
@@ -2522,7 +2781,7 @@ export default function Portion() {
                 <div key={cat.key} className="mt-6">
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-baseline gap-2">
-                      <h3 className="text-sm font-bold">{cat.label}</h3>
+                      <h3 className="text-sm font-bold">{tr(cat.label, language)}</h3>
                       {!visualMode &&
                         (categoryBudget ? (
                           <span
@@ -2541,7 +2800,7 @@ export default function Portion() {
                     </div>
                     <button
                       onClick={() => openCategory(cat.key)}
-                      aria-label={`Lägg till i ${cat.label}`}
+                      aria-label={`${tr("Lägg till i", language)} ${tr(cat.label, language)}`}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold"
                       style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
                     >
@@ -2566,9 +2825,7 @@ export default function Portion() {
                     <div
                       className="rounded-2xl py-4 text-center text-sm"
                       style={{ backgroundColor: colors.surface, color: colors.textDim, border: `1px solid ${colors.hairline}` }}
-                    >
-                      Inget tillagt än
-                    </div>
+                    >{tr("Inget tillagt än", language)}</div>
                   ) : (
                     <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${colors.hairline}` }}>
                       {items.map((item, i) => (
@@ -2613,7 +2870,7 @@ export default function Portion() {
                             </div>
                             {!visualMode && (
                               <p className="text-[11px]" style={{ color: colors.textDim }}>
-                                P {item.protein}g · K {item.carbs}g · F {item.fat}g · Fi {item.fiber || 0}g
+                                P {item.protein}g · {language === "en" ? "C" : "K"} {item.carbs}g · F {item.fat}g · Fi {item.fiber || 0}g
                               </p>
                             )}
                             {!visualMode && (item.co2 > 0 || item.cost > 0) && (
@@ -2630,7 +2887,7 @@ export default function Portion() {
                               shareMeal(item);
                             }}
                             role="button"
-                            aria-label="Dela måltid"
+                            aria-label={tr("Dela måltid", language)}
                             className="flex-shrink-0 text-sm px-1 self-start"
                             style={{ color: colors.textDim }}
                           >
@@ -2642,7 +2899,7 @@ export default function Portion() {
                               deleteEntry(cat.key, item.id);
                             }}
                             role="button"
-                            aria-label="Ta bort"
+                            aria-label={tr("Ta bort", language)}
                             className="flex-shrink-0 text-sm px-1 self-start"
                             style={{ color: colors.textDim }}
                           >
@@ -2670,6 +2927,7 @@ export default function Portion() {
             selectedDay={trendsSelectedDay}
             onSelectDay={setTrendsSelectedDay}
             todayKey={todayKey}
+            language={language}
           />
         )}
 
@@ -2683,14 +2941,15 @@ export default function Portion() {
             onDelete={deleteWeightEntry}
             todayKey={todayKey}
             profile={profile}
+            language={language}
           />
         )}
 
-        {activeTab === "news" && <NewsPanel />}
+        {activeTab === "news" && <NewsPanel language={language} />}
 
-        {activeTab === "help" && <HelpPanel openTopic={helpOpenTopic} onToggleTopic={setHelpOpenTopic} />}
+        {activeTab === "help" && <HelpPanel openTopic={helpOpenTopic} onToggleTopic={setHelpOpenTopic} language={language} />}
 
-        {activeTab === "legal" && <LegalPanel />}
+        {activeTab === "legal" && <LegalPanel language={language} />}
 
         {activeTab === "scanner" && (
           <ScannerPanel
@@ -2702,6 +2961,7 @@ export default function Portion() {
             onAddSuggestion={addScannerSuggestion}
             goals={goals}
             consumed={consumed}
+            language={language}
           />
         )}
 
@@ -2722,6 +2982,7 @@ export default function Portion() {
             onEdit={openEditExercise}
             stepGoal={stepGoal}
             onSaveStepGoal={saveStepGoal}
+            language={language}
           />
         )}
 
@@ -2745,6 +3006,7 @@ export default function Portion() {
             customHours={customFastHours}
             onCustomHoursChange={setCustomFastHours}
             onApplyCustomHours={() => applyCustomFastHours(customFastHours)}
+            language={language}
           />
         )}
       </div>
@@ -2770,7 +3032,7 @@ export default function Portion() {
                   {dateLabel(selectedDate)}
                 </span>
               </h3>
-              <button onClick={closeFlow} className="text-lg" style={{ color: colors.textDim }} aria-label="Stäng">
+              <button onClick={closeFlow} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
               </button>
             </div>
@@ -2781,57 +3043,43 @@ export default function Portion() {
                   onClick={triggerCamera}
                   className="w-full rounded-xl py-4 text-sm font-bold"
                   style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                >
-                  Fota maträtt
-                </button>
+                >{tr("Fota maträtt", language)}</button>
                 <button
                   onClick={openSearch}
                   className="w-full rounded-xl py-4 text-sm font-medium"
                   style={{ border: `1px solid ${colors.hairline}`, color: colors.text }}
-                >
-                  🔍 Sök livsmedel
-                </button>
+                >{tr("🔍 Sök livsmedel", language)}</button>
                 <button
                   onClick={openVoiceEntry}
                   className="w-full rounded-xl py-4 text-sm font-medium"
                   style={{ border: `1px solid ${colors.hairline}`, color: colors.text }}
-                >
-                  🎙️ Beskriv med ord
-                </button>
+                >{tr("🎙️ Beskriv med ord", language)}</button>
                 <button
                   onClick={openReceiveMeal}
                   className="w-full rounded-xl py-4 text-sm font-medium"
                   style={{ border: `1px solid ${colors.hairline}`, color: colors.text }}
-                >
-                  🤝 Hämta delad måltid
-                </button>
+                >{tr("🤝 Hämta delad måltid", language)}</button>
                 <button
                   onClick={openManual}
                   className="w-full rounded-xl py-4 text-sm font-medium"
                   style={{ border: `1px solid ${colors.hairline}`, color: colors.text }}
-                >
-                  Lägg till manuellt
-                </button>
+                >{tr("Lägg till manuellt", language)}</button>
               </div>
             )}
 
             {flow.step === "receive" && (
               <div className="pb-6">
-                <p className="text-xs mb-4" style={{ color: colors.textDim }}>
-                  Be din vän om koden de fick när de delade måltiden, och skriv in den här.
-                </p>
+                <p className="text-xs mb-4" style={{ color: colors.textDim }}>{tr("Be din vän om koden de fick när de delade måltiden, och skriv in den här.", language)}</p>
                 <input
                   autoFocus
                   value={flow.receiveCode}
                   onChange={(e) => updateReceiveCode(e.target.value)}
-                  placeholder="T.ex. A7K2M"
+                  placeholder={tr("T.ex. A7K2M", language)}
                   className="w-full rounded-lg px-3 py-3 text-center text-lg font-bold tracking-widest mb-3"
                   style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
                 />
                 {flow.receiveError && (
-                  <p className="text-xs mb-3" style={{ color: colors.coral }}>
-                    Hittade ingen måltid med den koden. Kolla att den stämmer, eller be din vän dela igen.
-                  </p>
+                  <p className="text-xs mb-3" style={{ color: colors.coral }}>{tr("Hittade ingen måltid med den koden. Kolla att den stämmer, eller be din vän dela igen.", language)}</p>
                 )}
                 <button
                   onClick={fetchSharedMeal}
@@ -2850,10 +3098,7 @@ export default function Portion() {
 
             {flow.step === "voice" && (
               <div className="pb-6">
-                <p className="text-xs mb-3" style={{ color: colors.textDim }}>
-                  Beskriv vad du åt med egna ord — tryck gärna på mikrofonen i din tangentbord för att diktera istället för att
-                  skriva.
-                </p>
+                <p className="text-xs mb-3" style={{ color: colors.textDim }}>{tr("Beskriv vad du åt med egna ord — tryck gärna på mikrofonen i din tangentbord för att diktera istället för att skriva.", language)}</p>
                 <textarea
                   autoFocus
                   value={flow.voiceText}
@@ -2881,20 +3126,14 @@ export default function Portion() {
             {flow.step === "voice-results" && (
               <div className="pb-6">
                 {flow.voiceError && (
-                  <p className="text-sm mb-4" style={{ color: colors.textDim }}>
-                    Något gick fel vid tolkningen. Försök igen, eller lägg till manuellt.
-                  </p>
+                  <p className="text-sm mb-4" style={{ color: colors.textDim }}>{tr("Något gick fel vid tolkningen. Försök igen, eller lägg till manuellt.", language)}</p>
                 )}
                 {!flow.voiceError && flow.voiceItems && flow.voiceItems.length === 0 && (
-                  <p className="text-sm mb-4" style={{ color: colors.textDim }}>
-                    Kunde inte tolka någon mat ur texten. Försök beskriva det lite tydligare.
-                  </p>
+                  <p className="text-sm mb-4" style={{ color: colors.textDim }}>{tr("Kunde inte tolka någon mat ur texten. Försök beskriva det lite tydligare.", language)}</p>
                 )}
                 {flow.voiceItems && flow.voiceItems.length > 0 && (
                   <>
-                    <p className="text-xs font-bold mb-3" style={{ color: colors.textDim }}>
-                      Vi tolkade det här — ta bort något som blev fel innan du lägger till
-                    </p>
+                    <p className="text-xs font-bold mb-3" style={{ color: colors.textDim }}>{tr("Vi tolkade det här — ta bort något som blev fel innan du lägger till", language)}</p>
                     <div className="flex flex-col gap-2 mb-5">
                       {flow.voiceItems.map((it) => (
                         <div
@@ -2905,12 +3144,12 @@ export default function Portion() {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{it.name}</p>
                             <p className="text-xs" style={{ color: colors.textDim }}>
-                              {it.kcal} kcal · P {it.protein}g · K {it.carbs}g · F {it.fat}g
+                              {it.kcal} kcal · P {it.protein}g · {language === "en" ? "C" : "K"} {it.carbs}g · F {it.fat}g
                             </p>
                           </div>
                           <button
                             onClick={() => removeVoiceItem(it.tempId)}
-                            aria-label="Ta bort"
+                            aria-label={tr("Ta bort", language)}
                             className="flex-shrink-0 text-sm px-1"
                             style={{ color: colors.textDim }}
                           >
@@ -2932,11 +3171,9 @@ export default function Portion() {
                       opacity: !flow.voiceItems || flow.voiceItems.length === 0 ? 0.5 : 1,
                     }}
                   >
-                    Lägg till {flow.voiceItems ? flow.voiceItems.length : 0} livsmedel
+                    {tr("Lägg till", language)} {flow.voiceItems ? flow.voiceItems.length : 0} {tr("livsmedel", language)}
                   </button>
-                  <button onClick={openVoiceEntry} className="text-xs font-semibold" style={{ color: colors.primary }}>
-                    Försök igen
-                  </button>
+                  <button onClick={openVoiceEntry} className="text-xs font-semibold" style={{ color: colors.primary }}>{tr("Försök igen", language)}</button>
                 </div>
               </div>
             )}
@@ -2957,14 +3194,12 @@ export default function Portion() {
                     onClick={runSearch}
                     className="rounded-lg px-4 py-2.5 text-sm font-bold flex-shrink-0"
                     style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                  >
-                    Sök
-                  </button>
+                  >{tr("Sök", language)}</button>
                 </div>
 
                 {flow.selectedProducts && flow.selectedProducts.length > 0 && (
                   <p className="text-xs mb-3" style={{ color: colors.textDim }}>
-                    {flow.selectedProducts.length} valda — sök gärna på fler rätter att lägga till i samma måltid
+                    {flow.selectedProducts.length} {tr("valda — sök gärna på fler rätter att lägga till i samma måltid", language)}
                   </p>
                 )}
 
@@ -2993,7 +3228,7 @@ export default function Portion() {
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{f.name}</p>
                               <p className="text-xs" style={{ color: colors.textDim }}>
-                                {f.kcal} kcal · P {f.protein}g · K {f.carbs}g · F {f.fat}g
+                                {f.kcal} kcal · P {f.protein}g · {language === "en" ? "C" : "K"} {f.carbs}g · F {f.fat}g
                               </p>
                             </div>
                             <span className="text-lg font-bold flex-shrink-0" style={{ color: colors.primary }}>
@@ -3002,9 +3237,7 @@ export default function Portion() {
                           </button>
                         ))}
                       </div>
-                      <p className="text-xs font-bold mt-4 mb-2" style={{ color: colors.textDim }}>
-                        Eller sök på nätet
-                      </p>
+                      <p className="text-xs font-bold mt-4 mb-2" style={{ color: colors.textDim }}>{tr("Eller sök på nätet", language)}</p>
                     </div>
                   );
                 })()}
@@ -3020,7 +3253,7 @@ export default function Portion() {
 
                 {!flow.searchLoading && flow.searchResults && flow.searchResults.length === 0 && (
                   <p className="text-sm text-center py-6" style={{ color: colors.textDim }}>
-                    Inga träffar. Prova ett annat sökord, eller lägg till maträtten manuellt.
+                    {tr("Inga träffar. Prova ett annat sökord, eller lägg till maträtten manuellt.", language)}
                   </p>
                 )}
 
@@ -3068,7 +3301,7 @@ export default function Portion() {
                 )}
 
                 <button onClick={openManual} className="text-xs font-semibold mt-3 mb-2 block" style={{ color: colors.primary }}>
-                  Hittar du inte det du söker? Lägg till manuellt
+                  {tr("Hittar du inte det du söker? Lägg till manuellt", language)}
                 </button>
 
                 {flow.selectedProducts && flow.selectedProducts.length > 0 && (
@@ -3086,7 +3319,7 @@ export default function Portion() {
             {flow.step === "search-confirm" && flow.selectedProducts && (
               <div className="pb-6">
                 <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                  Namn på måltiden
+                  {tr("Namn på måltiden", language)}
                 </label>
                 <input
                   value={flow.comboName}
@@ -3120,7 +3353,7 @@ export default function Portion() {
                       </span>
                       <button
                         onClick={() => removeSearchSelection(i)}
-                        aria-label="Ta bort"
+                        aria-label={tr("Ta bort", language)}
                         className="flex-shrink-0 text-sm px-1"
                         style={{ color: colors.textDim }}
                       >
@@ -3161,6 +3394,7 @@ export default function Portion() {
                   )}
                   weightKg={Number(profile?.weightKg) || DEFAULT_BODYWEIGHT_KG}
                   onAddStepGoal={addStepsToGoal}
+                  language={language}
                 />
 
                 <button
@@ -3180,7 +3414,7 @@ export default function Portion() {
                   className="w-10 h-10 rounded-full animate-spin"
                   style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
                 />
-                <p className="text-sm font-medium">Läser av maträtten …</p>
+                <p className="text-sm font-medium">{tr("Läser av maträtten …", language)}</p>
               </div>
             )}
 
@@ -3194,16 +3428,12 @@ export default function Portion() {
                     onClick={triggerCamera}
                     className="w-full rounded-xl py-3.5 text-sm font-bold"
                     style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                  >
-                    Försök fota igen
-                  </button>
+                  >{tr("Försök fota igen", language)}</button>
                   <button
                     onClick={openManual}
                     className="w-full rounded-xl py-3.5 text-sm font-medium"
                     style={{ border: `1px solid ${colors.hairline}`, color: colors.text }}
-                  >
-                    Lägg till manuellt
-                  </button>
+                  >{tr("Lägg till manuellt", language)}</button>
                 </div>
               </div>
             )}
@@ -3227,7 +3457,7 @@ export default function Portion() {
                     className="w-full rounded-xl py-3 text-sm font-medium mb-4 flex items-center justify-center gap-2"
                     style={{ border: `1px dashed ${colors.hairline}`, color: colors.textDim }}
                   >
-                    📷 Lägg till bild (valfritt)
+                    {tr("📷 Lägg till bild (valfritt)", language)}
                   </button>
                 )}
                 {flow.draft.portion_note && (
@@ -3236,20 +3466,16 @@ export default function Portion() {
                   </p>
                 )}
 
-                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                  Maträtt
-                </label>
+                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Maträtt", language)}</label>
                 <input
                   value={flow.draft.name}
                   onChange={(e) => updateDraft("name", e.target.value)}
-                  placeholder="T.ex. Kycklingsallad"
+                  placeholder={tr("T.ex. Kycklingsallad", language)}
                   className="w-full rounded-lg px-3 py-2.5 text-sm mb-3"
                   style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
                 />
 
-                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                  Kalorier (kcal)
-                </label>
+                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Kalorier (kcal)", language)}</label>
                 <input
                   value={flow.draft.kcal}
                   onChange={(e) => updateDraft("kcal", e.target.value.replace(/[^0-9]/g, ""))}
@@ -3263,17 +3489,18 @@ export default function Portion() {
                   kcal={Number(flow.draft.kcal) || 0}
                   weightKg={Number(profile?.weightKg) || DEFAULT_BODYWEIGHT_KG}
                   onAddStepGoal={addStepsToGoal}
+                  language={language}
                 />
 
                 <div className="grid grid-cols-2 gap-2 mb-3">
-                  <MacroInput label="Protein (g)" value={flow.draft.protein} onChange={(v) => updateDraft("protein", v)} />
-                  <MacroInput label="Kolhydrater (g)" value={flow.draft.carbs} onChange={(v) => updateDraft("carbs", v)} />
-                  <MacroInput label="Fett (g)" value={flow.draft.fat} onChange={(v) => updateDraft("fat", v)} />
-                  <MacroInput label="Fibrer (g)" value={flow.draft.fiber} onChange={(v) => updateDraft("fiber", v)} />
+                  <MacroInput label={tr("Protein (g)", language)} value={flow.draft.protein} onChange={(v) => updateDraft("protein", v)} />
+                  <MacroInput label={tr("Kolhydrater (g)", language)} value={flow.draft.carbs} onChange={(v) => updateDraft("carbs", v)} />
+                  <MacroInput label={tr("Fett (g)", language)} value={flow.draft.fat} onChange={(v) => updateDraft("fat", v)} />
+                  <MacroInput label={tr("Fibrer (g)", language)} value={flow.draft.fiber} onChange={(v) => updateDraft("fiber", v)} />
                 </div>
 
                 <p className="text-xs font-bold mb-2 mt-4" style={{ color: colors.textDim }}>
-                  Klimat &amp; plånbok (valfritt)
+                  {tr("Klimat & plånbok (valfritt)", language)}
                 </p>
                 <div className="grid grid-cols-2 gap-2 mb-5">
                   <MacroInput label="CO2 (kg)" value={flow.draft.co2} onChange={(v) => updateDraft("co2", v)} decimal />
@@ -3308,8 +3535,8 @@ export default function Portion() {
             style={{ backgroundColor: colors.surface, maxHeight: "88vh", overflowY: "auto" }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold">Dina mål</h3>
-              <button onClick={() => setProfileOpen(false)} className="text-lg" style={{ color: colors.textDim }} aria-label="Stäng">
+              <h3 className="text-base font-bold">{tr("Dina mål", language)}</h3>
+              <button onClick={() => setProfileOpen(false)} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
               </button>
             </div>
@@ -3336,9 +3563,7 @@ export default function Portion() {
               <MacroInput label="Längd (cm)" value={profileDraft.heightCm} onChange={(v) => updateProfileDraft("heightCm", v)} />
             </div>
 
-            <p className="text-xs mb-2" style={{ color: colors.textDim }}>
-              Aktivitetsnivå
-            </p>
+            <p className="text-xs mb-2" style={{ color: colors.textDim }}>{tr("Aktivitetsnivå", language)}</p>
             <div className="flex flex-col gap-2 mb-4">
               {ACTIVITY_LEVELS.map((a) => (
                 <button
@@ -3358,9 +3583,7 @@ export default function Portion() {
               ))}
             </div>
 
-            <p className="text-xs mb-2" style={{ color: colors.textDim }}>
-              Mål
-            </p>
+            <p className="text-xs mb-2" style={{ color: colors.textDim }}>{tr("Mål", language)}</p>
             <div className="flex gap-2 mb-5">
               {GOAL_TYPES.map((g) => (
                 <button
@@ -3379,9 +3602,7 @@ export default function Portion() {
 
             {livePreview && !profileDraft.manualOverride && (
               <div className="rounded-xl px-4 py-3 mb-4" style={{ backgroundColor: colors.primaryLight }}>
-                <p className="text-xs mb-2" style={{ color: colors.textDim }}>
-                  Beräknat dagsmål
-                </p>
+                <p className="text-xs mb-2" style={{ color: colors.textDim }}>{tr("Beräknat dagsmål", language)}</p>
                 <p className="text-2xl font-extrabold mb-1" style={{ color: colors.primary }}>
                   {livePreview.kcalGoal} kcal
                 </p>
@@ -3392,16 +3613,16 @@ export default function Portion() {
             )}
 
             <button onClick={toggleManualOverride} className="text-xs font-medium mb-4" style={{ color: colors.primary }}>
-              {profileDraft.manualOverride ? "Använd beräknat mål istället" : "Justera målen manuellt"}
+              {profileDraft.manualOverride ? tr("Använd beräknat mål istället", language) : tr("Justera målen manuellt", language)}
             </button>
 
             {profileDraft.manualOverride && (
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <MacroInput label="Kalorier (kcal)" value={profileDraft.kcalGoal} onChange={(v) => updateProfileDraft("kcalGoal", v)} />
-                <MacroInput label="Protein (g)" value={profileDraft.proteinGoal} onChange={(v) => updateProfileDraft("proteinGoal", v)} />
-                <MacroInput label="Kolhydrater (g)" value={profileDraft.carbsGoal} onChange={(v) => updateProfileDraft("carbsGoal", v)} />
-                <MacroInput label="Fett (g)" value={profileDraft.fatGoal} onChange={(v) => updateProfileDraft("fatGoal", v)} />
-                <MacroInput label="Fibrer (g)" value={profileDraft.fiberGoal} onChange={(v) => updateProfileDraft("fiberGoal", v)} />
+                <MacroInput label={tr("Protein (g)", language)} value={profileDraft.proteinGoal} onChange={(v) => updateProfileDraft("proteinGoal", v)} />
+                <MacroInput label={tr("Kolhydrater (g)", language)} value={profileDraft.carbsGoal} onChange={(v) => updateProfileDraft("carbsGoal", v)} />
+                <MacroInput label={tr("Fett (g)", language)} value={profileDraft.fatGoal} onChange={(v) => updateProfileDraft("fatGoal", v)} />
+                <MacroInput label={tr("Fibrer (g)", language)} value={profileDraft.fiberGoal} onChange={(v) => updateProfileDraft("fiberGoal", v)} />
               </div>
             )}
 
@@ -3413,7 +3634,7 @@ export default function Portion() {
               <div className="text-left pr-3">
                 <p className="text-sm font-medium">Flexibel veckobudget</p>
                 <p className="text-xs" style={{ color: colors.textDim }}>
-                  Äter du för mycket en dag jämnas det ut med ett lite lägre mål resten av veckan
+                  {tr("Äter du för mycket en dag jämnas det ut med ett lite lägre mål resten av veckan", language)}
                 </p>
               </div>
               <span
@@ -3437,9 +3658,7 @@ export default function Portion() {
               onClick={saveProfile}
               className="w-full rounded-xl py-3.5 text-sm font-bold mt-4"
               style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-            >
-              Spara mål
-            </button>
+            >{tr("Spara mål", language)}</button>
           </div>
         </div>
       )}
@@ -3460,11 +3679,11 @@ export default function Portion() {
               className="inline-block text-[10px] font-bold px-2.5 py-1 rounded-full mb-3"
               style={{ backgroundColor: colors.primaryLight, color: colors.primary }}
             >
-              NYTT · v{APP_VERSION}
+              {tr("NYTT", language)} · v{APP_VERSION}
             </span>
-            <h3 className="text-base font-extrabold mb-3">{CHANGELOG[0].headline}</h3>
+            <h3 className="text-base font-extrabold mb-3">{language === "en" ? CHANGELOG[0].headline_en : CHANGELOG[0].headline}</h3>
             <ul className="mb-5" style={{ paddingLeft: 18 }}>
-              {CHANGELOG[0].summary.map((line, i) => (
+              {(language === "en" ? CHANGELOG[0].summary_en : CHANGELOG[0].summary).map((line, i) => (
                 <li key={i} className="text-xs mb-1.5" style={{ color: colors.textDim, listStyleType: "disc" }}>
                   {line}
                 </li>
@@ -3474,12 +3693,8 @@ export default function Portion() {
               onClick={openNewsFromPopup}
               className="w-full rounded-full py-3 text-sm font-bold mb-2"
               style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-            >
-              Tryck här för att läsa mer
-            </button>
-            <button onClick={dismissNewsPopup} className="w-full text-xs font-semibold py-1" style={{ color: colors.textDim }}>
-              Stäng
-            </button>
+            >{tr("Tryck här för att läsa mer", language)}</button>
+            <button onClick={dismissNewsPopup} className="w-full text-xs font-semibold py-1" style={{ color: colors.textDim }}>{tr("Stäng", language)}</button>
           </div>
         </div>
       )}
@@ -3522,8 +3737,8 @@ export default function Portion() {
             style={{ backgroundColor: colors.surface, maxHeight: "70vh", overflowY: "auto" }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold">Dela måltid</h3>
-              <button onClick={closeShareModal} className="text-lg" style={{ color: colors.textDim }} aria-label="Stäng">
+              <h3 className="text-base font-bold">{tr("Dela måltid", language)}</h3>
+              <button onClick={closeShareModal} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
               </button>
             </div>
@@ -3538,16 +3753,14 @@ export default function Portion() {
             )}
 
             {shareModal.step === "error" && (
-              <p className="text-sm text-center py-6" style={{ color: colors.textDim }}>
-                Kunde inte dela just nu. Försök igen om en stund.
-              </p>
+              <p className="text-sm text-center py-6" style={{ color: colors.textDim }}>{tr("Kunde inte dela just nu. Försök igen om en stund.", language)}</p>
             )}
 
             {shareModal.step === "shared" && (
               <div className="pb-2">
                 <p className="text-xs mb-4" style={{ color: colors.textDim }}>
                   Skicka den här koden till din vän (t.ex. via SMS) — de kan hämta måltiden i sin egen app under{" "}
-                  <span style={{ color: colors.text }}>+ → "Hämta delad måltid"</span>.
+                  <span style={{ color: colors.text }}>+ → "{tr("🤝 Hämta delad måltid", language).replace("🤝 ", "")}"</span>.
                 </p>
                 <div
                   className="rounded-xl py-5 text-center mb-4"
@@ -3557,17 +3770,12 @@ export default function Portion() {
                     {shareModal.code}
                   </span>
                 </div>
-                <p className="text-[11px] mb-4" style={{ color: colors.textDim }}>
-                  Koden lagras i ett delat utrymme som tekniskt sett går att nå av andra som använder samma app om de gissar
-                  koden — dela den bara med personer du litar på.
-                </p>
+                <p className="text-[11px] mb-4" style={{ color: colors.textDim }}>{tr("Koden lagras i ett delat utrymme som tekniskt sett går att nå av andra som använder samma app om de gissar koden — dela den bara med personer du litar på.", language)}</p>
                 <button
                   onClick={closeShareModal}
                   className="w-full rounded-xl py-3.5 text-sm font-bold"
                   style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                >
-                  Klar
-                </button>
+                >{tr("Klar", language)}</button>
               </div>
             )}
           </div>
@@ -3591,21 +3799,19 @@ export default function Portion() {
               <h3 className="text-base font-bold">
                 {recipeFlow.step === "manual" ? "Eget recept" : "Recept med AI"}
               </h3>
-              <button onClick={closeRecipeFlow} className="text-lg" style={{ color: colors.textDim }} aria-label="Stäng">
+              <button onClick={closeRecipeFlow} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
               </button>
             </div>
 
             {recipeFlow.step === "ai-input" && (
               <div className="pb-4">
-                <p className="text-xs mb-3" style={{ color: colors.textDim }}>
-                  Har du några ingredienser du vill utgå från? Lämna tomt så hittar AI:n på något gott själv.
-                </p>
+                <p className="text-xs mb-3" style={{ color: colors.textDim }}>{tr("Har du några ingredienser du vill utgå från? Lämna tomt så hittar AI:n på något gott själv.", language)}</p>
                 <textarea
                   autoFocus
                   value={recipeFlow.ingredients}
                   onChange={(e) => updateRecipeFlow("ingredients", e.target.value)}
-                  placeholder="T.ex. kyckling, broccoli, ris"
+                  placeholder={tr("T.ex. kyckling, broccoli, ris", language)}
                   rows={3}
                   className="w-full rounded-lg px-3 py-2.5 text-sm mb-5"
                   style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
@@ -3614,9 +3820,7 @@ export default function Portion() {
                   onClick={generateRecipeAI}
                   className="w-full rounded-xl py-3.5 text-sm font-bold"
                   style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                >
-                  ✨ Skapa recept
-                </button>
+                >{tr("✨ Skapa recept", language)}</button>
               </div>
             )}
 
@@ -3626,18 +3830,14 @@ export default function Portion() {
                   className="w-9 h-9 rounded-full animate-spin"
                   style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
                 />
-                <p className="text-xs" style={{ color: colors.textDim }}>Komponerar ett recept …</p>
+                <p className="text-xs" style={{ color: colors.textDim }}>{tr("Komponerar ett recept …", language)}</p>
               </div>
             )}
 
             {recipeFlow.step === "ai-error" && (
               <div className="py-6 text-center">
-                <p className="text-sm mb-4" style={{ color: colors.textDim }}>
-                  Något gick fel. Försök igen om en stund.
-                </p>
-                <button onClick={openRecipeAI} className="text-xs font-semibold" style={{ color: colors.primary }}>
-                  Försök igen
-                </button>
+                <p className="text-sm mb-4" style={{ color: colors.textDim }}>{tr("Något gick fel. Försök igen om en stund.", language)}</p>
+                <button onClick={openRecipeAI} className="text-xs font-semibold" style={{ color: colors.primary }}>{tr("Försök igen", language)}</button>
               </div>
             )}
 
@@ -3645,13 +3845,13 @@ export default function Portion() {
               <div className="pb-2">
                 <h4 className="text-base font-bold mb-2">{recipeFlow.recipe.name}</h4>
                 <p className="text-xs font-bold mb-3" style={{ color: colors.primary }}>
-                  {Math.round(recipeFlow.recipe.kcal)} kcal · P {Math.round(recipeFlow.recipe.protein_g)}g · K{" "}
+                  {Math.round(recipeFlow.recipe.kcal)} kcal · P {Math.round(recipeFlow.recipe.protein_g)}g · {language === "en" ? "C" : "K"}{" "}
                   {Math.round(recipeFlow.recipe.carbs_g)}g · F {Math.round(recipeFlow.recipe.fat_g)}g
                 </p>
 
                 {Array.isArray(recipeFlow.recipe.ingredients) && recipeFlow.recipe.ingredients.length > 0 && (
                   <>
-                    <p className="text-xs font-bold mb-1.5">Ingredienser</p>
+                    <p className="text-xs font-bold mb-1.5">{tr("Ingredienser", language)}</p>
                     <ul className="mb-4" style={{ paddingLeft: 18 }}>
                       {recipeFlow.recipe.ingredients.map((ing, i) => (
                         <li key={i} className="text-xs mb-1" style={{ color: colors.textDim, listStyleType: "disc" }}>
@@ -3664,7 +3864,7 @@ export default function Portion() {
 
                 {Array.isArray(recipeFlow.recipe.instructions) && recipeFlow.recipe.instructions.length > 0 && (
                   <>
-                    <p className="text-xs font-bold mb-1.5">Gör så här</p>
+                    <p className="text-xs font-bold mb-1.5">{tr("Gör så här", language)}</p>
                     <ol className="mb-5" style={{ paddingLeft: 18 }}>
                       {recipeFlow.recipe.instructions.map((step, i) => (
                         <li key={i} className="text-xs mb-1.5" style={{ color: colors.textDim, listStyleType: "decimal" }}>
@@ -3675,7 +3875,7 @@ export default function Portion() {
                   </>
                 )}
 
-                <p className="text-xs font-bold mb-2">Lägg till i</p>
+                <p className="text-xs font-bold mb-2">{tr("Lägg till i", language)}</p>
                 <div className="flex gap-1.5 mb-4 flex-wrap">
                   {CATEGORIES.map((c) => (
                     <button
@@ -3687,7 +3887,7 @@ export default function Portion() {
                         color: recipeFlow.category === c.key ? colors.onPrimary : colors.textDim,
                       }}
                     >
-                      {c.label}
+                      {tr(c.label, language)}
                     </button>
                   ))}
                 </div>
@@ -3697,36 +3897,28 @@ export default function Portion() {
                     onClick={() => saveRecipeToLibraryAndMaybeLog(recipeFlow.recipe, recipeFlow.category)}
                     className="w-full rounded-xl py-3.5 text-sm font-bold"
                     style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-                  >
-                    Logga och spara
-                  </button>
+                  >{tr("Logga och spara", language)}</button>
                   <button
                     onClick={() => saveRecipeToLibraryAndMaybeLog(recipeFlow.recipe, null)}
                     className="w-full rounded-xl py-3 text-xs font-semibold"
                     style={{ color: colors.textDim }}
-                  >
-                    Spara bara i biblioteket (logga inte nu)
-                  </button>
+                  >{tr("Spara bara i biblioteket (logga inte nu)", language)}</button>
                 </div>
               </div>
             )}
 
             {recipeFlow.step === "manual" && (
               <div className="pb-2">
-                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                  Namn på receptet
-                </label>
+                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Namn på receptet", language)}</label>
                 <input
                   value={recipeFlow.name}
                   onChange={(e) => updateRecipeFlow("name", e.target.value)}
-                  placeholder="T.ex. Mammas köttbullar"
+                  placeholder={tr("T.ex. Mammas köttbullar", language)}
                   className="w-full rounded-lg px-3 py-2.5 text-sm mb-3"
                   style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
                 />
 
-                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                  Ingredienser (en per rad, valfritt)
-                </label>
+                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Ingredienser (en per rad, valfritt)", language)}</label>
                 <textarea
                   value={recipeFlow.ingredientsText}
                   onChange={(e) => updateRecipeFlow("ingredientsText", e.target.value)}
@@ -3735,9 +3927,7 @@ export default function Portion() {
                   style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
                 />
 
-                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                  Gör så här (valfritt)
-                </label>
+                <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Gör så här (valfritt)", language)}</label>
                 <textarea
                   value={recipeFlow.instructions}
                   onChange={(e) => updateRecipeFlow("instructions", e.target.value)}
@@ -3748,12 +3938,12 @@ export default function Portion() {
 
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   <MacroInput label="Kalorier" value={recipeFlow.kcal} onChange={(v) => updateRecipeFlow("kcal", v)} />
-                  <MacroInput label="Protein (g)" value={recipeFlow.protein} onChange={(v) => updateRecipeFlow("protein", v)} />
-                  <MacroInput label="Kolhydrater (g)" value={recipeFlow.carbs} onChange={(v) => updateRecipeFlow("carbs", v)} />
-                  <MacroInput label="Fett (g)" value={recipeFlow.fat} onChange={(v) => updateRecipeFlow("fat", v)} />
+                  <MacroInput label={tr("Protein (g)", language)} value={recipeFlow.protein} onChange={(v) => updateRecipeFlow("protein", v)} />
+                  <MacroInput label={tr("Kolhydrater (g)", language)} value={recipeFlow.carbs} onChange={(v) => updateRecipeFlow("carbs", v)} />
+                  <MacroInput label={tr("Fett (g)", language)} value={recipeFlow.fat} onChange={(v) => updateRecipeFlow("fat", v)} />
                 </div>
 
-                <p className="text-xs font-bold mb-2">Lägg till i (valfritt)</p>
+                <p className="text-xs font-bold mb-2">{tr("Lägg till i (valfritt)", language)}</p>
                 <div className="flex gap-1.5 mb-5 flex-wrap">
                   {CATEGORIES.map((c) => (
                     <button
@@ -3765,7 +3955,7 @@ export default function Portion() {
                         color: recipeFlow.category === c.key ? colors.onPrimary : colors.textDim,
                       }}
                     >
-                      {c.label}
+                      {tr(c.label, language)}
                     </button>
                   ))}
                 </div>
@@ -3802,12 +3992,12 @@ export default function Portion() {
             style={{ backgroundColor: colors.surface, maxHeight: "80vh", overflowY: "auto" }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold">Förslag på mellanmål</h3>
+              <h3 className="text-base font-bold">{tr("Förslag på mellanmål", language)}</h3>
               <button
                 onClick={() => setReactiveSuggestFlow(null)}
                 className="text-lg"
                 style={{ color: colors.textDim }}
-                aria-label="Stäng"
+                aria-label={tr("Stäng", language)}
               >
                 ×
               </button>
@@ -3823,9 +4013,7 @@ export default function Portion() {
             )}
 
             {reactiveSuggestFlow.step === "error" && (
-              <p className="text-sm text-center py-6" style={{ color: colors.textDim }}>
-                Något gick fel. Försök igen om en stund.
-              </p>
+              <p className="text-sm text-center py-6" style={{ color: colors.textDim }}>{tr("Något gick fel. Försök igen om en stund.", language)}</p>
             )}
 
             {reactiveSuggestFlow.step === "results" && (
@@ -3846,7 +4034,7 @@ export default function Portion() {
                         <span className="font-bold" style={{ color: colors.text }}>
                           {Math.round(s.kcal)} kcal
                         </span>{" "}
-                        · P {Math.round(s.protein_g)}g · K {Math.round(s.carbs_g)}g · F {Math.round(s.fat_g)}g
+                        · P {Math.round(s.protein_g)}g · {language === "en" ? "C" : "K"} {Math.round(s.carbs_g)}g · F {Math.round(s.fat_g)}g
                       </p>
                       <button
                         onClick={() => addReactiveSuggestion(s, i)}
@@ -3882,20 +4070,18 @@ export default function Portion() {
             style={{ backgroundColor: colors.surface, maxHeight: "88vh", overflowY: "auto" }}
           >
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-bold">Fördelning per måltid</h3>
-              <button onClick={() => setCategorySplitOpen(false)} className="text-lg" style={{ color: colors.textDim }} aria-label="Stäng">
+              <h3 className="text-base font-bold">{tr("Fördelning per måltid", language)}</h3>
+              <button onClick={() => setCategorySplitOpen(false)} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
               </button>
             </div>
-            <p className="text-xs mb-4" style={{ color: colors.textDim }}>
-              Som standard delas ditt dagsmål upp automatiskt. Fått andra siffror av t.ex. en dietist? Ange dem här så används de istället.
-            </p>
+            <p className="text-xs mb-4" style={{ color: colors.textDim }}>{tr("Som standard delas ditt dagsmål upp automatiskt. Fått andra siffror av t.ex. en dietist? Ange dem här så används de istället.", language)}</p>
 
             <div className="grid grid-cols-2 gap-2 mb-3">
               {CATEGORIES.map((c) => (
                 <MacroInput
                   key={c.key}
-                  label={`${c.label} (kcal)`}
+                  label={`${tr(c.label, language)} (kcal)`}
                   value={categorySplitDraft[c.key]}
                   onChange={(v) => updateCategorySplitDraft(c.key, v)}
                 />
@@ -3904,7 +4090,7 @@ export default function Portion() {
 
             {goals && (
               <p className="text-xs mb-5" style={{ color: colors.textDim }}>
-                Summa: {CATEGORIES.reduce((s, c) => s + (Number(categorySplitDraft[c.key]) || 0), 0)} kcal · Dagsmål: {goals.kcalGoal} kcal
+                {tr("Summa", language)}: {CATEGORIES.reduce((s, c) => s + (Number(categorySplitDraft[c.key]) || 0), 0)} kcal · {tr("Dagsmål", language)}: {goals.kcalGoal} kcal
               </p>
             )}
 
@@ -3913,17 +4099,13 @@ export default function Portion() {
                 onClick={saveCategorySplit}
                 className="w-full rounded-xl py-3.5 text-sm font-bold"
                 style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-              >
-                Spara fördelning
-              </button>
+              >{tr("Spara fördelning", language)}</button>
               {categorySplit && (
                 <button
                   onClick={resetCategorySplit}
                   className="w-full rounded-xl py-3.5 text-sm font-medium"
                   style={{ border: `1px solid ${colors.hairline}`, color: colors.text }}
-                >
-                  Återställ till automatisk fördelning
-                </button>
+                >{tr("Återställ till automatisk fördelning", language)}</button>
               )}
             </div>
           </div>
@@ -3959,7 +4141,7 @@ const TREND_METRICS = [
   { key: "fiber", label: "Fibrer", unit: "g", color: colors.fiber, goalKey: "fiberGoal" },
 ];
 
-function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay, onSelectDay, todayKey }) {
+function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay, onSelectDay, todayKey, language }) {
   if (loading || !data) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
@@ -3967,9 +4149,7 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
           className="w-8 h-8 rounded-full animate-spin"
           style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
         />
-        <p className="text-sm" style={{ color: colors.textDim }}>
-          Hämtar kalender …
-        </p>
+        <p className="text-sm" style={{ color: colors.textDim }}>{tr("Hämtar kalender …", language)}</p>
       </div>
     );
   }
@@ -4036,9 +4216,9 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
       {goals ? (
         <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
           <div className="grid grid-cols-2 gap-y-6">
-            <DarkMacroRing color={colors.carbs} label="Kolhydrater" consumed={selectedData.carbs} goal={goals.carbsGoal} />
+            <DarkMacroRing color={colors.carbs} label={tr("Kolhydrater", language)} consumed={selectedData.carbs} goal={goals.carbsGoal} />
             <DarkMacroRing color={colors.protein} label="Protein" consumed={selectedData.protein} goal={goals.proteinGoal} />
-            <DarkMacroRing color={colors.fat} label="Fett" consumed={selectedData.fat} goal={goals.fatGoal} />
+            <DarkMacroRing color={colors.fat} label={tr("Fett", language)} consumed={selectedData.fat} goal={goals.fatGoal} />
             <DarkMacroRing color={colors.fiber} label="Fiber" consumed={selectedData.fiber} goal={goals.fiberGoal} />
           </div>
         </div>
@@ -4047,22 +4227,18 @@ function TrendsPanel({ data, loading, goals, metric, onMetricChange, selectedDay
           className="rounded-2xl p-5 text-center text-sm"
           style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}`, color: colors.textDim }}
         >
-          Ställ in dina mål under "Översikt" för att se sammanfattningen
+          {tr("Ställ in dina mål under", language)} "{getTabLabel("budget", language)}" {tr("för att se sammanfattningen", language)}
         </div>
       )}
 
       <div className="mt-6 rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
         <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-base font-extrabold">Specifikation &amp; Makrovärden</h3>
+          <h3 className="text-base font-extrabold">{tr("Specifikation & Makrovärden", language)}</h3>
         </div>
 
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: colors.textDim }}>
-            Näringsämne
-          </span>
-          <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: colors.textDim }}>
-            Mängd / Energiandel
-          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: colors.textDim }}>{tr("Näringsämne", language)}</span>
+          <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: colors.textDim }}>{tr("Mängd / Energiandel", language)}</span>
         </div>
 
         {SPEC_ROWS.map((row, i) => {
@@ -4149,7 +4325,7 @@ function bmiCategoryFor(bmi) {
   return BMI_CATEGORIES.find((c) => bmi >= c.min && bmi < c.max) || BMI_CATEGORIES[BMI_CATEGORIES.length - 1];
 }
 
-function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, todayKey, profile }) {
+function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, todayKey, profile, language }) {
   const [bmiExpanded, setBmiExpanded] = useState(false);
 
   const chartData = log.map((e) => ({
@@ -4206,25 +4382,25 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
 
           <div className="flex justify-end mt-3">
             <button onClick={() => setBmiExpanded((v) => !v)} className="text-xs font-bold" style={{ color: colors.primary }}>
-              {bmiExpanded ? "Visa mindre" : "Visa mer"}
+              {bmiExpanded ? tr("Visa mindre", language) : tr("Visa mer", language)}
             </button>
           </div>
 
           {bmiExpanded && (
             <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${colors.hairline}` }}>
-              <h3 className="text-sm font-bold mb-3">BMI-kategorier</h3>
+              <h3 className="text-sm font-bold mb-3">{tr("BMI-kategorier", language)}</h3>
               <div className="flex flex-col gap-2.5 mb-5">
                 {BMI_CATEGORIES.map((c) => (
                   <div key={c.label} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: c.color }} />
-                      <span className="text-sm font-medium">{c.label}</span>
+                      <span className="text-sm font-medium">{tr(c.label, language)}</span>
                       {bmiCat.label === c.label && (
                         <span
                           className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                           style={{ backgroundColor: `${c.color}22`, color: c.color }}
                         >
-                          Nuvarande BMI
+                          {tr("Nuvarande BMI", language)}
                         </span>
                       )}
                     </div>
@@ -4235,17 +4411,20 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
                 ))}
               </div>
 
-              <h3 className="text-sm font-bold mb-2">Beräkning av BMI</h3>
+              <h3 className="text-sm font-bold mb-2">{tr("Beräkning av BMI", language)}</h3>
               <p className="text-xs mb-4" style={{ color: colors.textDim }}>
-                BMI räknas ut genom att dela vikten i kilogram med längden i meter i kvadrat (BMI = kg / m²).
+                {language === "en"
+                  ? "BMI is calculated by dividing weight in kilograms by height in metres squared (BMI = kg / m²)."
+                  : "BMI räknas ut genom att dela vikten i kilogram med längden i meter i kvadrat (BMI = kg / m²)."}
               </p>
 
               <p className="text-[11px] font-bold mb-1" style={{ color: colors.textDim }}>
-                Notera
+                {language === "en" ? "Note" : "Notera"}
               </p>
               <p className="text-[11px]" style={{ color: colors.textDim }}>
-                BMI är ett vanligt screeningmått men har begränsningar. Faktorer som graviditet eller hög muskelmassa kan ge ett
-                missvisande resultat, och måttet är mindre tillförlitligt för barn och äldre.
+                {language === "en"
+                  ? "BMI is a common screening measure but has limitations. Factors such as pregnancy or high muscle mass can give a misleading result, and the measure is less reliable for children and the elderly."
+                  : "BMI är ett vanligt screeningmått men har begränsningar. Faktorer som graviditet eller hög muskelmassa kan ge ett missvisande resultat, och måttet är mindre tillförlitligt för barn och äldre."}
               </p>
             </div>
           )}
@@ -4255,7 +4434,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
           className="rounded-2xl p-5 mb-4 text-center text-sm"
           style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}`, color: colors.textDim }}
         >
-          Lägg in din längd under "Översikt" och logga en vikt för att se ditt BMI
+          {tr("Lägg in din längd under", language)} "{getTabLabel("budget", language)}" {tr("och logga en vikt för att se ditt BMI", language)}
         </div>
       )}
 
@@ -4264,9 +4443,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
         style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
       >
         <div className="flex-1">
-          <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-            Vikt (kg)
-          </label>
+          <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Vikt (kg)", language)}</label>
           <input
             value={draft.kg}
             onChange={(e) => onDraftChange({ ...draft, kg: e.target.value.replace(/[^0-9.]/g, "") })}
@@ -4277,9 +4454,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
           />
         </div>
         <div className="flex-1">
-          <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-            Datum
-          </label>
+          <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Datum", language)}</label>
           <input
             type="date"
             value={draft.date}
@@ -4293,9 +4468,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
           onClick={onAdd}
           className="rounded-lg px-4 py-2.5 text-sm font-bold"
           style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-        >
-          Lägg till
-        </button>
+        >{tr("Lägg till", language)}</button>
       </div>
 
       {loading ? (
@@ -4309,9 +4482,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
         <div
           className="rounded-2xl py-6 text-center text-sm"
           style={{ backgroundColor: colors.surface, color: colors.textDim, border: `1px solid ${colors.hairline}` }}
-        >
-          Ingen vikt loggad än
-        </div>
+        >{tr("Ingen vikt loggad än", language)}</div>
       ) : (
         <>
           <div className="rounded-2xl p-4 mb-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
@@ -4349,7 +4520,7 @@ function WeightPanel({ log, loading, draft, onDraftChange, onAdd, onDelete, toda
                 </span>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-bold">{e.kg} kg</span>
-                  <button onClick={() => onDelete(e.id)} aria-label="Ta bort" className="text-sm" style={{ color: colors.textDim }}>
+                  <button onClick={() => onDelete(e.id)} aria-label={tr("Ta bort", language)} className="text-sm" style={{ color: colors.textDim }}>
                     ×
                   </button>
                 </div>
@@ -4377,6 +4548,7 @@ function TrainingPanel({
   onEdit,
   stepGoal,
   onSaveStepGoal,
+  language,
 }) {
   const [editingStepGoal, setEditingStepGoal] = useState(false);
   const [stepGoalDraft, setStepGoalDraft] = useState(String(stepGoal));
@@ -4393,9 +4565,7 @@ function TrainingPanel({
           className="w-8 h-8 rounded-full animate-spin"
           style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
         />
-        <p className="text-sm" style={{ color: colors.textDim }}>
-          Hämtar loggen …
-        </p>
+        <p className="text-sm" style={{ color: colors.textDim }}>{tr("Hämtar loggen …", language)}</p>
       </div>
     );
   }
@@ -4466,7 +4636,7 @@ function TrainingPanel({
             >
               <span className="text-sm font-bold">{stepGoal.toLocaleString("sv-SE")}</span>
               <span className="text-xs" style={{ color: colors.textDim }}>
-                dagligt mål
+                {tr("dagligt mål", language)}
               </span>
               <span style={{ fontSize: 12, color: colors.textDim }}>✎</span>
             </button>
@@ -4497,10 +4667,10 @@ function TrainingPanel({
 
       {/* Exercise log */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-bold">Träningspass</h3>
+        <h3 className="text-sm font-bold">{tr("Träningspass", language)}</h3>
         <button
           onClick={onOpenMenu}
-          aria-label="Lägg till träningspass"
+          aria-label={tr("Lägg till träningspass", language)}
           className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold"
           style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
         >
@@ -4512,9 +4682,7 @@ function TrainingPanel({
         <div
           className="rounded-2xl py-4 text-center text-sm"
           style={{ backgroundColor: colors.surface, color: colors.textDim, border: `1px solid ${colors.hairline}` }}
-        >
-          Inget tillagt än
-        </div>
+        >{tr("Inget tillagt än", language)}</div>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${colors.hairline}` }}>
           {exercises.map((e, i) => (
@@ -4553,7 +4721,7 @@ function TrainingPanel({
                   onDelete(e.id);
                 }}
                 role="button"
-                aria-label="Ta bort"
+                aria-label={tr("Ta bort", language)}
                 className="flex-shrink-0 text-sm px-1"
                 style={{ color: colors.textDim }}
               >
@@ -4638,7 +4806,7 @@ function TrainingPanel({
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold">{flow.editId ? "Redigera träning" : "Lägg till träning"}</h3>
-              <button onClick={onClose} className="text-lg" style={{ color: colors.textDim }} aria-label="Stäng">
+              <button onClick={onClose} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
               </button>
             </div>
@@ -4668,9 +4836,7 @@ function TrainingPanel({
 
                 {flow.type.mode === "steps" ? (
                   <>
-                    <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                      Antal steg
-                    </label>
+                    <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Antal steg", language)}</label>
                     <input
                       value={flow.steps}
                       onChange={(e) => onUpdateDraft("steps", e.target.value.replace(/[^0-9]/g, ""))}
@@ -4680,15 +4846,15 @@ function TrainingPanel({
                       style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
                     />
                     <p className="text-xs mb-5" style={{ color: colors.textDim }}>
-                      Uppskattad förbränning: <span className="font-bold" style={{ color: colors.text }}>{previewKcal} kcal</span>
+                      {tr("Uppskattad förbränning", language)}: <span className="font-bold" style={{ color: colors.text }}>{previewKcal} kcal</span>
                       <br />
-                      (baserat på ca 1 333 steg/km och 0,7 kcal per kg kroppsvikt och kilometer)
+                      {language === "en" ? "(based on approx. 1,333 steps/km and 0.7 kcal per kg body weight per kilometre)" : "(baserat på ca 1 333 steg/km och 0,7 kcal per kg kroppsvikt och kilometer)"}
                     </p>
                   </>
                 ) : flow.type.mode === "distance" ? (
                   <>
                     <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                      Antal kilometer
+                      {tr("Antal kilometer", language)}
                     </label>
                     <input
                       value={flow.km}
@@ -4699,9 +4865,9 @@ function TrainingPanel({
                       style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
                     />
                     <p className="text-xs mb-5" style={{ color: colors.textDim }}>
-                      Uppskattad förbränning: <span className="font-bold" style={{ color: colors.text }}>{previewKcal} kcal</span>
+                      {tr("Uppskattad förbränning", language)}: <span className="font-bold" style={{ color: colors.text }}>{previewKcal} kcal</span>
                       <br />
-                      ({String(flow.type.kcalPerKgPerKm).replace(".", ",")} kcal per kg kroppsvikt och kilometer)
+                      ({language === "en" ? String(flow.type.kcalPerKgPerKm) : String(flow.type.kcalPerKgPerKm).replace(".", ",")} kcal {language === "en" ? "per kg body weight per kilometre" : "per kg kroppsvikt och kilometer"})
                     </p>
                   </>
                 ) : flow.type.mode === "time" ? (
@@ -4718,14 +4884,12 @@ function TrainingPanel({
                       style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
                     />
                     <p className="text-xs mb-5" style={{ color: colors.textDim }}>
-                      Uppskattad förbränning: <span className="font-bold" style={{ color: colors.text }}>{previewKcal} kcal</span>
+                      {tr("Uppskattad förbränning", language)}: <span className="font-bold" style={{ color: colors.text }}>{previewKcal} kcal</span>
                     </p>
                   </>
                 ) : (
                   <>
-                    <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
-                      Kalorier (kcal)
-                    </label>
+                    <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>{tr("Kalorier (kcal)", language)}</label>
                     <input
                       value={flow.kcalManual}
                       onChange={(e) => onUpdateDraft("kcalManual", e.target.value.replace(/[^0-9]/g, ""))}
@@ -4919,15 +5083,144 @@ const HELP_TOPICS = [
   },
 ];
 
-function HelpPanel({ openTopic, onToggleTopic }) {
+const HELP_TOPICS_EN = [
+  {
+    title: "Set your calorie goal and personal details",
+    steps: [
+      "Go to the Overview tab and tap ✎ Edit in the top right.",
+      "Fill in your sex, age, weight, height and activity level — the app will calculate a recommended calorie goal for you automatically.",
+      "Prefer to set the goal yourself? Turn on \"Set goal manually\" in the same screen and type in the calorie count you want.",
+      "You can come back here and change these details any time — your calorie goal is recalculated instantly.",
+    ],
+  },
+  {
+    title: "Log a meal — four different ways",
+    steps: [
+      "Tap + next to a meal category (Breakfast, Lunch, Snack, Dinner or Other) on the Overview tab.",
+      "📷 Photograph meal: take a photo and AI estimates the calories and nutrition automatically.",
+      "🔍 Search food: search by name, choose the amount in grams — works against both your own saved foods and an open product database.",
+      "🎙️ Describe with words: type (or dictate using your keyboard's microphone) a sentence about what you ate, e.g. \"a bowl of porridge with a banana\" — AI splits it into separate food items.",
+      "✏️ Manually: fill in the name, calories and nutrition values yourself, with the option to attach your own photo.",
+    ],
+  },
+  {
+    title: "Edit or delete something you've logged",
+    steps: [
+      "Tap directly on a logged meal in the list to open it in edit mode.",
+      "Change whichever field you like (name, calories, nutrition) and tap \"Save changes\".",
+      "Want to remove it entirely? Tap the × on the far right of the row instead.",
+    ],
+  },
+  {
+    title: "Change how calories are split between meals",
+    steps: [
+      "Tap \"Edit distribution\" above the meal list on the Overview tab.",
+      "Enter how many calories you want for Breakfast, Lunch, Snack, Dinner and Other.",
+      "The split is saved as a share of your total calorie budget, so it automatically scales if you later change your calorie goal.",
+    ],
+  },
+  {
+    title: "Log water",
+    steps: [
+      "The water tracker sits right under your daily summary on the Overview tab.",
+      "Tap the quick-add buttons (e.g. +250 ml) to log a drink at a time.",
+      "Undo the last entry with the arrow if you tapped the wrong one.",
+    ],
+  },
+  {
+    title: "Training and steps",
+    steps: [
+      "Go to the Training tab.",
+      "Set your step goal at the top and log today's steps.",
+      "Tap + to add an exercise session — pick a type (walk, run, strength training, etc.), and the calories you burned are calculated automatically.",
+      "Calories burned always count towards your daily calorie budget on the Overview tab.",
+    ],
+  },
+  {
+    title: "Fasting (intermittent fasting)",
+    steps: [
+      "Go to the Fasting tab.",
+      "Choose a fasting method, e.g. 16:8, or set a custom number of hours.",
+      "Tap \"Start fast\" — the ring and text show which phase you're currently in.",
+      "The fast ends automatically once the time is up, and you'll get an encouraging confirmation.",
+    ],
+  },
+  {
+    title: "Weight tracking and BMI",
+    steps: [
+      "Go to the Weight tab.",
+      "Enter today's weight and tap save — it's added to the graph.",
+      "Your BMI is calculated automatically from the weight and height you entered under Overview → Edit.",
+    ],
+  },
+  {
+    title: "Flexible weekly budget",
+    steps: [
+      "If you've eaten more or less than your goal earlier in the week, the app automatically evens it out over the remaining days.",
+      "You'll see an info box about this directly on the Overview tab when it's relevant.",
+      "Want to turn it off and always have exactly the same goal every day? Tap \"Turn off\" in the box, or change the setting under ✎ Edit.",
+    ],
+  },
+  {
+    title: "Number-free mode",
+    steps: [
+      "Tap \"🌿 Number-free mode\" next to ✎ Edit on the Overview tab.",
+      "Exact calorie numbers are hidden and replaced with colour-coded hearts and a simple status (green/yellow/red).",
+      "Perfect for days when you want to keep track without getting stuck on numbers. Tap the same button again to show numbers.",
+    ],
+  },
+  {
+    title: "Share a meal with a friend",
+    steps: [
+      "Tap the 🤝 icon next to a logged meal.",
+      "A short code is generated — send it to your friend via text or any app.",
+      "Your friend taps + on a category in their own app → \"Get a shared meal\" → enters the code, and the whole meal appears for them.",
+    ],
+  },
+  {
+    title: "Meal scanner (photograph the fridge)",
+    steps: [
+      "Go to the Meal Scanner tab.",
+      "Choose which meal you want suggestions for (e.g. Dinner).",
+      "Photograph the inside of your fridge or pantry — AI identifies the ingredients and suggests 2–3 dishes tailored to how much you have left of today's calorie goal.",
+      "Like a suggestion? Tap \"Add\" to log it right away.",
+    ],
+  },
+  {
+    title: "Recipes with AI or your own recipe",
+    steps: [
+      "The \"Recipe\" box is on the Overview tab, between water and meals.",
+      "🤖 Create with AI: optionally enter ingredients you'd like to use, and AI composes a complete recipe with ingredients, instructions and nutrition values.",
+      "✏️ My own recipe: enter your own recipe manually, with ingredients, instructions and nutrition values.",
+      "Both are saved to your food library for quick reuse, and you can log them directly into any meal category at the same time.",
+    ],
+  },
+  {
+    title: "Climate and cost estimates",
+    steps: [
+      "When you log food, the app also estimates its climate footprint (CO2) and approximate cost.",
+      "When entering food manually, you can fill in your own values under \"Climate & wallet\".",
+      "Today's total climate footprint and food cost are shown at the bottom of the summary on the Overview tab.",
+    ],
+  },
+  {
+    title: "Account and logging out",
+    steps: [
+      "Tap the three lines (☰) in the top left to open the menu.",
+      "There you'll find all the tabs gathered together, plus the \"Log out\" button at the bottom.",
+      "All your data is tied to your account and saved in a database, so it stays there no matter which device you log in from.",
+    ],
+  },
+];
+
+function HelpPanel({ openTopic, onToggleTopic, language }) {
+  const topics = language === "en" ? HELP_TOPICS_EN : HELP_TOPICS;
   return (
     <div className="px-5">
-      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
-        Tryck på ett ämne nedan för att öppna en steg-för-steg-guide för just den delen av appen.
-      </p>
+      <p className="text-xs mb-5" style={{ color: colors.textDim }}>{tr("Tryck på ett ämne nedan för att öppna en steg-för-steg-guide för just den delen av appen.", language)}</p>
 
       <div className="flex flex-col gap-2.5">
-        {HELP_TOPICS.map((topic, i) => {
+        {topics.map((topic, i) => {
           const isOpen = openTopic === i;
           return (
             <div
@@ -4966,12 +5259,10 @@ function HelpPanel({ openTopic, onToggleTopic }) {
   );
 }
 
-function NewsPanel() {
+function NewsPanel({ language }) {
   return (
     <div className="px-5">
-      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
-        Allt som är nytt i Calio Bite, senaste versionen överst.
-      </p>
+      <p className="text-xs mb-5" style={{ color: colors.textDim }}>{tr("Allt som är nytt i Calio Bite, senaste versionen överst.", language)}</p>
 
       <div className="flex flex-col gap-4">
         {CHANGELOG.map((entry, i) => (
@@ -4994,9 +5285,9 @@ function NewsPanel() {
                 {entry.date}
               </span>
             </div>
-            <h3 className="text-sm font-bold mb-2">{entry.headline}</h3>
+            <h3 className="text-sm font-bold mb-2">{language === "en" ? entry.headline_en : entry.headline}</h3>
             <ul style={{ paddingLeft: 18 }}>
-              {entry.details.map((line, j) => (
+              {(language === "en" ? entry.details_en : entry.details).map((line, j) => (
                 <li key={j} className="text-xs mb-1" style={{ color: colors.textDim, listStyleType: "disc" }}>
                   {line}
                 </li>
@@ -5009,12 +5300,10 @@ function NewsPanel() {
   );
 }
 
-function LegalPanel() {
+function LegalPanel({ language }) {
   return (
     <div className="px-5">
-      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
-        Villkor och ansvarsbegränsning för Calio Bite.
-      </p>
+      <p className="text-xs mb-5" style={{ color: colors.textDim }}>{tr("Villkor och ansvarsbegränsning för Calio Bite.", language)}</p>
 
       <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
         <h3 className="text-base font-bold mb-4">Disclaimer and Limitation of Liability</h3>
@@ -5050,19 +5339,19 @@ function LegalPanel() {
       </div>
 
       <p className="text-[11px] text-center mt-5" style={{ color: colors.textDim }}>
-        © {new Date().getFullYear()} Femtes. Alla rättigheter förbehållna.
+        © {new Date().getFullYear()} Femtes. {tr("Alla rättigheter förbehållna.", language)}
       </p>
     </div>
   );
 }
 
-function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClose, onAddSuggestion, goals, consumed }) {
+function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClose, onAddSuggestion, goals, consumed, language }) {
   const remainingKcal = goals ? Math.max(0, goals.kcalGoal - consumed.kcal) : null;
 
   return (
     <div className="px-5">
       <p className="text-xs font-bold mb-2" style={{ color: colors.textDim }}>
-        Vad vill du ha förslag på?
+        {tr("Vad vill du ha förslag på?", language)}
       </p>
       <div className="flex gap-2 mb-5 overflow-x-auto">
         {SCANNER_CATEGORIES.map((c) => (
@@ -5075,7 +5364,7 @@ function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClo
               color: category === c.key ? colors.onPrimary : colors.textDim,
             }}
           >
-            {c.label}
+            {tr(c.label, language)}
           </button>
         ))}
       </div>
@@ -5083,14 +5372,17 @@ function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClo
       {goals ? (
         <div className="rounded-2xl px-4 py-3 mb-5" style={{ backgroundColor: colors.surfaceMuted }}>
           <p className="text-xs" style={{ color: colors.textDim }}>
-            Du har <span className="font-bold" style={{ color: colors.text }}>{remainingKcal} kcal</span> kvar av dagens mål —
-            förslagen anpassas efter det.
+            {language === "en" ? (
+              <>You have <span className="font-bold" style={{ color: colors.text }}>{remainingKcal} kcal</span> left of today's goal — suggestions are adapted accordingly.</>
+            ) : (
+              <>Du har <span className="font-bold" style={{ color: colors.text }}>{remainingKcal} kcal</span> kvar av dagens mål — förslagen anpassas efter det.</>
+            )}
           </p>
         </div>
       ) : (
         <div className="rounded-2xl px-4 py-3 mb-5" style={{ backgroundColor: colors.surfaceMuted }}>
           <p className="text-xs" style={{ color: colors.textDim }}>
-            Ställ in dina mål under "Översikt" så kan förslagen anpassas efter hur mycket du har kvar att äta.
+            {tr("Ställ in dina mål under", language)} "{getTabLabel("budget", language)}" {tr("så kan förslagen anpassas efter hur mycket du har kvar att äta.", language)}
           </p>
         </div>
       )}
@@ -5101,7 +5393,7 @@ function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClo
           className="w-full rounded-xl py-4 text-sm font-bold mb-6"
           style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
         >
-          📷 Fota kylskåp / skafferi
+          {tr("📷 Fota kylskåp / skafferi", language)}
         </button>
       )}
 
@@ -5112,7 +5404,7 @@ function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClo
             style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
           />
           <p className="text-sm" style={{ color: colors.textDim }}>
-            Analyserar innehållet …
+            {tr("Analyserar innehållet …", language)}
           </p>
         </div>
       )}
@@ -5166,7 +5458,7 @@ function ScannerPanel({ category, onCategoryChange, flow, onTriggerCamera, onClo
                     <span className="font-bold" style={{ color: colors.text }}>
                       {Math.round(s.kcal)} kcal
                     </span>{" "}
-                    · P {Math.round(s.protein_g)}g · K {Math.round(s.carbs_g)}g · F {Math.round(s.fat_g)}g · Fi{" "}
+                    · P {Math.round(s.protein_g)}g · {language === "en" ? "C" : "K"} {Math.round(s.carbs_g)}g · F {Math.round(s.fat_g)}g · Fi{" "}
                     {Math.round(s.fiber_g)}g
                   </p>
                   <button
@@ -5288,6 +5580,7 @@ function FastingPanel({
   customHours,
   onCustomHoursChange,
   onApplyCustomHours,
+  language,
 }) {
   if (!loaded) {
     return (
@@ -5387,17 +5680,13 @@ function FastingPanel({
           onClick={onStart}
           className="w-full rounded-full py-3.5 text-sm font-bold mb-6"
           style={{ backgroundColor: colors.primary, color: colors.onPrimary }}
-        >
-          Starta fasta
-        </button>
+        >{tr("Starta fasta", language)}</button>
       )}
 
       {(startParts || endParts) && (
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl p-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
-            <p className="text-xs mb-1" style={{ color: colors.textDim }}>
-              Starta fasta
-            </p>
+            <p className="text-xs mb-1" style={{ color: colors.textDim }}>{tr("Starta fasta", language)}</p>
             {editingStart ? (
               <div className="flex flex-col gap-2">
                 <input
@@ -5422,7 +5711,7 @@ function FastingPanel({
                 <div className="flex items-center gap-1.5">
                   <p className="text-base font-extrabold">{startParts.time}</p>
                   {fasting.isFasting && (
-                    <button onClick={onOpenEditStart} aria-label="Ändra starttid" style={{ color: colors.primary, fontSize: 12 }}>
+                    <button onClick={onOpenEditStart} aria-label={tr("Ändra starttid", language)} style={{ color: colors.primary, fontSize: 12 }}>
                       ✎
                     </button>
                   )}
@@ -5456,7 +5745,7 @@ function FastingPanel({
       <div className="mt-8">
         <h3 className="text-base font-extrabold mb-1">Faser under en fasta</h3>
         <p className="text-xs mb-4" style={{ color: colors.textDim }}>
-          Generell översikt över vad som händer i kroppen ju längre en fasta pågår
+          {tr("Generell översikt över vad som händer i kroppen ju längre en fasta pågår", language)}
         </p>
 
         {FASTING_STAGE_GROUPS.map((group) => (
@@ -5486,9 +5775,7 @@ function FastingPanel({
                         <span
                           className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                           style={{ backgroundColor: s.color, color: colors.onPrimary }}
-                        >
-                          Nu
-                        </span>
+                        >{tr("Nu", language)}</span>
                       )}
                     </div>
                     <p className="text-sm font-bold mb-1" style={{ color: isCurrent ? s.color : colors.text }}>
@@ -5518,8 +5805,8 @@ function FastingPanel({
             style={{ backgroundColor: colors.surface, maxHeight: "70vh", overflowY: "auto" }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold">Välj fastemetod</h3>
-              <button onClick={onCloseMethod} className="text-lg" style={{ color: colors.textDim }} aria-label="Stäng">
+              <h3 className="text-base font-bold">{tr("Välj fastemetod", language)}</h3>
+              <button onClick={onCloseMethod} className="text-lg" style={{ color: colors.textDim }} aria-label={tr("Stäng", language)}>
                 ×
               </button>
             </div>
@@ -5564,7 +5851,7 @@ function FastingPanel({
                   opacity: !customHours || Number(customHours) <= 0 || Number(customHours) > 72 ? 0.5 : 1,
                 }}
               >
-                Använd
+                {language === "en" ? "Use" : "Använd"}
               </button>
             </div>
           </div>
@@ -5617,7 +5904,7 @@ function MacroRow({ icon, color, label, value, goal }) {
   );
 }
 
-function WalkOffCard({ kcal, weightKg, onAddStepGoal }) {
+function WalkOffCard({ kcal, weightKg, onAddStepGoal, language }) {
   const [addedForKcal, setAddedForKcal] = useState(null);
   if (!kcal || kcal <= 0) return null;
 
@@ -5628,13 +5915,13 @@ function WalkOffCard({ kcal, weightKg, onAddStepGoal }) {
   return (
     <div className="rounded-xl px-4 py-3 mb-4" style={{ backgroundColor: colors.surfaceMuted }}>
       <p className="text-xs mb-2" style={{ color: colors.textDim }}>
-        🚶 Det här motsvarar{" "}
+        🚶 {language === "en" ? "This is equivalent to" : "Det här motsvarar"}{" "}
         <span className="font-bold" style={{ color: colors.text }}>
-          {steps.toLocaleString("sv-SE")} steg
+          {steps.toLocaleString(language === "en" ? "en-US" : "sv-SE")} {language === "en" ? "steps" : "steg"}
         </span>{" "}
-        eller{" "}
+        {language === "en" ? "or" : "eller"}{" "}
         <span className="font-bold" style={{ color: colors.text }}>
-          {minutes} minuters promenad
+          {minutes} {language === "en" ? "minutes of walking" : "minuters promenad"}
         </span>
       </p>
       <button
@@ -5646,7 +5933,13 @@ function WalkOffCard({ kcal, weightKg, onAddStepGoal }) {
         className="text-xs font-bold"
         style={{ color: isAdded ? colors.textDim : colors.primary }}
       >
-        {isAdded ? "Tillagt i dagens stegmål ✓" : "Lägg till som stegmål"}
+        {isAdded
+          ? language === "en"
+            ? "Added to today's step goal ✓"
+            : "Tillagt i dagens stegmål ✓"
+          : language === "en"
+          ? "Add as step goal"
+          : "Lägg till som stegmål"}
       </button>
     </div>
   );
