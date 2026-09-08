@@ -82,6 +82,30 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.7.1",
+    date: "2026-09-08",
+    headline: "Anteckningar och svar i support-inkorgen",
+    headline_en: "Notes and replies in the support inbox",
+    summary: [
+      "Skriv en intern anteckning på ett ärende innan det löses",
+      "Svara den som skickade in ärendet direkt via e-post, t.ex. som ett tack",
+    ],
+    summary_en: [
+      "Write an internal note on a ticket before resolving it",
+      "Reply directly to the person who submitted the ticket via email, e.g. as a thank-you",
+    ],
+    details: [
+      "Varje supportärende har nu ett fält för en intern anteckning — bara synlig för admin, sparas oberoende av status.",
+      "Lagt till ett svarsfält där du skriver ett meddelande till avsändaren, och en knapp 'Öppna i e-post' som öppnar ditt eget mejlprogram förifyllt med mottagare, ämne och text.",
+      "Både anteckning och svar sparas i databasen, så du kan gå tillbaka och se vad som skrivits även efter att ärendet markerats som löst.",
+    ],
+    details_en: [
+      "Every support ticket now has a field for an internal note — only visible to admins, saved independently of status.",
+      "Added a reply field where you write a message to the sender, and an 'Open in email' button that opens your own email app pre-filled with recipient, subject and body.",
+      "Both the note and the reply are saved to the database, so you can go back and see what was written even after the ticket is marked resolved.",
+    ],
+  },
+  {
     version: "0.7.0",
     date: "2026-09-08",
     headline: "Admin-vy: Support-inkorg och AI-kostnadsöversikt",
@@ -1404,6 +1428,24 @@ export default function Portion() {
       await supabase.from("feedback").update({ status }).eq("id", id);
     } catch (e) {
       console.error("Kunde inte uppdatera status:", e);
+    }
+  }
+
+  async function saveFeedbackNote(id, note) {
+    setAdminFeedback((prev) => (prev ? prev.map((f) => (f.id === id ? { ...f, admin_note: note } : f)) : prev));
+    try {
+      await supabase.from("feedback").update({ admin_note: note }).eq("id", id);
+    } catch (e) {
+      console.error("Kunde inte spara anteckningen:", e);
+    }
+  }
+
+  async function saveFeedbackReply(id, reply) {
+    setAdminFeedback((prev) => (prev ? prev.map((f) => (f.id === id ? { ...f, admin_reply: reply } : f)) : prev));
+    try {
+      await supabase.from("feedback").update({ admin_reply: reply }).eq("id", id);
+    } catch (e) {
+      console.error("Kunde inte spara svaret:", e);
     }
   }
 
@@ -3558,6 +3600,8 @@ export default function Portion() {
             feedback={adminFeedback}
             feedbackLoading={adminFeedbackLoading}
             onUpdateFeedbackStatus={updateFeedbackStatus}
+            onSaveNote={saveFeedbackNote}
+            onSaveReply={saveFeedbackReply}
             aiLog={adminAiLog}
             aiLogLoading={adminAiLogLoading}
             language={language}
@@ -6165,12 +6209,148 @@ const AI_FEATURE_LABELS_EN = {
 };
 const GEMINI_FREE_DAILY_LIMIT = 1500;
 
+function FeedbackCard({ item, onUpdateStatus, onSaveNote, onSaveReply, language }) {
+  const [note, setNote] = useState(item.admin_note || "");
+  const [reply, setReply] = useState(item.admin_reply || "");
+  const [noteSaved, setNoteSaved] = useState(true);
+  const [replySaved, setReplySaved] = useState(true);
+
+  function handleNoteChange(v) {
+    setNote(v);
+    setNoteSaved(false);
+  }
+
+  function handleReplyChange(v) {
+    setReply(v);
+    setReplySaved(false);
+  }
+
+  function handleSaveNote() {
+    onSaveNote(item.id, note);
+    setNoteSaved(true);
+  }
+
+  function handleSaveReply() {
+    onSaveReply(item.id, reply);
+    setReplySaved(true);
+  }
+
+  function openReplyEmail() {
+    if (!item.user_email) return;
+    if (!replySaved) handleSaveReply();
+    const subject = encodeURIComponent(`Re: ${item.title}`);
+    const body = encodeURIComponent(reply || "");
+    window.location.href = `mailto:${item.user_email}?subject=${subject}&body=${body}`;
+  }
+
+  return (
+    <div className="rounded-2xl p-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+      <div className="flex items-center justify-between mb-1.5">
+        <span style={{ fontSize: 16 }}>{item.type === "bug" ? "🐞" : "💡"}</span>
+        <span
+          className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+          style={{
+            backgroundColor: item.status === "resolved" ? colors.primaryLight : colors.surfaceMuted,
+            color: item.status === "resolved" ? colors.primary : colors.textDim,
+          }}
+        >
+          {(language === "en" ? FEEDBACK_STATUS_LABELS_EN : FEEDBACK_STATUS_LABELS)[item.status] || item.status}
+        </span>
+      </div>
+      <p className="text-sm font-bold mb-1">{item.title}</p>
+      <p className="text-xs mb-2" style={{ color: colors.textDim, lineHeight: 1.5 }}>
+        {item.description}
+      </p>
+      <p className="text-[11px] mb-3" style={{ color: colors.textDim }}>
+        {item.user_email || "Ingen e-post"} · {new Date(item.created_at).toLocaleString("sv-SE")}
+      </p>
+
+      <div className="flex gap-1.5 mb-3">
+        {["new", "read", "resolved"].map((s) => (
+          <button
+            key={s}
+            onClick={() => onUpdateStatus(item.id, s)}
+            className="flex-1 rounded-lg py-2 text-[11px] font-semibold"
+            style={{
+              backgroundColor: item.status === s ? colors.primary : colors.surfaceMuted,
+              color: item.status === s ? colors.onPrimary : colors.textDim,
+            }}
+          >
+            {(language === "en" ? FEEDBACK_STATUS_LABELS_EN : FEEDBACK_STATUS_LABELS)[s]}
+          </button>
+        ))}
+      </div>
+
+      <div className="pt-3" style={{ borderTop: `1px solid ${colors.hairline}` }}>
+        <label className="text-[11px] font-bold block mb-1.5" style={{ color: colors.textDim }}>
+          📝 Intern anteckning (bara du ser den här)
+        </label>
+        <textarea
+          value={note}
+          onChange={(e) => handleNoteChange(e.target.value)}
+          rows={2}
+          placeholder="T.ex. viktigt att komma ihåg innan detta löses …"
+          className="w-full rounded-lg px-3 py-2 text-xs mb-1.5"
+          style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+        />
+        {!noteSaved && (
+          <button
+            onClick={handleSaveNote}
+            className="text-[11px] font-bold mb-3"
+            style={{ color: colors.primary }}
+          >
+            Spara anteckning
+          </button>
+        )}
+
+        <label className="text-[11px] font-bold block mb-1.5 mt-2" style={{ color: colors.textDim }}>
+          ✉️ Svar till avsändaren
+        </label>
+        <textarea
+          value={reply}
+          onChange={(e) => handleReplyChange(e.target.value)}
+          rows={2}
+          placeholder="T.ex. Tack för ett bra förslag! Vi bygger in det i nästa uppdatering."
+          className="w-full rounded-lg px-3 py-2 text-xs mb-2"
+          style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+        />
+        <div className="flex gap-2">
+          {!replySaved && (
+            <button
+              onClick={handleSaveReply}
+              className="text-[11px] font-bold"
+              style={{ color: colors.primary }}
+            >
+              Spara svar
+            </button>
+          )}
+          <button
+            onClick={openReplyEmail}
+            disabled={!item.user_email || !reply.trim()}
+            className="text-[11px] font-bold ml-auto"
+            style={{ color: !item.user_email || !reply.trim() ? colors.textDim : colors.primary, opacity: !item.user_email || !reply.trim() ? 0.5 : 1 }}
+          >
+            ✉️ Öppna i e-post
+          </button>
+        </div>
+        {!item.user_email && (
+          <p className="text-[10px] mt-1.5" style={{ color: colors.textDim }}>
+            Ingen e-post angiven av avsändaren — går inte att svara direkt.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AdminPanel({
   section,
   onSectionChange,
   feedback,
   feedbackLoading,
   onUpdateFeedbackStatus,
+  onSaveNote,
+  onSaveReply,
   aiLog,
   aiLogLoading,
   language,
@@ -6269,47 +6449,14 @@ function AdminPanel({
           ) : (
             <div className="flex flex-col gap-2.5">
               {filteredFeedback.map((f) => (
-                <div
+                <FeedbackCard
                   key={f.id}
-                  className="rounded-2xl p-4"
-                  style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span style={{ fontSize: 16 }}>{f.type === "bug" ? "🐞" : "💡"}</span>
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor:
-                          f.status === "resolved" ? colors.primaryLight : colors.surfaceMuted,
-                        color: f.status === "resolved" ? colors.primary : colors.textDim,
-                      }}
-                    >
-                      {(language === "en" ? FEEDBACK_STATUS_LABELS_EN : FEEDBACK_STATUS_LABELS)[f.status] || f.status}
-                    </span>
-                  </div>
-                  <p className="text-sm font-bold mb-1">{f.title}</p>
-                  <p className="text-xs mb-2" style={{ color: colors.textDim, lineHeight: 1.5 }}>
-                    {f.description}
-                  </p>
-                  <p className="text-[11px] mb-3" style={{ color: colors.textDim }}>
-                    {f.user_email || "Ingen e-post"} · {new Date(f.created_at).toLocaleString("sv-SE")}
-                  </p>
-                  <div className="flex gap-1.5">
-                    {["new", "read", "resolved"].map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => onUpdateFeedbackStatus(f.id, s)}
-                        className="flex-1 rounded-lg py-2 text-[11px] font-semibold"
-                        style={{
-                          backgroundColor: f.status === s ? colors.primary : colors.surfaceMuted,
-                          color: f.status === s ? colors.onPrimary : colors.textDim,
-                        }}
-                      >
-                        {(language === "en" ? FEEDBACK_STATUS_LABELS_EN : FEEDBACK_STATUS_LABELS)[s]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                  item={f}
+                  onUpdateStatus={onUpdateFeedbackStatus}
+                  onSaveNote={onSaveNote}
+                  onSaveReply={onSaveReply}
+                  language={language}
+                />
               ))}
             </div>
           )}
