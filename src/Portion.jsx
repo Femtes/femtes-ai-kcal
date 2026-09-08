@@ -3,7 +3,7 @@ import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, Cart
 import { logout } from "./lib/auth.js";
 import { supabase } from "./lib/supabaseClient.js";
 
-const colors = {
+const DARK_COLORS = {
   bg: "#121317",
   surface: "#1C1E24",
   surfaceMuted: "#26282F",
@@ -21,6 +21,37 @@ const colors = {
   pink: "#F0567F",
   onPrimary: "#14180D",
 };
+
+const LIGHT_COLORS = {
+  bg: "#F5F6F8",
+  surface: "#FFFFFF",
+  surfaceMuted: "#EEF0F3",
+  text: "#14171F",
+  textDim: "#6B7280",
+  hairline: "#E3E5EA",
+  primary: "#5C8F2E",
+  primaryLight: "#E8F3DC",
+  water: "#2C97B5",
+  carbs: "#2F9E63",
+  protein: "#D97A34",
+  fat: "#B4901E",
+  fiber: "#9C7249",
+  coral: "#E2503A",
+  pink: "#D63F6C",
+  onPrimary: "#FFFFFF",
+};
+
+// "colors" är avsiktligt en muterbar (let) referens, inte en konstant.
+// Hela filen läser colors.xxx direkt vid render, så när applyTheme()
+// muterar objektet slår temabytet igenom överallt i appen automatiskt,
+// utan att varje enskild färgreferens behöver ändras för hand.
+let colors = { ...DARK_COLORS };
+
+function applyTheme(theme) {
+  Object.assign(colors, theme === "light" ? LIGHT_COLORS : DARK_COLORS);
+}
+
+const THEME_KEY = "app-theme";
 
 const MACRO_BAR_COLORS = { carbs: "#6FCF57", protein: "#4E8CFF", fat: "#F0924B", fiber: "#B98B5E" };
 
@@ -42,12 +73,37 @@ const TABS = [
   { key: "fasting", label: "Fasta" },
   { key: "trends", label: "Trender" },
   { key: "weight", label: "Viktgång" },
+  { key: "setup", label: "Setup" },
   { key: "news", label: "Nyheter" },
   { key: "help", label: "Hjälp" },
   { key: "legal", label: "Legal" },
 ];
 
 const CHANGELOG = [
+  {
+    version: "0.6.0",
+    date: "2026-09-08",
+    headline: "Ljust och mörkt läge",
+    headline_en: "Light and dark mode",
+    summary: [
+      "Ny flik 'Setup' där du kan välja mellan ljust och mörkt tema",
+      "Hela appen byter utseende direkt, inget behöver laddas om",
+    ],
+    summary_en: [
+      "New 'Setup' tab where you can choose between light and dark theme",
+      "The whole app switches appearance instantly, no reload needed",
+    ],
+    details: [
+      "Lagt till en ny flik 'Setup' i hamburgermenyn med en tydlig växlare mellan 🌙 Mörkt och ☀️ Ljust läge.",
+      "Ditt val sparas på kontot och gäller nästa gång du loggar in också.",
+      "Färgerna i ljust läge är justerade för god läsbarhet mot vit bakgrund, separat från de ljusstarka färgerna i mörkt läge.",
+    ],
+    details_en: [
+      "Added a new 'Setup' tab in the hamburger menu with a clear toggle between 🌙 Dark and ☀️ Light mode.",
+      "Your choice is saved to your account and applies the next time you log in too.",
+      "Colours in light mode are adjusted for good readability against a white background, separate from the brighter colours used in dark mode.",
+    ],
+  },
   {
     version: "0.5.1",
     date: "2026-09-08",
@@ -332,6 +388,7 @@ const TAB_LABELS_EN = {
   fasting: "Fasting",
   trends: "Trends",
   weight: "Weight",
+  setup: "Setup",
   news: "News",
   help: "Help",
   legal: "Legal",
@@ -583,6 +640,12 @@ const EN_STRINGS = {
   "g kvar": "g left",
   "Välj datum": "Choose date",
   "Sparar bild …": "Saving photo …",
+  "Utseende": "Appearance",
+  "Välj det tema som känns skönast för dina ögon.": "Choose the theme that's easiest on your eyes.",
+  "Mörkt": "Dark",
+  "Ljust": "Light",
+  "Ställ in ljust eller mörkt läge, samt andra allmänna inställningar för appen.":
+    "Set light or dark mode, plus other general settings for the app.",
   "portion": "serving",
   "portioner": "servings",
   "Hur många lagar du till?": "How many are you cooking for?",
@@ -636,6 +699,7 @@ const TAB_INFO = {
     "Här kan du gå tillbaka i historiken vecka för vecka. Tryck på en dag för att se just den dagens kalorier och makron i detalj.",
   weight:
     "Logga din vikt regelbundet för att se utvecklingen som en graf över tid, och håll koll på ditt uträknade BMI högst upp.",
+  setup: "Ställ in ljust eller mörkt läge, samt andra allmänna inställningar för appen.",
   news: "Allt som är nytt i Calio Bite, senaste versionen överst.",
   help: "Tryck på ett ämne för att öppna en steg-för-steg-guide för just den delen av appen.",
   legal: "Villkor och ansvarsbegränsning för Calio Bite.",
@@ -1128,6 +1192,7 @@ export default function Portion() {
   const [scannerFlow, setScannerFlow] = useState(null);
   const [recipeFlow, setRecipeFlow] = useState(null);
   const [language, setLanguage] = useState("sv");
+  const [theme, setThemeState] = useState("dark");
   const [helpOpenTopic, setHelpOpenTopic] = useState(null);
   const [nowTick, setNowTick] = useState(Date.now());
   const [fastCompletedMsg, setFastCompletedMsg] = useState(null);
@@ -1158,6 +1223,24 @@ export default function Portion() {
       } catch (e) {}
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await window.storage.get(THEME_KEY, false);
+        if (res && res.value) {
+          applyTheme(res.value);
+          setThemeState(res.value);
+        }
+      } catch (e) {}
+    })();
+  }, []);
+
+  function changeTheme(next) {
+    applyTheme(next);
+    setThemeState(next);
+    window.storage.set(THEME_KEY, next, false).catch(() => {});
+  }
 
   function changeLanguage(code) {
     setLanguage(code);
@@ -2551,9 +2634,9 @@ export default function Portion() {
               className="w-8 h-8 flex items-center justify-center flex-shrink-0"
             >
               <svg width="20" height="16" viewBox="0 0 20 16" fill="none">
-                <rect y="0" width="20" height="2.4" rx="1.2" fill="#FFFFFF" />
-                <rect y="6.8" width="20" height="2.4" rx="1.2" fill="#FFFFFF" />
-                <rect y="13.6" width="20" height="2.4" rx="1.2" fill="#FFFFFF" />
+                <rect y="0" width="20" height="2.4" rx="1.2" fill={colors.text} />
+                <rect y="6.8" width="20" height="2.4" rx="1.2" fill={colors.text} />
+                <rect y="13.6" width="20" height="2.4" rx="1.2" fill={colors.text} />
               </svg>
             </button>
             <img src="/logo.png" alt="Calio Bite" className="h-7 w-auto flex-shrink-0" style={{ objectFit: "contain" }} />
@@ -2645,12 +2728,12 @@ export default function Portion() {
           >
             <div
               className="h-full flex flex-col"
-              style={{ width: "78%", maxWidth: 300, backgroundColor: "#0B0B0D", borderRight: `1px solid ${colors.hairline}` }}
+              style={{ width: "78%", maxWidth: 300, backgroundColor: colors.surface, borderRight: `1px solid ${colors.hairline}` }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="px-5 pt-6 pb-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${colors.hairline}` }}>
                 <img src="/logo.png" alt="Calio Bite" className="h-7 w-auto" style={{ objectFit: "contain" }} />
-                <button onClick={() => setMenuOpen(false)} aria-label={tr("Stäng meny", language)} style={{ color: "#FFFFFF", fontSize: 20 }}>
+                <button onClick={() => setMenuOpen(false)} aria-label={tr("Stäng meny", language)} style={{ color: colors.text, fontSize: 20 }}>
                   ×
                 </button>
               </div>
@@ -2664,7 +2747,7 @@ export default function Portion() {
                     }}
                     className="w-full text-left px-5 py-3.5 text-sm font-semibold"
                     style={{
-                      color: activeTab === t.key ? colors.primary : "#FFFFFF",
+                      color: activeTab === t.key ? colors.primary : colors.text,
                       backgroundColor: activeTab === t.key ? colors.primaryLight : "transparent",
                     }}
                   >
@@ -3247,6 +3330,10 @@ export default function Portion() {
             profile={profile}
             language={language}
           />
+        )}
+
+        {activeTab === "setup" && (
+          <SetupPanel theme={theme} onChangeTheme={changeTheme} language={language} />
         )}
 
         {activeTab === "news" && <NewsPanel language={language} />}
@@ -5667,6 +5754,52 @@ function HelpPanel({ openTopic, onToggleTopic, language }) {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function SetupPanel({ theme, onChangeTheme, language }) {
+  return (
+    <div className="px-5">
+      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
+        {tr("Ställ in ljust eller mörkt läge, samt andra allmänna inställningar för appen.", language)}
+      </p>
+
+      <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+        <p className="text-sm font-bold mb-1">{tr("Utseende", language)}</p>
+        <p className="text-xs mb-4" style={{ color: colors.textDim }}>
+          {tr("Välj det tema som känns skönast för dina ögon.", language)}
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => onChangeTheme("dark")}
+            className="flex-1 rounded-2xl py-5 flex flex-col items-center gap-2"
+            style={{
+              backgroundColor: theme === "dark" ? colors.primaryLight : colors.surfaceMuted,
+              border: `2px solid ${theme === "dark" ? colors.primary : "transparent"}`,
+            }}
+          >
+            <span style={{ fontSize: 26 }}>🌙</span>
+            <span className="text-sm font-bold" style={{ color: theme === "dark" ? colors.primary : colors.text }}>
+              {tr("Mörkt", language)}
+            </span>
+          </button>
+          <button
+            onClick={() => onChangeTheme("light")}
+            className="flex-1 rounded-2xl py-5 flex flex-col items-center gap-2"
+            style={{
+              backgroundColor: theme === "light" ? colors.primaryLight : colors.surfaceMuted,
+              border: `2px solid ${theme === "light" ? colors.primary : "transparent"}`,
+            }}
+          >
+            <span style={{ fontSize: 26 }}>☀️</span>
+            <span className="text-sm font-bold" style={{ color: theme === "light" ? colors.primary : colors.text }}>
+              {tr("Ljust", language)}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );
