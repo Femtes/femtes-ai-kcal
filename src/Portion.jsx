@@ -82,6 +82,30 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.7.2",
+    date: "2026-09-08",
+    headline: "Historik-flik i support-inkorgen",
+    headline_en: "History tab in the support inbox",
+    summary: [
+      "Lösta ärenden flyttas nu automatiskt till en egen flik 'Historik'",
+      "De andra flikarna visar bara det som fortfarande behöver hanteras",
+    ],
+    summary_en: [
+      "Resolved tickets now automatically move to their own 'History' tab",
+      "The other tabs only show what still needs handling",
+    ],
+    details: [
+      "Ny filterflik 'Historik' som visar alla ärenden markerade som Löst.",
+      "Flikarna Alla/Fel/Förbättring döljer nu automatiskt lösta ärenden, så en tom lista snabbt visar att inget nytt väntar.",
+      "Tydligare tomt-läge: 'Inget nytt just nu 🎉' istället för ett neutralt 'Inga ärenden än'.",
+    ],
+    details_en: [
+      "New 'History' filter tab that shows all tickets marked Resolved.",
+      "The All/Bug/Improvement tabs now automatically hide resolved tickets, so an empty list quickly shows that nothing new is waiting.",
+      "Clearer empty state: 'Nothing new right now 🎉' instead of a neutral 'No tickets yet'.",
+    ],
+  },
+  {
     version: "0.7.1",
     date: "2026-09-08",
     headline: "Anteckningar och svar i support-inkorgen",
@@ -6357,7 +6381,11 @@ function AdminPanel({
 }) {
   const [feedbackFilter, setFeedbackFilter] = useState("all");
 
-  const filteredFeedback = (feedback || []).filter((f) => feedbackFilter === "all" || f.type === feedbackFilter);
+  const filteredFeedback = (feedback || []).filter((f) => {
+    if (feedbackFilter === "history") return f.status === "resolved";
+    if (f.status === "resolved") return false;
+    return feedbackFilter === "all" || f.type === feedbackFilter;
+  });
 
   let aiStats = null;
   if (aiLog) {
@@ -6417,6 +6445,7 @@ function AdminPanel({
               { key: "all", label: "Alla" },
               { key: "bug", label: "🐞 Fel" },
               { key: "improvement", label: "💡 Förbättring" },
+              { key: "history", label: "🗂️ Historik" },
             ].map((f) => (
               <button
                 key={f.key}
@@ -6444,7 +6473,7 @@ function AdminPanel({
               className="rounded-2xl py-8 text-center text-sm"
               style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}`, color: colors.textDim }}
             >
-              Inga ärenden än
+              {feedbackFilter === "history" ? "Inga lösta ärenden än" : "Inget nytt just nu 🎉"}
             </div>
           ) : (
             <div className="flex flex-col gap-2.5">
