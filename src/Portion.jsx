@@ -49,6 +49,30 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.5.1",
+    date: "2026-09-08",
+    headline: "Inloggning krävs nu för AI-anrop",
+    headline_en: "Login now required for AI calls",
+    summary: [
+      "Säkerhetsfix: AI-funktionerna kan inte längre nås utan att vara inloggad",
+      "Skyddar mot att utomstående kan använda din Gemini-budget",
+    ],
+    summary_en: [
+      "Security fix: AI features can no longer be reached without being logged in",
+      "Protects against outsiders using up your Gemini budget",
+    ],
+    details: [
+      "Serverfunktionen som pratar med Gemini (foto, röst, Scanner, recept, mellanmålsförslag) verifierar nu att anroparen har en giltig, inloggad Supabase-session innan den gör något AI-anrop.",
+      "Tidigare kunde adressen tekniskt sett nås direkt utifrån, utan att gå via appen, vilket hade kunnat missbrukas för att dra kostnader på ditt Gemini-konto.",
+      "Ingen skillnad märks för dig som redan inloggad användare — det här är ett rent bakgrundsskydd.",
+    ],
+    details_en: [
+      "The server function that talks to Gemini (photo, voice, Scanner, recipes, snack suggestions) now verifies the caller has a valid, logged-in Supabase session before making any AI call.",
+      "Previously the endpoint could technically be reached directly from outside the app, which could have been abused to run up costs on your Gemini account.",
+      "No difference is noticeable for you as an already logged-in user — this is a purely behind-the-scenes protection.",
+    ],
+  },
+  {
     version: "0.5.0",
     date: "2026-09-07",
     headline: "Foton sparas i ditt eget bibliotek",
@@ -1779,18 +1803,13 @@ export default function Portion() {
     if (!text || !text.trim()) return;
 
     try {
-      const response = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system:
-            "Du är en assistent som tolkar en fritextbeskrivning av en måltid och delar upp den i separata livsmedel. Användaren kan nämna flera saker i en och samma mening, t.ex. \"Åt en skål havregrynsgröt med en banan och en skvätt lättmjölk\". Identifiera varje separat livsmedel som nämns, uppskatta en rimlig portionsstorlek utifrån beskrivningen (t.ex. \"en skål\", \"en banan\", \"en skvätt\") och ange näringsvärden, klimatavtryck och kostnad för just den portionen. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{\"name\": string (livsmedelsnamn, inkl. uppskattad mängd, t.ex. \"Havregrynsgröt (1 skål)\"), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen)}]. Om texten inte verkar beskriva någon mat, svara med en tom array []." +
-            aiLangInstruction(language),
-          text,
-          image: null,
-        }),
+      const data = await callGeminiAPI({
+        system:
+          "Du är en assistent som tolkar en fritextbeskrivning av en måltid och delar upp den i separata livsmedel. Användaren kan nämna flera saker i en och samma mening, t.ex. \"Åt en skål havregrynsgröt med en banan och en skvätt lättmjölk\". Identifiera varje separat livsmedel som nämns, uppskatta en rimlig portionsstorlek utifrån beskrivningen (t.ex. \"en skål\", \"en banan\", \"en skvätt\") och ange näringsvärden, klimatavtryck och kostnad för just den portionen. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{\"name\": string (livsmedelsnamn, inkl. uppskattad mängd, t.ex. \"Havregrynsgröt (1 skål)\"), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen)}]. Om texten inte verkar beskriva någon mat, svara med en tom array []." +
+          aiLangInstruction(language),
+        text,
+        image: null,
       });
-      const data = await response.json();
       if (data.error) {
         console.error("Gemini-fel (röstinmatning):", data.error);
         throw new Error(data.error);
@@ -2013,20 +2032,15 @@ export default function Portion() {
       const compressed = await compressImage(file);
       const base64Data = compressed.split(",")[1];
 
-      const response = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system:
-            "Du är en assistent som uppskattar näringsinnehåll, klimatavtryck och kostnad för mat från bilder. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledning. Använd exakt denna form: {\"name\": string (kort maträttsnamn), \"portion_note\": string (kort kommentar om uppskattad portionsstorlek), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen, baserat på ingredienserna), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen, baserat på ungefärliga svenska matvarupriser), \"confidence\": string (en av 'låg', 'medel', 'hög')}. Om bilden inte visar mat, svara med {\"error\": \"no_food_detected\"}." +
-            aiLangInstruction(language),
-          text: "Analysera den här maträtten.",
-          image: base64Data,
-          mimeType: "image/jpeg",
-        }),
+      const data = await callGeminiAPI({
+        system:
+          "Du är en assistent som uppskattar näringsinnehåll, klimatavtryck och kostnad för mat från bilder. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledning. Använd exakt denna form: {\"name\": string (kort maträttsnamn), \"portion_note\": string (kort kommentar om uppskattad portionsstorlek), \"kcal\": number, \"protein_g\": number, \"carbs_g\": number, \"fat_g\": number, \"fiber_g\": number, \"co2_kg\": number (uppskattat klimatavtryck i kg CO2e för portionen, baserat på ingredienserna), \"cost_sek\": number (uppskattad kostnad i svenska kronor för portionen, baserat på ungefärliga svenska matvarupriser), \"confidence\": string (en av 'låg', 'medel', 'hög')}. Om bilden inte visar mat, svara med {\"error\": \"no_food_detected\"}." +
+          aiLangInstruction(language),
+        text: "Analysera den här maträtten.",
+        image: base64Data,
+        mimeType: "image/jpeg",
       });
 
-      const data = await response.json();
       if (data.error) {
         console.error("Gemini-fel (fotoanalys):", data.error);
         throw new Error(data.error);
@@ -2072,6 +2086,20 @@ export default function Portion() {
 
   function updateDraft(field, value) {
     setFlow((f) => ({ ...f, draft: { ...f.draft, [field]: value } }));
+  }
+
+  async function callGeminiAPI(body) {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    const response = await fetch("/api/gemini", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+    return response.json();
   }
 
   async function uploadFoodImage(dataUrl) {
@@ -2250,20 +2278,14 @@ export default function Portion() {
         budgetLine = `Användaren har ungefär ${remKcal} kcal kvar av sitt dagsmål, samt ca ${remProtein}g protein, ${remCarbs}g kolhydrater och ${remFat}g fett kvar. Föreslå måltider som passar väl in i detta.`;
       }
 
-      const response = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system:
-            `Du är en assistent som hjälper användare att komma på måltidsförslag utifrån vad de har hemma i kylskåp eller skafferi. Titta på bilden och identifiera synliga råvaror. Föreslå sedan 2-3 olika förslag på "${mealLabel}" som huvudsakligen använder dessa råvaror. ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"ingredients": [string, ...], "suggestions": [{"name": string, "description": string (kort, en till två meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]}. Om bilden inte visar mat, ett kylskåp eller ett skafferi, svara med {"error": "no_food_detected"}.` +
-            aiLangInstruction(language),
-          text: `Vad kan jag laga till ${mealLabel.toLowerCase()} med det som syns här?`,
-          image: base64Data,
-          mimeType: "image/jpeg",
-        }),
+      const data = await callGeminiAPI({
+        system:
+          `Du är en assistent som hjälper användare att komma på måltidsförslag utifrån vad de har hemma i kylskåp eller skafferi. Titta på bilden och identifiera synliga råvaror. Föreslå sedan 2-3 olika förslag på "${mealLabel}" som huvudsakligen använder dessa råvaror. ${budgetLine} Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"ingredients": [string, ...], "suggestions": [{"name": string, "description": string (kort, en till två meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]}. Om bilden inte visar mat, ett kylskåp eller ett skafferi, svara med {"error": "no_food_detected"}.` +
+          aiLangInstruction(language),
+        text: `Vad kan jag laga till ${mealLabel.toLowerCase()} med det som syns här?`,
+        image: base64Data,
+        mimeType: "image/jpeg",
       });
-
-      const data = await response.json();
       if (data.error) {
         console.error("Gemini-fel (scanner):", data.error);
         throw new Error(data.error);
@@ -2320,18 +2342,13 @@ export default function Portion() {
     const targetKcal = Math.max(150, Math.min(500, Math.round(reactiveBurn.surplus / 2)));
 
     try {
-      const response = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system:
-            `Du är en assistent som föreslår mellanmål. Föreslå 3 olika, varierade mellanmål som ligger nära ${targetKcal} kcal styck. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{"name": string, "description": string (kort, en mening), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]` +
-            aiLangInstruction(language),
-          text: `Ge mig 3 mellanmålsförslag på ca ${targetKcal} kcal.`,
-          image: null,
-        }),
+      const data = await callGeminiAPI({
+        system:
+          `Du är en assistent som föreslår mellanmål. Föreslå 3 olika, varierade mellanmål som ligger nära ${targetKcal} kcal styck. Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: [{"name": string, "description": string (kort, en mening), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}]` +
+          aiLangInstruction(language),
+        text: `Ge mig 3 mellanmålsförslag på ca ${targetKcal} kcal.`,
+        image: null,
       });
-      const data = await response.json();
       if (data.error) {
         console.error("Gemini-fel (mellanmålsförslag):", data.error);
         throw new Error(data.error);
@@ -2423,18 +2440,13 @@ export default function Portion() {
       : "Användaren har inte angett några särskilda ingredienser — hitta på ett gott, enkelt recept.";
 
     try {
-      const response = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system:
-            `Du är en assistent som skapar recept för en enskild måltid. ${ingredientLine} ${budgetLine}${goalLine} Sätt ALLTID "servings" till 1 om du inte har en tydlig anledning (t.ex. att receptet är opraktiskt att laga i mindre skala, som en hel gryta eller bakverk) att göra fler portioner — och om du anger fler portioner MÅSTE ingrediensmängderna vara realistiska för det totala antalet portioner (t.ex. en portion pasta är ca 80–100g torr pasta och en portion kött/fisk/kyckling är ca 120–180g per person — skala ingredienserna korrekt utifrån antalet portioner du anger). Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn), "servings": number, "ingredients": [{"amount": number (numeriskt mått, t.ex. 400 eller 2), "unit": string (t.ex. "g", "dl", "msk", "st" — tom sträng "" om ingrediensen inte mäts i en enhet, t.ex. "efter smak"), "name": string (ingrediensens namn, utan mängd)}, ...], "instructions": [string, ...] (steg för steg, korta meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Varje ingrediens MÅSTE ha "amount" som ett rent nummer (aldrig text eller intervall) så att mängden går att räkna om exakt vid annat antal portioner. Kcal- och näringsvärdena ska gälla HELA receptet (alla portioner tillsammans) — appen räknar själv ut värdet per portion genom att dela med "servings".` +
-            aiLangInstruction(language),
-          text: "Skapa ett recept åt mig.",
-          image: null,
-        }),
+      const data = await callGeminiAPI({
+        system:
+          `Du är en assistent som skapar recept för en enskild måltid. ${ingredientLine} ${budgetLine}${goalLine} Sätt ALLTID "servings" till 1 om du inte har en tydlig anledning (t.ex. att receptet är opraktiskt att laga i mindre skala, som en hel gryta eller bakverk) att göra fler portioner — och om du anger fler portioner MÅSTE ingrediensmängderna vara realistiska för det totala antalet portioner (t.ex. en portion pasta är ca 80–100g torr pasta och en portion kött/fisk/kyckling är ca 120–180g per person — skala ingredienserna korrekt utifrån antalet portioner du anger). Svara ENDAST med giltig JSON, utan markdown-formatering, utan kodblock, utan inledande text, i denna form: {"name": string (receptnamn), "servings": number, "ingredients": [{"amount": number (numeriskt mått, t.ex. 400 eller 2), "unit": string (t.ex. "g", "dl", "msk", "st" — tom sträng "" om ingrediensen inte mäts i en enhet, t.ex. "efter smak"), "name": string (ingrediensens namn, utan mängd)}, ...], "instructions": [string, ...] (steg för steg, korta meningar), "kcal": number, "protein_g": number, "carbs_g": number, "fat_g": number, "fiber_g": number}. Varje ingrediens MÅSTE ha "amount" som ett rent nummer (aldrig text eller intervall) så att mängden går att räkna om exakt vid annat antal portioner. Kcal- och näringsvärdena ska gälla HELA receptet (alla portioner tillsammans) — appen räknar själv ut värdet per portion genom att dela med "servings".` +
+          aiLangInstruction(language),
+        text: "Skapa ett recept åt mig.",
+        image: null,
       });
-      const data = await response.json();
       if (data.error) {
         console.error("Gemini-fel (recept):", data.error);
         throw new Error(data.error);

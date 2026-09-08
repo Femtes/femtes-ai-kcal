@@ -1,15 +1,40 @@
 // api/gemini.js
 //
 // Säker server-funktion mot Googles Gemini API (gratis-nivå).
-// Klienten skickar { system, text, image, mimeType } — den här
-// funktionen bygger om det till Geminis format och lägger till
-// nyckeln, som aldrig syns i webbläsaren.
+// Kräver att anroparen är inloggad — verifierar Supabase-sessionen
+// innan den pratar med Gemini, så ingen utomstående kan använda din
+// AI-budget genom att posta direkt till den här adressen.
+//
+// Klienten skickar { system, text, image, mimeType } plus en
+// Authorization: Bearer <access_token>-header — den här funktionen
+// bygger om det till Geminis format och lägger till nyckeln, som
+// aldrig syns i webbläsaren.
+
+import { createClient } from "@supabase/supabase-js";
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Endast POST är tillåtet" });
+  }
+
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) {
+    return res.status(401).json({ error: "Inloggning krävs för att använda AI-funktioner." });
+  }
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return res.status(500).json({ error: "Supabase-konfiguration saknas på servern." });
+  }
+
+  const authClient = createClient(supabaseUrl, supabaseAnonKey);
+  const { data: userData, error: authError } = await authClient.auth.getUser(token);
+  if (authError || !userData?.user) {
+    return res.status(401).json({ error: "Ogiltig eller utgången session. Logga in igen." });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
