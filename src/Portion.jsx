@@ -73,13 +73,38 @@ const TABS = [
   { key: "fasting", label: "Fasta" },
   { key: "trends", label: "Trender" },
   { key: "weight", label: "Viktgång" },
-  { key: "setup", label: "Setup" },
+  { key: "setup", label: "Inställningar" },
+  { key: "support", label: "Support" },
   { key: "news", label: "Nyheter" },
   { key: "help", label: "Hjälp" },
   { key: "legal", label: "Legal" },
 ];
 
 const CHANGELOG = [
+  {
+    version: "0.6.1",
+    date: "2026-09-08",
+    headline: "Ny Support-flik och namnbyte",
+    headline_en: "New Support tab and rename",
+    summary: [
+      "'Setup' heter nu 'Inställningar'",
+      "Ny flik 'Support' där du kan rapportera fel eller föreslå förbättringar direkt i appen",
+    ],
+    summary_en: [
+      "'Setup' is now called 'Settings'",
+      "New 'Support' tab where you can report bugs or suggest improvements directly in the app",
+    ],
+    details: [
+      "Bytt namn på fliken 'Setup' till 'Inställningar' i menyn.",
+      "Lagt till en ny flik 'Support' med formuläret 'Förbättring och rapportera fel' — välj typ (buggrapport eller förbättringsförslag), skriv en rubrik och beskrivning, valfri e-post om vi behöver återkomma.",
+      "Inskickade ärenden sparas i en egen databastabell som går att läsa direkt i Supabase.",
+    ],
+    details_en: [
+      "Renamed the 'Setup' tab to 'Settings' in the menu.",
+      "Added a new 'Support' tab with the 'Improvement and bug reports' form — choose a type (bug report or improvement suggestion), write a title and description, optional email if we need to follow up.",
+      "Submitted reports are saved to their own database table that can be read directly in Supabase.",
+    ],
+  },
   {
     version: "0.6.0",
     date: "2026-09-08",
@@ -388,7 +413,8 @@ const TAB_LABELS_EN = {
   fasting: "Fasting",
   trends: "Trends",
   weight: "Weight",
-  setup: "Setup",
+  setup: "Settings",
+  support: "Support",
   news: "News",
   help: "Help",
   legal: "Legal",
@@ -646,6 +672,25 @@ const EN_STRINGS = {
   "Ljust": "Light",
   "Ställ in ljust eller mörkt läge, samt andra allmänna inställningar för appen.":
     "Set light or dark mode, plus other general settings for the app.",
+  "Rapportera en bugg eller föreslå en förbättring — fyll i formuläret så tar vi del av det.":
+    "Report a bug or suggest an improvement — fill in the form and we'll take a look.",
+  "Förbättring och rapportera fel": "Improvement and bug reports",
+  "Beskriv så noga du kan — skärmdumpar går tyvärr inte att bifoga här, men beskriv gärna var i appen det hände.":
+    "Describe it as thoroughly as you can — screenshots unfortunately can't be attached here, but feel free to describe where in the app it happened.",
+  "Tack! Ditt ärende är mottaget.": "Thanks! Your report has been received.",
+  "Vi läser igenom allt som skickas in.": "We read through everything that's sent in.",
+  "Typ av ärende": "Type of report",
+  "Rapportera fel": "Report a bug",
+  "Föreslå förbättring": "Suggest improvement",
+  "Rubrik": "Title",
+  "T.ex. Kan inte lägga till frukost": "E.g. Can't add breakfast",
+  "T.ex. Fler språk att välja mellan": "E.g. More languages to choose from",
+  "Beskrivning": "Description",
+  "Berätta vad som hände, eller vad du önskar dig — ju mer detaljer desto bättre.":
+    "Tell us what happened, or what you'd like to see — the more detail, the better.",
+  "E-post (valfritt, om vi behöver återkomma)": "Email (optional, in case we need to follow up)",
+  "Skickar …": "Sending …",
+  "Skicka in": "Submit",
   "portion": "serving",
   "portioner": "servings",
   "Hur många lagar du till?": "How many are you cooking for?",
@@ -700,6 +745,7 @@ const TAB_INFO = {
   weight:
     "Logga din vikt regelbundet för att se utvecklingen som en graf över tid, och håll koll på ditt uträknade BMI högst upp.",
   setup: "Ställ in ljust eller mörkt läge, samt andra allmänna inställningar för appen.",
+  support: "Rapportera en bugg eller föreslå en förbättring — fyll i formuläret så tar vi del av det.",
   news: "Allt som är nytt i Calio Bite, senaste versionen överst.",
   help: "Tryck på ett ämne för att öppna en steg-för-steg-guide för just den delen av appen.",
   legal: "Villkor och ansvarsbegränsning för Calio Bite.",
@@ -1193,6 +1239,8 @@ export default function Portion() {
   const [recipeFlow, setRecipeFlow] = useState(null);
   const [language, setLanguage] = useState("sv");
   const [theme, setThemeState] = useState("dark");
+  const [supportForm, setSupportForm] = useState({ type: "bug", title: "", description: "", email: "" });
+  const [supportStatus, setSupportStatus] = useState("idle");
   const [helpOpenTopic, setHelpOpenTopic] = useState(null);
   const [nowTick, setNowTick] = useState(Date.now());
   const [fastCompletedMsg, setFastCompletedMsg] = useState(null);
@@ -1236,10 +1284,46 @@ export default function Portion() {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (data?.user?.email) {
+          setSupportForm((f) => ({ ...f, email: f.email || data.user.email }));
+        }
+      } catch (e) {}
+    })();
+  }, []);
+
   function changeTheme(next) {
     applyTheme(next);
     setThemeState(next);
     window.storage.set(THEME_KEY, next, false).catch(() => {});
+  }
+
+  function updateSupportForm(field, value) {
+    setSupportForm((f) => ({ ...f, [field]: value }));
+  }
+
+  async function submitSupportForm() {
+    if (!supportForm.title.trim() || !supportForm.description.trim()) return;
+    setSupportStatus("sending");
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const { error } = await supabase.from("feedback").insert({
+        user_id: userData?.user?.id || null,
+        user_email: supportForm.email || userData?.user?.email || null,
+        type: supportForm.type,
+        title: supportForm.title.trim(),
+        description: supportForm.description.trim(),
+      });
+      if (error) throw error;
+      setSupportStatus("sent");
+      setSupportForm({ type: "bug", title: "", description: "", email: supportForm.email });
+    } catch (e) {
+      console.error("Kunde inte skicka support-ärendet:", e);
+      setSupportStatus("error");
+    }
   }
 
   function changeLanguage(code) {
@@ -3334,6 +3418,16 @@ export default function Portion() {
 
         {activeTab === "setup" && (
           <SetupPanel theme={theme} onChangeTheme={changeTheme} language={language} />
+        )}
+
+        {activeTab === "support" && (
+          <SupportPanel
+            form={supportForm}
+            onUpdate={updateSupportForm}
+            onSubmit={submitSupportForm}
+            status={supportStatus}
+            language={language}
+          />
         )}
 
         {activeTab === "news" && <NewsPanel language={language} />}
@@ -5800,6 +5894,120 @@ function SetupPanel({ theme, onChangeTheme, language }) {
             </span>
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SupportPanel({ form, onUpdate, onSubmit, status, language }) {
+  const isValid = form.title.trim() !== "" && form.description.trim() !== "";
+
+  return (
+    <div className="px-5">
+      <p className="text-xs mb-5" style={{ color: colors.textDim }}>
+        {tr("Rapportera en bugg eller föreslå en förbättring — fyll i formuläret så tar vi del av det.", language)}
+      </p>
+
+      <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+        <p className="text-sm font-bold mb-1">{tr("Förbättring och rapportera fel", language)}</p>
+        <p className="text-xs mb-4" style={{ color: colors.textDim }}>
+          {tr("Beskriv så noga du kan — skärmdumpar går tyvärr inte att bifoga här, men beskriv gärna var i appen det hände.", language)}
+        </p>
+
+        {status === "sent" ? (
+          <div className="rounded-xl px-4 py-6 text-center" style={{ backgroundColor: colors.primaryLight }}>
+            <p className="text-sm font-bold mb-1" style={{ color: colors.primary }}>
+              {tr("Tack! Ditt ärende är mottaget.", language)}
+            </p>
+            <p className="text-xs" style={{ color: colors.textDim }}>
+              {tr("Vi läser igenom allt som skickas in.", language)}
+            </p>
+          </div>
+        ) : (
+          <>
+            <p className="text-xs font-bold mb-2">{tr("Typ av ärende", language)}</p>
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => onUpdate("type", "bug")}
+                className="flex-1 rounded-xl py-3 text-xs font-bold"
+                style={{
+                  backgroundColor: form.type === "bug" ? colors.primary : colors.surfaceMuted,
+                  color: form.type === "bug" ? colors.onPrimary : colors.textDim,
+                }}
+              >
+                🐞 {tr("Rapportera fel", language)}
+              </button>
+              <button
+                onClick={() => onUpdate("type", "improvement")}
+                className="flex-1 rounded-xl py-3 text-xs font-bold"
+                style={{
+                  backgroundColor: form.type === "improvement" ? colors.primary : colors.surfaceMuted,
+                  color: form.type === "improvement" ? colors.onPrimary : colors.textDim,
+                }}
+              >
+                💡 {tr("Föreslå förbättring", language)}
+              </button>
+            </div>
+
+            <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
+              {tr("Rubrik", language)}
+            </label>
+            <input
+              value={form.title}
+              onChange={(e) => onUpdate("title", e.target.value)}
+              placeholder={
+                form.type === "bug"
+                  ? tr("T.ex. Kan inte lägga till frukost", language)
+                  : tr("T.ex. Fler språk att välja mellan", language)
+              }
+              className="w-full rounded-lg px-3 py-2.5 text-sm mb-3"
+              style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+            />
+
+            <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
+              {tr("Beskrivning", language)}
+            </label>
+            <textarea
+              value={form.description}
+              onChange={(e) => onUpdate("description", e.target.value)}
+              rows={5}
+              placeholder={tr("Berätta vad som hände, eller vad du önskar dig — ju mer detaljer desto bättre.", language)}
+              className="w-full rounded-lg px-3 py-2.5 text-sm mb-3"
+              style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+            />
+
+            <label className="text-xs block mb-1.5" style={{ color: colors.textDim }}>
+              {tr("E-post (valfritt, om vi behöver återkomma)", language)}
+            </label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => onUpdate("email", e.target.value)}
+              placeholder="din@epost.se"
+              className="w-full rounded-lg px-3 py-2.5 text-sm mb-4"
+              style={{ backgroundColor: colors.surfaceMuted, border: `1px solid ${colors.hairline}`, color: colors.text }}
+            />
+
+            {status === "error" && (
+              <p className="text-xs mb-3" style={{ color: colors.coral }}>
+                {tr("Något gick fel. Försök igen om en stund.", language)}
+              </p>
+            )}
+
+            <button
+              onClick={onSubmit}
+              disabled={!isValid || status === "sending"}
+              className="w-full rounded-xl py-3.5 text-sm font-bold"
+              style={{
+                backgroundColor: colors.primary,
+                color: colors.onPrimary,
+                opacity: !isValid || status === "sending" ? 0.5 : 1,
+              }}
+            >
+              {status === "sending" ? tr("Skickar …", language) : tr("Skicka in", language)}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
