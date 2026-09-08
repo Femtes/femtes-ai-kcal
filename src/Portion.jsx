@@ -82,6 +82,34 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.7.0",
+    date: "2026-09-08",
+    headline: "Admin-vy: Support-inkorg och AI-kostnadsöversikt",
+    headline_en: "Admin view: Support inbox and AI cost overview",
+    summary: [
+      "Ny dold Admin-flik, bara synlig för utsedda administratörskonton",
+      "Se och hantera inskickade supportärenden direkt i appen",
+      "Håll koll på hur mycket AI-funktionerna används, per dag och per funktion",
+    ],
+    summary_en: [
+      "New hidden Admin tab, only visible to designated admin accounts",
+      "View and manage submitted support tickets directly in the app",
+      "Keep track of how much the AI features are used, per day and per feature",
+    ],
+    details: [
+      "Lagt till ett admin-behörighetssystem i databasen — ett konto måste läggas till manuellt för att se Admin-fliken.",
+      "Support-inkorgen listar alla inskickade fel-/förbättringsärenden, filtrerbara på typ, med möjlighet att markera som Ny/Läst/Löst.",
+      "AI-kostnadsöversikten visar dagens antal AI-anrop mot Geminis gratisgräns, en graf över de senaste 7 dagarna, samt fördelning per funktion (foto/röst/Scanner/recept/mellanmål) de senaste 30 dagarna.",
+      "Varje AI-anrop loggas nu automatiskt i bakgrunden av serverfunktionen, kopplat till vilken användare och vilken funktion som användes.",
+    ],
+    details_en: [
+      "Added an admin permission system in the database — an account must be added manually to see the Admin tab.",
+      "The support inbox lists all submitted bug/improvement reports, filterable by type, with the ability to mark them New/Read/Resolved.",
+      "The AI cost overview shows today's AI call count against Gemini's free limit, a 7-day trend graph, and a breakdown by feature (photo/voice/Scanner/recipes/snacks) over the last 30 days.",
+      "Every AI call is now automatically logged in the background by the server function, tied to which user and which feature was used.",
+    ],
+  },
+  {
     version: "0.6.1",
     date: "2026-09-08",
     headline: "Ny Support-flik och namnbyte",
@@ -421,6 +449,7 @@ const TAB_LABELS_EN = {
 };
 
 function getTabLabel(key, language) {
+  if (key === "admin") return "Admin";
   if (language === "en" && TAB_LABELS_EN[key]) return TAB_LABELS_EN[key];
   return TABS.find((t) => t.key === key)?.label || "";
 }
@@ -746,6 +775,7 @@ const TAB_INFO = {
     "Logga din vikt regelbundet för att se utvecklingen som en graf över tid, och håll koll på ditt uträknade BMI högst upp.",
   setup: "Ställ in ljust eller mörkt läge, samt andra allmänna inställningar för appen.",
   support: "Rapportera en bugg eller föreslå en förbättring — fyll i formuläret så tar vi del av det.",
+  admin: "Support-inkorg och AI-kostnadsöversikt — bara synlig för administratörer.",
   news: "Allt som är nytt i Calio Bite, senaste versionen överst.",
   help: "Tryck på ett ämne för att öppna en steg-för-steg-guide för just den delen av appen.",
   legal: "Villkor och ansvarsbegränsning för Calio Bite.",
@@ -1240,6 +1270,12 @@ export default function Portion() {
   const [language, setLanguage] = useState("sv");
   const [theme, setThemeState] = useState("dark");
   const [supportForm, setSupportForm] = useState({ type: "bug", title: "", description: "", email: "" });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminSection, setAdminSection] = useState("support");
+  const [adminFeedback, setAdminFeedback] = useState(null);
+  const [adminFeedbackLoading, setAdminFeedbackLoading] = useState(false);
+  const [adminAiLog, setAdminAiLog] = useState(null);
+  const [adminAiLogLoading, setAdminAiLogLoading] = useState(false);
   const [supportStatus, setSupportStatus] = useState("idle");
   const [helpOpenTopic, setHelpOpenTopic] = useState(null);
   const [nowTick, setNowTick] = useState(Date.now());
@@ -1295,6 +1331,28 @@ export default function Portion() {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData?.user?.id) return;
+        const { data, error } = await supabase
+          .from("admin_users")
+          .select("user_id")
+          .eq("user_id", userData.user.id)
+          .maybeSingle();
+        if (!error && data) setIsAdmin(true);
+      } catch (e) {}
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== "admin" || !isAdmin) return;
+    if (adminSection === "support" && !adminFeedback) loadAdminFeedback();
+    if (adminSection === "ai" && !adminAiLog) loadAdminAiLog();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, adminSection, isAdmin]);
+
   function changeTheme(next) {
     applyTheme(next);
     setThemeState(next);
@@ -1323,6 +1381,49 @@ export default function Portion() {
     } catch (e) {
       console.error("Kunde inte skicka support-ärendet:", e);
       setSupportStatus("error");
+    }
+  }
+
+  async function loadAdminFeedback() {
+    setAdminFeedbackLoading(true);
+    try {
+      const { data, error } = await supabase.from("feedback").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      setAdminFeedback(data || []);
+    } catch (e) {
+      console.error("Kunde inte hämta supportärenden:", e);
+      setAdminFeedback([]);
+    } finally {
+      setAdminFeedbackLoading(false);
+    }
+  }
+
+  async function updateFeedbackStatus(id, status) {
+    setAdminFeedback((prev) => (prev ? prev.map((f) => (f.id === id ? { ...f, status } : f)) : prev));
+    try {
+      await supabase.from("feedback").update({ status }).eq("id", id);
+    } catch (e) {
+      console.error("Kunde inte uppdatera status:", e);
+    }
+  }
+
+  async function loadAdminAiLog() {
+    setAdminAiLogLoading(true);
+    try {
+      const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from("ai_call_log")
+        .select("id, user_id, feature, created_at")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(5000);
+      if (error) throw error;
+      setAdminAiLog(data || []);
+    } catch (e) {
+      console.error("Kunde inte hämta AI-loggen:", e);
+      setAdminAiLog([]);
+    } finally {
+      setAdminAiLogLoading(false);
     }
   }
 
@@ -1976,6 +2077,7 @@ export default function Portion() {
           aiLangInstruction(language),
         text,
         image: null,
+        feature: "voice",
       });
       if (data.error) {
         console.error("Gemini-fel (röstinmatning):", data.error);
@@ -2206,6 +2308,7 @@ export default function Portion() {
         text: "Analysera den här maträtten.",
         image: base64Data,
         mimeType: "image/jpeg",
+        feature: "photo",
       });
 
       if (data.error) {
@@ -2452,6 +2555,7 @@ export default function Portion() {
         text: `Vad kan jag laga till ${mealLabel.toLowerCase()} med det som syns här?`,
         image: base64Data,
         mimeType: "image/jpeg",
+        feature: "scanner",
       });
       if (data.error) {
         console.error("Gemini-fel (scanner):", data.error);
@@ -2515,6 +2619,7 @@ export default function Portion() {
           aiLangInstruction(language),
         text: `Ge mig 3 mellanmålsförslag på ca ${targetKcal} kcal.`,
         image: null,
+        feature: "reactive",
       });
       if (data.error) {
         console.error("Gemini-fel (mellanmålsförslag):", data.error);
@@ -2613,6 +2718,7 @@ export default function Portion() {
           aiLangInstruction(language),
         text: "Skapa ett recept åt mig.",
         image: null,
+        feature: "recipe",
       });
       if (data.error) {
         console.error("Gemini-fel (recept):", data.error);
@@ -2838,6 +2944,21 @@ export default function Portion() {
                     {getTabLabel(t.key, language)}
                   </button>
                 ))}
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      setActiveTab("admin");
+                      setMenuOpen(false);
+                    }}
+                    className="w-full text-left px-5 py-3.5 text-sm font-semibold"
+                    style={{
+                      color: activeTab === "admin" ? colors.primary : colors.text,
+                      backgroundColor: activeTab === "admin" ? colors.primaryLight : "transparent",
+                    }}
+                  >
+                    🛠️ Admin
+                  </button>
+                )}
               </div>
               <div className="px-5 py-4" style={{ borderTop: `1px solid ${colors.hairline}` }}>
                 <button
@@ -3426,6 +3547,19 @@ export default function Portion() {
             onUpdate={updateSupportForm}
             onSubmit={submitSupportForm}
             status={supportStatus}
+            language={language}
+          />
+        )}
+
+        {activeTab === "admin" && isAdmin && (
+          <AdminPanel
+            section={adminSection}
+            onSectionChange={setAdminSection}
+            feedback={adminFeedback}
+            feedbackLoading={adminFeedbackLoading}
+            onUpdateFeedbackStatus={updateFeedbackStatus}
+            aiLog={adminAiLog}
+            aiLogLoading={adminAiLogLoading}
             language={language}
           />
         )}
@@ -6009,6 +6143,255 @@ function SupportPanel({ form, onUpdate, onSubmit, status, language }) {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+const FEEDBACK_STATUS_LABELS = { new: "Ny", read: "Läst", resolved: "Löst" };
+const FEEDBACK_STATUS_LABELS_EN = { new: "New", read: "Read", resolved: "Resolved" };
+const AI_FEATURE_LABELS = {
+  photo: "Fotoanalys",
+  voice: "Röstinmatning",
+  scanner: "Scanner",
+  recipe: "Recept",
+  reactive: "Mellanmålsförslag",
+};
+const AI_FEATURE_LABELS_EN = {
+  photo: "Photo analysis",
+  voice: "Voice input",
+  scanner: "Scanner",
+  recipe: "Recipes",
+  reactive: "Snack suggestions",
+};
+const GEMINI_FREE_DAILY_LIMIT = 1500;
+
+function AdminPanel({
+  section,
+  onSectionChange,
+  feedback,
+  feedbackLoading,
+  onUpdateFeedbackStatus,
+  aiLog,
+  aiLogLoading,
+  language,
+}) {
+  const [feedbackFilter, setFeedbackFilter] = useState("all");
+
+  const filteredFeedback = (feedback || []).filter((f) => feedbackFilter === "all" || f.type === feedbackFilter);
+
+  let aiStats = null;
+  if (aiLog) {
+    const todayKeyStr = dateKey(new Date());
+    const byFeature = {};
+    const byDay = {};
+    aiLog.forEach((row) => {
+      const feat = row.feature || "okänd";
+      byFeature[feat] = (byFeature[feat] || 0) + 1;
+      const day = dateKey(new Date(row.created_at));
+      byDay[day] = (byDay[day] || 0) + 1;
+    });
+    aiStats = {
+      total: aiLog.length,
+      today: byDay[todayKeyStr] || 0,
+      byFeature,
+      last7Days: Array.from({ length: 7 }, (_, i) => {
+        const d = shiftDateKey(todayKeyStr, -i);
+        return { date: d, count: byDay[d] || 0 };
+      }).reverse(),
+    };
+  }
+
+  return (
+    <div className="px-5">
+      <p className="text-xs mb-4" style={{ color: colors.textDim }}>
+        {tr("Support-inkorg och AI-kostnadsöversikt — bara synlig för administratörer.", language)}
+      </p>
+
+      <div className="flex gap-2 mb-5">
+        <button
+          onClick={() => onSectionChange("support")}
+          className="flex-1 rounded-full py-2.5 text-xs font-bold"
+          style={{
+            backgroundColor: section === "support" ? colors.primary : colors.surfaceMuted,
+            color: section === "support" ? colors.onPrimary : colors.textDim,
+          }}
+        >
+          📥 Support
+        </button>
+        <button
+          onClick={() => onSectionChange("ai")}
+          className="flex-1 rounded-full py-2.5 text-xs font-bold"
+          style={{
+            backgroundColor: section === "ai" ? colors.primary : colors.surfaceMuted,
+            color: section === "ai" ? colors.onPrimary : colors.textDim,
+          }}
+        >
+          🤖 AI-användning
+        </button>
+      </div>
+
+      {section === "support" && (
+        <div>
+          <div className="flex gap-1.5 mb-4 flex-wrap">
+            {[
+              { key: "all", label: "Alla" },
+              { key: "bug", label: "🐞 Fel" },
+              { key: "improvement", label: "💡 Förbättring" },
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setFeedbackFilter(f.key)}
+                className="rounded-full px-3 py-1.5 text-xs font-semibold"
+                style={{
+                  backgroundColor: feedbackFilter === f.key ? colors.primary : colors.surfaceMuted,
+                  color: feedbackFilter === f.key ? colors.onPrimary : colors.textDim,
+                }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {feedbackLoading ? (
+            <div className="flex justify-center py-10">
+              <div
+                className="w-8 h-8 rounded-full animate-spin"
+                style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
+              />
+            </div>
+          ) : filteredFeedback.length === 0 ? (
+            <div
+              className="rounded-2xl py-8 text-center text-sm"
+              style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}`, color: colors.textDim }}
+            >
+              Inga ärenden än
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {filteredFeedback.map((f) => (
+                <div
+                  key={f.id}
+                  className="rounded-2xl p-4"
+                  style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span style={{ fontSize: 16 }}>{f.type === "bug" ? "🐞" : "💡"}</span>
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor:
+                          f.status === "resolved" ? colors.primaryLight : colors.surfaceMuted,
+                        color: f.status === "resolved" ? colors.primary : colors.textDim,
+                      }}
+                    >
+                      {(language === "en" ? FEEDBACK_STATUS_LABELS_EN : FEEDBACK_STATUS_LABELS)[f.status] || f.status}
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold mb-1">{f.title}</p>
+                  <p className="text-xs mb-2" style={{ color: colors.textDim, lineHeight: 1.5 }}>
+                    {f.description}
+                  </p>
+                  <p className="text-[11px] mb-3" style={{ color: colors.textDim }}>
+                    {f.user_email || "Ingen e-post"} · {new Date(f.created_at).toLocaleString("sv-SE")}
+                  </p>
+                  <div className="flex gap-1.5">
+                    {["new", "read", "resolved"].map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => onUpdateFeedbackStatus(f.id, s)}
+                        className="flex-1 rounded-lg py-2 text-[11px] font-semibold"
+                        style={{
+                          backgroundColor: f.status === s ? colors.primary : colors.surfaceMuted,
+                          color: f.status === s ? colors.onPrimary : colors.textDim,
+                        }}
+                      >
+                        {(language === "en" ? FEEDBACK_STATUS_LABELS_EN : FEEDBACK_STATUS_LABELS)[s]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {section === "ai" && (
+        <div>
+          {aiLogLoading || !aiStats ? (
+            <div className="flex justify-center py-10">
+              <div
+                className="w-8 h-8 rounded-full animate-spin"
+                style={{ border: `3px solid ${colors.hairline}`, borderTopColor: colors.primary }}
+              />
+            </div>
+          ) : (
+            <>
+              <div className="rounded-2xl p-5 mb-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs" style={{ color: colors.textDim }}>
+                    Anrop idag
+                  </p>
+                  {aiStats.today >= GEMINI_FREE_DAILY_LIMIT * 0.8 && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${colors.coral}22`, color: colors.coral }}>
+                      Närmar sig gränsen
+                    </span>
+                  )}
+                </div>
+                <p className="text-3xl font-extrabold mb-1">
+                  {aiStats.today} <span className="text-sm font-medium" style={{ color: colors.textDim }}>/ {GEMINI_FREE_DAILY_LIMIT} gratis</span>
+                </p>
+                <div className="w-full h-1.5 rounded-full overflow-hidden mt-2" style={{ backgroundColor: colors.surfaceMuted }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.min(100, Math.round((aiStats.today / GEMINI_FREE_DAILY_LIMIT) * 100))}%`,
+                      backgroundColor: aiStats.today >= GEMINI_FREE_DAILY_LIMIT * 0.8 ? colors.coral : colors.primary,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-2xl p-5 mb-4" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+                <p className="text-sm font-bold mb-3">Senaste 7 dagarna</p>
+                <div className="flex items-end justify-between gap-1.5" style={{ height: 80 }}>
+                  {aiStats.last7Days.map((d) => {
+                    const max = Math.max(1, ...aiStats.last7Days.map((x) => x.count));
+                    const h = Math.max(4, Math.round((d.count / max) * 70));
+                    return (
+                      <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+                        <div className="w-full rounded-t-md" style={{ height: h, backgroundColor: colors.primary }} />
+                        <span className="text-[9px]" style={{ color: colors.textDim }}>
+                          {d.date.slice(8)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-2xl p-5" style={{ backgroundColor: colors.surface, border: `1px solid ${colors.hairline}` }}>
+                <p className="text-sm font-bold mb-3">Fördelning per funktion (30 dagar)</p>
+                <div className="flex flex-col gap-2.5">
+                  {Object.entries(aiStats.byFeature)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([feat, count]) => (
+                      <div key={feat} className="flex items-center justify-between">
+                        <span className="text-xs" style={{ color: colors.textDim }}>
+                          {(language === "en" ? AI_FEATURE_LABELS_EN : AI_FEATURE_LABELS)[feat] || feat}
+                        </span>
+                        <span className="text-sm font-bold">{count}</span>
+                      </div>
+                    ))}
+                </div>
+                <p className="text-[11px] mt-3" style={{ color: colors.textDim }}>
+                  Totalt {aiStats.total} anrop senaste 30 dagarna.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

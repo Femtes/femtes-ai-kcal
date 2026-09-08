@@ -3,10 +3,12 @@
 // Säker server-funktion mot Googles Gemini API (gratis-nivå).
 // Kräver att anroparen är inloggad — verifierar Supabase-sessionen
 // innan den pratar med Gemini, så ingen utomstående kan använda din
-// AI-budget genom att posta direkt till den här adressen.
+// AI-budget genom att posta direkt till den här adressen. Loggar
+// även varje lyckat anrop (vem + vilken funktion) för admin-vyns
+// AI-kostnadsöversikt.
 //
-// Klienten skickar { system, text, image, mimeType } plus en
-// Authorization: Bearer <access_token>-header — den här funktionen
+// Klienten skickar { system, text, image, mimeType, feature } plus
+// en Authorization: Bearer <access_token>-header — den här funktionen
 // bygger om det till Geminis format och lägger till nyckeln, som
 // aldrig syns i webbläsaren.
 
@@ -31,7 +33,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Supabase-konfiguration saknas på servern." });
   }
 
-  const authClient = createClient(supabaseUrl, supabaseAnonKey);
+  // Skapar klienten med användarens egen token, så efterföljande anrop
+  // (inklusive loggningen längre ner) körs som just den användaren och
+  // respekterar Supabases RLS-regler korrekt.
+  const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
   const { data: userData, error: authError } = await authClient.auth.getUser(token);
   if (authError || !userData?.user) {
     return res.status(401).json({ error: "Ogiltig eller utgången session. Logga in igen." });
@@ -42,7 +49,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "GEMINI_API_KEY saknas i miljövariablerna på servern." });
   }
 
-  const { system, text, image, mimeType } = req.body || {};
+  const { system, text, image, mimeType, feature } = req.body || {};
 
   const parts = [];
   if (text) parts.push({ text });
@@ -68,6 +75,13 @@ export default async function handler(req, res) {
     if (!geminiResponse.ok) {
       return res.status(geminiResponse.status).json({ error: data.error?.message || "Gemini-fel" });
     }
+
+    authClient
+      .from("ai_call_log")
+      .insert({ user_id: userData.user.id, feature: feature || null })
+      .then(({ error }) => {
+        if (error) console.error("Kunde inte logga AI-anropet:", error.message);
+      });
 
     const outputText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
     res.status(200).json({ text: outputText });
