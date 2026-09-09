@@ -82,6 +82,38 @@ const TABS = [
 
 const CHANGELOG = [
   {
+    version: "0.7.3",
+    date: "2026-09-08",
+    headline: "Säkerhetsgranskning och fyra fixar",
+    headline_en: "Security review and four fixes",
+    summary: [
+      "Genomförde en kodgranskning av hela systemet",
+      "Lade till gräns för hur många AI-anrop ett konto kan göra",
+      "Fixade en läcka där en intern anteckning kunde läsas av fel person",
+      "Låste bilduppladdning till bara bilder, max 5 MB",
+      "Delade måltidskoder slutar nu fungera efter 7 dagar",
+    ],
+    summary_en: [
+      "Carried out a code review of the whole system",
+      "Added a limit on how many AI calls one account can make",
+      "Fixed a leak where an internal note could be read by the wrong person",
+      "Locked photo uploads to images only, max 5 MB",
+      "Shared meal codes now stop working after 7 days",
+    ],
+    details: [
+      "Serverfunktionen mot Gemini tillåter nu max 10 anrop per minut och 150 per dag och konto, för att skydda mot att ett enskilt (även äkta, inloggat) konto kan sköva AI-budgeten.",
+      "Flyttat interna anteckningar och svarstexter i support-inkorgen till en egen, admin-låst databastabell — tidigare kunde en teknisk användare komma åt sin egen anteckning via webbläsarens verktyg, trots att den bara skulle synas för admin.",
+      "Bild-bucketen tillåter nu bara jpeg/png/webp/gif, max 5 MB per fil, genomdrivet av Supabase själv oavsett vad som skickas.",
+      "Delade måltidskoder (kalori-samåkning) fungerar nu bara i 7 dagar efter att de skapats, sedan går de inte längre att hämta av någon.",
+    ],
+    details_en: [
+      "The Gemini server function now allows a maximum of 10 calls per minute and 150 per day per account, to protect against a single (even genuine, logged-in) account running up the AI budget.",
+      "Moved internal notes and reply text in the support inbox to a separate, admin-only database table — previously a technical user could access their own note via browser developer tools, even though it was only meant to be visible to admins.",
+      "The image bucket now only accepts jpeg/png/webp/gif, max 5 MB per file, enforced by Supabase itself regardless of what's sent.",
+      "Shared meal codes now only work for 7 days after being created, after which no one can retrieve them any longer.",
+    ],
+  },
+  {
     version: "0.7.2",
     date: "2026-09-08",
     headline: "Historik-flik i support-inkorgen",
@@ -743,6 +775,7 @@ const EN_STRINGS = {
   "g kvar": "g left",
   "Välj datum": "Choose date",
   "Sparar bild …": "Saving photo …",
+  "Koden slutar fungera efter 7 dagar.": "The code stops working after 7 days.",
   "Utseende": "Appearance",
   "Välj det tema som känns skönast för dina ögon.": "Choose the theme that's easiest on your eyes.",
   "Mörkt": "Dark",
@@ -1435,9 +1468,21 @@ export default function Portion() {
   async function loadAdminFeedback() {
     setAdminFeedbackLoading(true);
     try {
-      const { data, error } = await supabase.from("feedback").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      setAdminFeedback(data || []);
+      const [feedbackRes, notesRes] = await Promise.all([
+        supabase.from("feedback").select("*").order("created_at", { ascending: false }),
+        supabase.from("feedback_admin_notes").select("*"),
+      ]);
+      if (feedbackRes.error) throw feedbackRes.error;
+      const notesMap = {};
+      (notesRes.data || []).forEach((n) => {
+        notesMap[n.feedback_id] = n;
+      });
+      const merged = (feedbackRes.data || []).map((f) => ({
+        ...f,
+        admin_note: notesMap[f.id]?.admin_note || "",
+        admin_reply: notesMap[f.id]?.admin_reply || "",
+      }));
+      setAdminFeedback(merged);
     } catch (e) {
       console.error("Kunde inte hämta supportärenden:", e);
       setAdminFeedback([]);
@@ -1458,7 +1503,7 @@ export default function Portion() {
   async function saveFeedbackNote(id, note) {
     setAdminFeedback((prev) => (prev ? prev.map((f) => (f.id === id ? { ...f, admin_note: note } : f)) : prev));
     try {
-      await supabase.from("feedback").update({ admin_note: note }).eq("id", id);
+      await supabase.from("feedback_admin_notes").upsert({ feedback_id: id, admin_note: note }, { onConflict: "feedback_id" });
     } catch (e) {
       console.error("Kunde inte spara anteckningen:", e);
     }
@@ -1467,7 +1512,7 @@ export default function Portion() {
   async function saveFeedbackReply(id, reply) {
     setAdminFeedback((prev) => (prev ? prev.map((f) => (f.id === id ? { ...f, admin_reply: reply } : f)) : prev));
     try {
-      await supabase.from("feedback").update({ admin_reply: reply }).eq("id", id);
+      await supabase.from("feedback_admin_notes").upsert({ feedback_id: id, admin_reply: reply }, { onConflict: "feedback_id" });
     } catch (e) {
       console.error("Kunde inte spara svaret:", e);
     }
@@ -4465,6 +4510,7 @@ export default function Portion() {
                     {shareModal.code}
                   </span>
                 </div>
+                <p className="text-[11px] mb-2" style={{ color: colors.textDim }}>{tr("Koden slutar fungera efter 7 dagar.", language)}</p>
                 <p className="text-[11px] mb-4" style={{ color: colors.textDim }}>{tr("Koden lagras i ett delat utrymme som tekniskt sett går att nå av andra som använder samma app om de gissar koden — dela den bara med personer du litar på.", language)}</p>
                 <button
                   onClick={closeShareModal}

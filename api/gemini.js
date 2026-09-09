@@ -49,6 +49,31 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "GEMINI_API_KEY saknas i miljövariablerna på servern." });
   }
 
+  // Rate limiting: kollar mot loggen så ett enskilt konto inte kan
+  // sköva AI-budgeten, även om det är inloggat på riktigt.
+  const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+  const oneDayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+
+  const [{ count: recentCount }, { count: dailyCount }] = await Promise.all([
+    authClient
+      .from("ai_call_log")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userData.user.id)
+      .gte("created_at", oneMinuteAgo),
+    authClient
+      .from("ai_call_log")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userData.user.id)
+      .gte("created_at", oneDayAgo),
+  ]);
+
+  if ((recentCount || 0) >= 10) {
+    return res.status(429).json({ error: "För många förfrågningar just nu — vänta en liten stund och försök igen." });
+  }
+  if ((dailyCount || 0) >= 150) {
+    return res.status(429).json({ error: "Du har nått dagens gräns för AI-funktioner. Försök igen imorgon." });
+  }
+
   const { system, text, image, mimeType, feature } = req.body || {};
 
   const parts = [];
